@@ -42,10 +42,10 @@ def login_form(request: Request):
     return templates.TemplateResponse("login.html", {"request": request, "error": None})
 
 @app.post("/login")
-def login(response: Response, email: str = Form(...), password: str = Form(...), db: Session = Depends(get_db)):
+def login(request: Request, response: Response, email: str = Form(...), password: str = Form(...), db: Session = Depends(get_db)):
     user = db.query(models.User).filter(models.User.email == email).first()
     if not user or not verify_password(password, user.password_hash):
-        return templates.TemplateResponse("login.html", {"request": response, "error": "Email o contraseña incorrectos"})
+        return templates.TemplateResponse("login.html", {"request": request, "error": "Email o contraseña incorrectos"})
     token = create_access_token({"sub": user.email, "role": user.role})
     resp = RedirectResponse(url="/admin" if user.role == models.RoleEnum.admin else "/eval", status_code=302)
     resp.set_cookie("access_token", token, httponly=True)
