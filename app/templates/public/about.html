@@ -1,0 +1,128 @@
+{% extends "public/base.html" %}
+{% block content %}
+
+<!-- Hero -->
+<div class="relative rounded-2xl overflow-hidden mb-10" style="min-height: 180px; background: linear-gradient(135deg, #0a1628 0%, #0d3b6e 60%, #1a6b4a 100%);">
+    <div class="relative z-10 flex flex-col items-center justify-center text-center px-8 py-12">
+        <h1 class="text-3xl font-black text-white mb-2">Sobre el NANO</h1>
+        <p class="text-teal-300">XXIV Encuentro de Superficies y Materiales Nanoestructurados</p>
+    </div>
+</div>
+
+<!-- Historia -->
+<div class="bg-white rounded-2xl shadow p-8 mb-8">
+    <h2 class="text-xl font-bold text-gray-800 mb-4">Historia del encuentro</h2>
+    <p class="text-gray-600 leading-relaxed mb-4">
+        El evento nació en 2001 dentro de la <strong>Comisión Nacional de Energía Atómica (CNEA)</strong> en Bariloche,
+        y ha ido creciendo hasta convertirse en un encuentro nacional multidisciplinario que reúne a investigadores
+        de todo el país, así como invitados internacionales.
+    </p>
+    <p class="text-gray-600 leading-relaxed mb-6">
+        Con cada edición, hemos ampliado nuestros horizontes y profundizado el compromiso con la innovación
+        y la colaboración científica. Este año se hará particular hincapié en generar un espacio de interacción con empresas 
+            y se espera atraer sponsors públicos y privados. 
+    </p>
+    
+    
+
+    <h3 class="text-sm font-semibold text-gray-500 uppercase tracking-wider mb-3">Ediciones anteriores</h3>
+    <div class="flex flex-wrap gap-2">
+        {% for ed in [
+            ('2001–2010', 'Bariloche'),
+            ('2011', 'Buenos Aires'),
+            ('2012', 'Córdoba'),
+            ('2013', 'Mar del Plata'),
+            ('2014', 'Bariloche'),
+            ('2015', 'Rosario'),
+            ('2016', 'Buenos Aires'),
+            ('2017', 'Bariloche'),
+            ('2018', 'La Plata'),
+            ('2019', 'Buenos Aires'),
+            ('2021', 'Mar del Plata'),
+            ('2022', 'Río Cuarto'),
+            ('2025', 'Tucumán'),
+        ] %}
+        <div class="bg-gray-50 border rounded-xl px-3 py-2 text-sm">
+            <span class="font-semibold text-teal-600">{{ ed[0] }}</span>
+            <span class="text-gray-500 ml-1">{{ ed[1] }}</span>
+        </div>
+        {% endfor %}
+        <div class="bg-teal-500 rounded-xl px-3 py-2 text-sm">
+            <span class="font-semibold text-white">2026</span>
+            <span class="text-teal-100 ml-1">San Martín, UNSAM</span>
+        </div>
+    </div>
+</div>
+
+<!-- Comités -->
+<div class="grid grid-cols-1 md:grid-cols-2 gap-8 mb-8">
+
+     <!-- Comité Organizador -->
+    <div class="bg-white rounded-2xl shadow p-8">
+        <h2 class="text-xl font-bold text-gray-800 mb-4">Comité Organizador</h2>
+        <ul class="space-y-2 text-sm text-gray-600">
+            {% for m in [
+                ('Cintia B. Contreras', 'INS-UNSAM'),
+                ('Gastón Corthey', 'INS-UNSAM'),
+                ('Estefanía González Solveyra', 'INS-UNSAM'),
+                ('Ianina Violi', 'INS-UNSAM'),
+                ('Jimena Rinaldi', 'INS-UNSAM'),
+                ('Ana Huergo', 'INIFTA-UNLP'),
+                ('Martín Desimone', 'UBA'),
+                ('Lucía Famá', 'UBA'),
+                ('María Laura Foresti', 'UBA'),               
+                ('Cristian Lillo', 'UNAHUR'),                
+                ('Waldemar Marmisollé', 'INIFTA, UNLP-CONICET'),                
+                ('Ignacio Venutolo', 'ADIMRA')           
+            ] %}
+            <li class="flex items-start gap-2">
+                <span class="text-teal-500 mt-0.5">·</span>
+                <span><strong>{{ m[0] }}</strong> <span class="text-gray-400">({{ m[1] }})</span></span>
+            </li>
+            {% endfor %}
+        </ul>
+    </div>
+
+    <!-- Comité Científico -->
+    <div class="bg-white rounded-2xl shadow p-8">
+        <h2 class="text-xl font-bold text-gray-800 mb-4">Comité Científico</h2>
+        <ul class="space-y-2 text-sm text-gray-600">
+            {% for m in [
+                ('Vera Álvarez', 'INTEMA'),
+                ('Paula C. Angelomé', 'CNEA'),
+                ('Ma. Cristina Área', 'IMAM, UNaM-CONICET'),
+                ('Omar Azzaroni', 'INIFTA-UNLP'),
+                ('Andrea Bragas', 'UBA'),
+                ('Sebastián Collins', 'UNL'),
+                ('Yanina Fasano', 'CNEA'),
+                ('Darío Falcone', 'UNRC'),
+                ('Verónica Lassalle', 'UNS'),
+                ('Jorge Montanari', 'UNAHUR'),
+                ('Gustavo Rivas', 'UNC'),
+                ('Cintia Romero', 'UNT'),
+                ('Karim Sapag', 'UNSL'),
+                ('Galo Soler Illia', 'INS-UNSAM'),
+            ] %}
+            <li class="flex items-start gap-2">
+                <span class="text-teal-500 mt-0.5">·</span>
+                <span><strong>{{ m[0] }}</strong> <span class="text-gray-400">({{ m[1] }})</span></span>
+            </li>
+            {% endfor %}
+        </ul>
+    </div>
+
+    
+
+   
+
+</div>
+<!-- Organizado por -->
+<div class="bg-white rounded-2xl shadow p-8 mb-4">
+    <h2 class="text-xl font-bold text-gray-800 mb-6">Organizado por</h2>
+    <div class="flex items-center justify-center">
+       <img src="/static/logos/organizadores.svg" alt="Instituciones organizadoras"
+    class="w-full max-w-4xl object-contain"/>
+    </div>
+</div>
+
+{% endblock %}

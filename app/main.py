@@ -468,3 +468,8 @@ def venue(request: Request):
 @app.get("/programa", response_class=HTMLResponse)
 def programa(request: Request):
     return templates.TemplateResponse("public/programa.html", {"request": request})
+
+
+@app.get("/about", response_class=HTMLResponse)
+def about(request: Request):
+    return templates.TemplateResponse("public/about.html", {"request": request})
