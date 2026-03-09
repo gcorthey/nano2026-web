@@ -69,6 +69,7 @@ class Review(Base):
     fecha = Column(DateTime, default=datetime.utcnow)
     abstract = relationship("Abstract", back_populates="reviews")
     evaluador = relationship("User", back_populates="reviews")
+    recomienda_oral = Column(Integer, nullable=True)
 
 class Asignacion(Base):
     __tablename__ = "asignaciones"

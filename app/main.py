@@ -295,6 +295,7 @@ def eval_detalle(
     abstract_id: int,
     request: Request,
     current_user: models.User = Depends(require_evaluador),
+    recomienda_oral: int = Form(None),
     db: Session = Depends(get_db)
 ):
     asig = db.query(models.Asignacion).filter(
@@ -322,6 +323,7 @@ def eval_submit(
     decision: str = Form(...),
     comentario: str = Form(""),
     current_user: models.User = Depends(require_evaluador),
+    recomienda_oral: int = Form(None),
     db: Session = Depends(get_db)
 ):
     asig = db.query(models.Asignacion).filter(
@@ -420,9 +422,9 @@ def abstract_publico_detalle(
 @app.get("/abstracts/{abstract_id}/pdf")
 def abstract_pdf(abstract_id: int, db: Session = Depends(get_db)):
     abstract = db.query(models.Abstract).filter(
-        models.Abstract.id == abstract_id,
-        models.Abstract.estado == models.EstadoEnum.aprobado
-    ).first()
+    models.Abstract.id == abstract_id
+).first()
+
     if not abstract:
         raise HTTPException(status_code=404, detail="Resumen no encontrado")
 

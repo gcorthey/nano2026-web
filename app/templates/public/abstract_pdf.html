@@ -5,41 +5,65 @@
     <style>
         body {
             font-family: "Times New Roman", Times, serif;
-            font-size: 12pt;
+            font-size: 11pt;
             margin: 2.5cm;
             color: #000;
         }
         h1 {
-            font-size: 14pt;
+            font-size: 13pt;
             font-weight: bold;
             text-align: center;
-            margin-bottom: 0.5cm;
+            margin-bottom: 0.3cm;
         }
-        .autor {
+        .autores {
             text-align: center;
             font-size: 11pt;
             margin-bottom: 0.2cm;
         }
-        .afiliacion {
+        .afiliaciones {
             text-align: center;
-            font-size: 10pt;
+            font-size: 9pt;
             color: #444;
-            margin-bottom: 0.8cm;
+            margin-bottom: 0.3cm;
         }
         .email {
             text-align: center;
-            font-size: 10pt;
+            font-size: 9pt;
             color: #444;
-            margin-bottom: 1cm;
+            margin-bottom: 0.2cm;
+        }
+        .area {
+            text-align: center;
+            font-size: 9pt;
+            color: #666;
+            margin-bottom: 0.8cm;
         }
         hr {
             border: none;
             border-top: 1px solid #ccc;
-            margin-bottom: 1cm;
+            margin-bottom: 0.6cm;
+        }
+        .seccion-titulo {
+            font-size: 10pt;
+            font-weight: bold;
+            text-transform: uppercase;
+            letter-spacing: 0.05cm;
+            color: #333;
+            margin-top: 0.6cm;
+            margin-bottom: 0.3cm;
         }
         .contenido {
             text-align: justify;
-            line-height: 1.6;
+            line-height: 1.5;
+        }
+        .referencias {
+            font-size: 9pt;
+            text-align: left;
+            line-height: 1.4;
+        }
+        sup {
+            font-size: 7pt;
+            color: #008080;
         }
         .footer {
             position: fixed;
@@ -47,7 +71,7 @@
             left: 2.5cm;
             right: 2.5cm;
             text-align: center;
-            font-size: 9pt;
+            font-size: 8pt;
             color: #999;
             border-top: 1px solid #eee;
             padding-top: 0.3cm;
@@ -55,16 +79,64 @@
     </style>
 </head>
 <body>
-    <h1>{{ abstract.titulo }}</h1>
-    <p class="autor">{{ abstract.autor }}</p>
-    <p class="afiliacion">{{ abstract.afiliacion }}</p>
+
+    <!-- Título -->
+    <h1>{{ abstract.titulo | striptags }}</h1>
+
+    <!-- Autores -->
+    <p class="autores">
+        {% for autor in abstract.autores %}
+            {% if autor.es_presentador %}<u>{% endif %}
+            {{ autor.nombre }}
+            {% if autor.afiliaciones_ids %}
+                <sup>{{ autor.afiliaciones_ids }}</sup>
+            {% endif %}
+            {% if autor.es_presentador %}</u>{% endif %}
+            {% if not loop.last %}, {% endif %}
+        {% endfor %}
+    </p>
+
+    <!-- Afiliaciones -->
+    <div class="afiliaciones">
+        {% for afil in abstract.afiliaciones %}
+            <sup>{{ afil.orden }}</sup> {{ afil.nombre }}<br>
+        {% endfor %}
+    </div>
+
+    <!-- Email -->
     <p class="email">{{ abstract.email_autor }}</p>
+
+    <!-- Área temática -->
+    {% set areas = {
+        '1': 'Síntesis de nanomateriales',
+        '2': 'Autoensamblado',
+        '3': 'Nanobiointerfaces y procesos biológicos',
+        '4': 'Superficies',
+        '5': 'Propiedades de nanomateriales',
+        '6': 'Aplicaciones de nanomateriales en ambiente, energía, agro, alimentos y catálisis',
+        '7': 'Nanotecnología y Salud'
+    } %}
+    <p class="area">Área: {{ areas.get(abstract.area_tematica, '—') }}</p>
+
     <hr>
+
+    <!-- Resumen -->
+    <div class="seccion-titulo">Resumen</div>
     <div class="contenido">
         {{ abstract.contenido_html | safe }}
     </div>
-    <div class="footer">
-        Congreso Nano 2025
+
+    <!-- Referencias -->
+    {% if abstract.referencias_html and abstract.referencias_html != '<p><br></p>' %}
+    <div class="seccion-titulo">Referencias</div>
+    <div class="referencias">
+        {{ abstract.referencias_html | safe }}
     </div>
+    {% endif %}
+
+    <div class="footer">
+        NANO2026 · XXIV Encuentro de Superficies y Materiales Nanoestructurados · Campus UNSAM
+    </div>
+
 </body>
 </html>
