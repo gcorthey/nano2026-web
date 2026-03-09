@@ -135,20 +135,25 @@ def submit_abstract(
     })
 # --- Admin: lista de abstracts ---
 @app.get("/admin", response_class=HTMLResponse)
+@app.get("/admin", response_class=HTMLResponse)
 def admin_abstracts(
     request: Request,
     estado: str = "todos",
+    area: str = "todas",
     current_user: models.User = Depends(require_admin),
     db: Session = Depends(get_db)
 ):
     query = db.query(models.Abstract)
     if estado != "todos":
         query = query.filter(models.Abstract.estado == estado)
+    if area != "todas":
+        query = query.filter(models.Abstract.area_tematica == area)
     abstracts = query.order_by(models.Abstract.fecha_envio.desc()).all()
     return templates.TemplateResponse("admin/abstracts.html", {
         "request": request,
         "abstracts": abstracts,
         "estado_filtro": estado,
+        "area_filtro": area,
         "current_user": current_user
     })
 

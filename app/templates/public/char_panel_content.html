@@ -1,0 +1,58 @@
+<div class="pb-2 border-b">
+    <p class="text-xs text-gray-400 font-semibold uppercase tracking-wider mb-1">Ecuaciones LaTeX</p>
+    <button type="button" onclick="insertFormula(activeQuill)"
+        class="px-3 py-1.5 text-sm border rounded bg-white hover:bg-teal-50 hover:border-teal-400 transition font-medium">
+        √ Insertar ecuación
+    </button>
+    <p class="text-xs text-gray-400 mt-1">Ejemplos: <code>\frac{1}{2}</code> · <code>E=mc^2</code> · <code>\int_0^\infty</code></p>
+</div>
+
+<div>
+    <p class="text-xs text-gray-400 font-semibold uppercase tracking-wider mb-1">Letras griegas minúsculas</p>
+    <div class="flex flex-wrap gap-1">
+        {% for c in ['α','β','γ','δ','ε','ζ','η','θ','ι','κ','λ','μ','ν','ξ','π','ρ','σ','τ','υ','φ','χ','ψ','ω'] %}
+        <button type="button" onclick="insertChar('{{ c }}')"
+            class="px-2 py-1 text-sm border rounded bg-white hover:bg-teal-50 hover:border-teal-400 transition">{{ c }}</button>
+        {% endfor %}
+    </div>
+</div>
+
+<div>
+    <p class="text-xs text-gray-400 font-semibold uppercase tracking-wider mb-1">Letras griegas mayúsculas</p>
+    <div class="flex flex-wrap gap-1">
+        {% for c in ['Α','Β','Γ','Δ','Ε','Ζ','Η','Θ','Λ','Μ','Ν','Ξ','Π','Ρ','Σ','Τ','Υ','Φ','Χ','Ψ','Ω'] %}
+        <button type="button" onclick="insertChar('{{ c }}')"
+            class="px-2 py-1 text-sm border rounded bg-white hover:bg-teal-50 hover:border-teal-400 transition">{{ c }}</button>
+        {% endfor %}
+    </div>
+</div>
+
+<div>
+    <p class="text-xs text-gray-400 font-semibold uppercase tracking-wider mb-1">Símbolos matemáticos</p>
+    <div class="flex flex-wrap gap-1">
+        {% for c in ['±','×','÷','≈','≠','≤','≥','∞','√','∑','∫','∂','∇','∝','∈','∉','⊂','⊃','∪','∩','‰','°'] %}
+        <button type="button" onclick="insertChar('{{ c }}')"
+            class="px-2 py-1 text-sm border rounded bg-white hover:bg-teal-50 hover:border-teal-400 transition">{{ c }}</button>
+        {% endfor %}
+    </div>
+</div>
+
+<div>
+    <p class="text-xs text-gray-400 font-semibold uppercase tracking-wider mb-1">Símbolos científicos</p>
+    <div class="flex flex-wrap gap-1">
+        {% for c in ['Å','µ','ħ','ℏ','ℓ','℃','℉','∆','⊗','⟨','⟩'] %}
+        <button type="button" onclick="insertChar('{{ c }}')"
+            class="px-2 py-1 text-sm border rounded bg-white hover:bg-teal-50 hover:border-teal-400 transition">{{ c }}</button>
+        {% endfor %}
+    </div>
+</div>
+
+<div>
+    <p class="text-xs text-gray-400 font-semibold uppercase tracking-wider mb-1">Flechas</p>
+    <div class="flex flex-wrap gap-1">
+        {% for c in ['→','←','↑','↓','↔','↕','⇒','⇐','⇔','⇌','⟶','⟵','⟷'] %}
+        <button type="button" onclick="insertChar('{{ c }}')"
+            class="px-2 py-1 text-sm border rounded bg-white hover:bg-teal-50 hover:border-teal-400 transition">{{ c }}</button>
+        {% endfor %}
+    </div>
+</div>

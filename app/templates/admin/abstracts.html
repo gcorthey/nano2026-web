@@ -1,13 +1,27 @@
 {% extends "admin/base.html" %}
 {% block content %}
 
-<div class="flex items-center justify-between mb-6">
-    <h1 class="text-2xl font-bold">Resúmenes enviados</h1>
-    <div class="flex gap-2 text-sm">
-        <a href="?estado=todos" class="px-3 py-1 rounded border {% if estado_filtro == 'todos' %}bg-blue-600 text-white{% else %}bg-white{% endif %}">Todos</a>
-        <a href="?estado=pendiente" class="px-3 py-1 rounded border {% if estado_filtro == 'pendiente' %}bg-yellow-500 text-white{% else %}bg-white{% endif %}">Pendientes</a>
-        <a href="?estado=aprobado" class="px-3 py-1 rounded border {% if estado_filtro == 'aprobado' %}bg-green-600 text-white{% else %}bg-white{% endif %}">Aprobados</a>
-        <a href="?estado=rechazado" class="px-3 py-1 rounded border {% if estado_filtro == 'rechazado' %}bg-red-600 text-white{% else %}bg-white{% endif %}">Rechazados</a>
+<div class="mb-6">
+    <div class="flex items-center justify-between mb-3">
+        <h1 class="text-2xl font-bold">Resúmenes enviados</h1>
+    </div>
+    <div class="flex flex-wrap gap-2 text-sm mb-2">
+        <span class="text-gray-400 text-xs self-center uppercase tracking-wider mr-1">Estado:</span>
+        <a href="?estado=todos&area={{ area_filtro }}" class="px-3 py-1 rounded border {% if estado_filtro == 'todos' %}bg-blue-600 text-white{% else %}bg-white{% endif %}">Todos</a>
+        <a href="?estado=pendiente&area={{ area_filtro }}" class="px-3 py-1 rounded border {% if estado_filtro == 'pendiente' %}bg-yellow-500 text-white{% else %}bg-white{% endif %}">Pendientes</a>
+        <a href="?estado=aprobado&area={{ area_filtro }}" class="px-3 py-1 rounded border {% if estado_filtro == 'aprobado' %}bg-green-600 text-white{% else %}bg-white{% endif %}">Aprobados</a>
+        <a href="?estado=rechazado&area={{ area_filtro }}" class="px-3 py-1 rounded border {% if estado_filtro == 'rechazado' %}bg-red-600 text-white{% else %}bg-white{% endif %}">Rechazados</a>
+    </div>
+    <div class="flex flex-wrap gap-2 text-sm">
+        <span class="text-gray-400 text-xs self-center uppercase tracking-wider mr-1">Área:</span>
+        <a href="?estado={{ estado_filtro }}&area=todas" class="px-3 py-1 rounded border {% if area_filtro == 'todas' %}bg-gray-700 text-white{% else %}bg-white{% endif %}">Todas</a>
+        <a href="?estado={{ estado_filtro }}&area=1" class="px-3 py-1 rounded border {% if area_filtro == '1' %}bg-blue-500 text-white{% else %}bg-white{% endif %}">Síntesis</a>
+        <a href="?estado={{ estado_filtro }}&area=2" class="px-3 py-1 rounded border {% if area_filtro == '2' %}bg-purple-500 text-white{% else %}bg-white{% endif %}">Autoensamblado</a>
+        <a href="?estado={{ estado_filtro }}&area=3" class="px-3 py-1 rounded border {% if area_filtro == '3' %}bg-green-500 text-white{% else %}bg-white{% endif %}">Nanobio</a>
+        <a href="?estado={{ estado_filtro }}&area=4" class="px-3 py-1 rounded border {% if area_filtro == '4' %}bg-orange-500 text-white{% else %}bg-white{% endif %}">Superficies</a>
+        <a href="?estado={{ estado_filtro }}&area=5" class="px-3 py-1 rounded border {% if area_filtro == '5' %}bg-yellow-500 text-white{% else %}bg-white{% endif %}">Propiedades</a>
+        <a href="?estado={{ estado_filtro }}&area=6" class="px-3 py-1 rounded border {% if area_filtro == '6' %}bg-teal-500 text-white{% else %}bg-white{% endif %}">Aplicaciones</a>
+        <a href="?estado={{ estado_filtro }}&area=7" class="px-3 py-1 rounded border {% if area_filtro == '7' %}bg-red-500 text-white{% else %}bg-white{% endif %}">Nano y Salud</a>
     </div>
 </div>
 
