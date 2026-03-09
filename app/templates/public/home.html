@@ -25,7 +25,7 @@
     </div>
 </div>
 <!-- Contadores -->
-<div class="grid grid-cols-3 gap-6 mb-12">
+<div class="grid grid-cols-1 sm:grid-cols-3 gap-6 mb-12">
     <div class="bg-white rounded-2xl shadow p-6 text-center border-t-4 border-teal-500">
         <p class="text-4xl font-black text-teal-600">{{ total_abstracts }}</p>
         <p class="text-gray-500 text-sm mt-1">Resúmenes recibidos</p>
@@ -41,7 +41,7 @@
 </div>
 
 <!-- Sobre el congreso -->
-<div class="grid grid-cols-2 gap-8 mb-12">
+<div class="grid grid-cols-1 md:grid-cols-2 gap-8 mb-12">
     <div class="bg-white rounded-2xl shadow p-8">
         <h2 class="text-xl font-bold text-gray-800 mb-4">Sobre el NANO2026</h2>
         <p class="text-gray-600 leading-relaxed">
@@ -68,7 +68,7 @@
     </div>
 </div>
 <!-- Galería visual -->
-<div class="grid grid-cols-3 gap-4 mb-12">
+<div class="grid grid-cols-1 sm:grid-cols-3 gap-4 mb-12">
     <img src="https://images.unsplash.com/photo-1576086213369-97a306d36557?w=600&q=80"
         class="rounded-2xl object-cover w-full h-48 shadow" alt="Microscopía"/>
     <img src="https://images.unsplash.com/photo-1507413245164-6160d8298b31?w=600&q=80"
@@ -79,7 +79,7 @@
 <!-- Áreas temáticas -->
 <div class="bg-white rounded-2xl shadow p-8 mb-12">
     <h2 class="text-xl font-bold text-gray-800 mb-6">Áreas temáticas</h2>
-    <div class="grid grid-cols-2 gap-3 sm:grid-cols-3 lg:grid-cols-4">
+   <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-3">
         {% for area in [
             ('🔬', 'Síntesis de nanomateriales'),
             ('⚛️', 'Autoensamblado'),
