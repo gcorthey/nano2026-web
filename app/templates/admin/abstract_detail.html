@@ -6,7 +6,7 @@
 <div class="mt-4 bg-white rounded shadow p-6 mb-6">
 
     <!-- Encabezado -->
-    <div class="flex items-start justify-between mb-4">
+    <div class="flex flex-col md:flex-row md:items-start md:justify-between mb-4 gap-3">
         <div class="flex-1">
             <h1 class="text-xl font-bold">{{ abstract.titulo | striptags }}</h1>
 
@@ -37,7 +37,7 @@
             </p>
         </div>
 
-        <div class="flex flex-col items-end gap-2 ml-4">
+        <div class="flex flex-row md:flex-col items-start md:items-end flex-wrap gap-2 md:ml-4">
             {% if abstract.estado.value == 'pendiente' %}
                 <span class="bg-yellow-100 text-yellow-800 px-3 py-1 rounded text-sm">Pendiente</span>
             {% elif abstract.estado.value == 'aprobado' %}
@@ -84,23 +84,25 @@
     </div>
     {% endif %}
 
-<!-- Acciones -->
-    <div class="border-t pt-4 flex gap-3">
+    <!-- Acciones -->
+    <div class="border-t pt-4">
         <a href="/abstracts/{{ abstract.id }}/pdf" target="_blank"
-            class="bg-gray-200 text-gray-700 px-4 py-2 rounded hover:bg-gray-300 text-sm">📄 Ver PDF</a>
+            class="bg-gray-200 text-gray-700 px-4 py-2 rounded hover:bg-gray-300 text-sm inline-block">📄 Ver PDF</a>
     </div>
+
+</div>
 
 <!-- Asignar evaluadores -->
 <div class="bg-white rounded shadow p-6 mb-6">
     <h2 class="font-semibold mb-3">Asignar evaluadores</h2>
     {% if evaluadores_disponibles %}
-    <form method="post" action="/admin/abstracts/{{ abstract.id }}/asignar" class="flex gap-3 items-center">
-        <select name="evaluador_id" class="border rounded px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-blue-400">
+    <form method="post" action="/admin/abstracts/{{ abstract.id }}/asignar" class="flex flex-col sm:flex-row gap-3 items-start sm:items-center">
+        <select name="evaluador_id" class="w-full sm:w-auto border rounded px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-blue-400">
             {% for e in evaluadores_disponibles %}
                 <option value="{{ e.id }}">{{ e.nombre }} ({{ e.email }})</option>
             {% endfor %}
         </select>
-        <button class="bg-blue-600 text-white px-4 py-2 rounded hover:bg-blue-700 text-sm">Asignar</button>
+        <button class="bg-blue-600 text-white px-4 py-2 rounded hover:bg-blue-700 text-sm whitespace-nowrap">Asignar</button>
     </form>
     {% else %}
         <p class="text-gray-400 text-sm">No hay evaluadores disponibles. <a href="/admin/evaluadores" class="text-blue-600 hover:underline">Crear evaluadores</a></p>
@@ -112,9 +114,9 @@
         <ul class="text-sm space-y-1">
             {% for asig in abstract.asignaciones %}
             <li class="flex items-center justify-between border rounded px-3 py-2">
-                <span>{{ asig.evaluador.nombre }} ({{ asig.evaluador.email }})</span>
+                <span class="truncate mr-2">{{ asig.evaluador.nombre }} ({{ asig.evaluador.email }})</span>
                 <form method="post" action="/admin/abstracts/{{ abstract.id }}/desasignar/{{ asig.evaluador_id }}">
-                    <button class="text-red-500 text-xs hover:underline">Quitar</button>
+                    <button class="text-red-500 text-xs hover:underline whitespace-nowrap">Quitar</button>
                 </form>
             </li>
             {% endfor %}
@@ -130,16 +132,16 @@
     <div class="space-y-3">
         {% for r in reviews %}
         <div class="border rounded p-4">
-            <div class="flex items-center justify-between mb-1">
+            <div class="flex items-center justify-between mb-1 gap-2">
                 <span class="font-medium text-sm">{{ r.evaluador.nombre }}</span>
                 {% if r.decision %}
                     {% if r.decision.value == 'aprobado' %}
-                        <span class="bg-green-100 text-green-800 px-2 py-0.5 rounded text-xs">Aprobado</span>
+                        <span class="bg-green-100 text-green-800 px-2 py-0.5 rounded text-xs whitespace-nowrap">Aprobado</span>
                     {% else %}
-                        <span class="bg-red-100 text-red-800 px-2 py-0.5 rounded text-xs">Rechazado</span>
+                        <span class="bg-red-100 text-red-800 px-2 py-0.5 rounded text-xs whitespace-nowrap">Rechazado</span>
                     {% endif %}
                 {% else %}
-                    <span class="bg-gray-100 text-gray-500 px-2 py-0.5 rounded text-xs">Sin evaluar</span>
+                    <span class="bg-gray-100 text-gray-500 px-2 py-0.5 rounded text-xs whitespace-nowrap">Sin evaluar</span>
                 {% endif %}
             </div>
             {% if r.comentario %}

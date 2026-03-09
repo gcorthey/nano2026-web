@@ -26,8 +26,8 @@
 </div>
 
 {% if abstracts %}
-<div class="bg-white rounded shadow overflow-hidden">
-    <table class="w-full text-sm" id="tabla-abstracts">
+<div class="bg-white rounded shadow overflow-x-auto">
+    <table class="text-sm" id="tabla-abstracts" style="min-width: 800px; width: 100%;">
         <thead class="bg-gray-50 text-gray-600 uppercase text-xs">
             <tr>
                 <th class="px-4 py-3 text-left cursor-pointer hover:bg-gray-100 select-none" onclick="sortTable(0)"># <span class="sort-icon">↕</span></th>
@@ -55,10 +55,10 @@
             {% set info = area_info.get(a.area_tematica, ('—', 'bg-gray-100 text-gray-500')) %}
             <tr class="hover:bg-gray-50">
                 <td class="px-4 py-3 text-gray-400">{{ a.id }}</td>
-                <td class="px-4 py-3 font-medium max-w-xs">
+                <td class="px-4 py-3 font-medium" style="max-width: 200px;">
                     <div class="truncate">{{ a.titulo | striptags }}</div>
                 </td>
-                <td class="px-4 py-3 text-gray-600 max-w-xs">
+                <td class="px-4 py-3 text-gray-600" style="max-width: 200px;">
                     {% for autor in a.autores %}
                         <span>{{ autor.nombre }}{% if autor.es_presentador %}<span class="text-teal-600 font-bold" title="Presenta">*</span>{% endif %}{% if not loop.last %}, {% endif %}</span>
                     {% endfor %}
@@ -73,8 +73,8 @@
                         <span class="text-gray-400" title="Solo póster">📋</span>
                     {% endif %}
                 </td>
-                <td class="px-4 py-3 text-gray-400">{{ a.fecha_envio.strftime('%d/%m/%Y') }}</td>
-                <td class="px-4 py-3">
+                <td class="px-4 py-3 text-gray-400 whitespace-nowrap">{{ a.fecha_envio.strftime('%d/%m/%Y') }}</td>
+                <td class="px-4 py-3 whitespace-nowrap">
                     {% if a.estado.value == 'pendiente' %}
                         <span class="bg-yellow-100 text-yellow-800 px-2 py-0.5 rounded text-xs">Pendiente</span>
                     {% elif a.estado.value == 'aprobado' %}
@@ -83,7 +83,7 @@
                         <span class="bg-red-100 text-red-800 px-2 py-0.5 rounded text-xs">Rechazado</span>
                     {% endif %}
                 </td>
-                <td class="px-4 py-3 text-gray-500 text-xs">{{ a.asignaciones | length }} / {{ a.reviews | length }}</td>
+                <td class="px-4 py-3 text-gray-500 text-xs whitespace-nowrap">{{ a.asignaciones | length }} / {{ a.reviews | length }}</td>
                 <td class="px-4 py-3">
                     <a href="/admin/abstracts/{{ a.id }}" class="text-blue-600 hover:underline">Ver</a>
                 </td>
@@ -109,7 +109,6 @@
         sortDir[col] = sortDir[col] === 'asc' ? 'desc' : 'asc';
         const dir = sortDir[col];
 
-        // Resetear iconos
         table.querySelectorAll('.sort-icon').forEach(i => i.textContent = '↕');
         table.querySelectorAll('th')[col].querySelector('.sort-icon').textContent = dir === 'asc' ? '↑' : '↓';
 
