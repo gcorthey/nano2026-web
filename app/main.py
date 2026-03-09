@@ -473,3 +473,17 @@ def programa(request: Request):
 @app.get("/about", response_class=HTMLResponse)
 def about(request: Request):
     return templates.TemplateResponse("public/about.html", {"request": request})
+
+
+@app.post("/admin/abstracts/{abstract_id}/delete")
+def admin_delete_abstract(abstract_id: int, current_user: models.User = Depends(require_admin), db: Session = Depends(get_db)):
+    abstract = db.query(models.Abstract).filter(models.Abstract.id == abstract_id).first()
+    if not abstract:
+        raise HTTPException(status_code=404, detail="No encontrado")
+    db.query(models.Review).filter(models.Review.abstract_id == abstract_id).delete()
+    db.query(models.Asignacion).filter(models.Asignacion.abstract_id == abstract_id).delete()
+    db.query(models.Autor).filter(models.Autor.abstract_id == abstract_id).delete()
+    db.query(models.Afiliacion).filter(models.Afiliacion.abstract_id == abstract_id).delete()
+    db.delete(abstract)
+    db.commit()
+    return RedirectResponse(url="/admin", status_code=303)
