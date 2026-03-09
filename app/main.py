@@ -72,6 +72,7 @@ def submit_abstract(
     contenido_html: str = Form(...),
     autor_count: int = Form(...),
     afil_count: int = Form(...),
+    area_tematica: str = Form(...),
     db: Session = Depends(get_db)
 ):
     if not contenido_html or contenido_html.strip() == "<p></p>":
@@ -87,6 +88,7 @@ def submit_abstract(
         email_autor=email_autor,
         contenido_html=contenido_html,
         presentacion_oral=presentacion_oral,
+        area_tematica=area_tematica,
     )
     db.add(abstract)
     db.flush()  # para obtener el id

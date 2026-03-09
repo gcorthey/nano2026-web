@@ -38,6 +38,7 @@ class Abstract(Base):
     asignaciones = relationship("Asignacion", back_populates="abstract")
     autores = relationship("Autor", back_populates="abstract", order_by="Autor.orden")
     afiliaciones = relationship("Afiliacion", back_populates="abstract", order_by="Afiliacion.orden")
+    area_tematica = Column(String, nullable=True)
 
 class Autor(Base):
     __tablename__ = "autores"

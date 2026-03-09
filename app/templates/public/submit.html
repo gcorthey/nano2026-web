@@ -69,6 +69,20 @@
     <input type="email" name="email_autor" required
         class="w-full border rounded-xl px-3 py-2 focus:outline-none focus:ring-2 focus:ring-teal-400"/>
 </div>
+<div class="mb-6">
+    <label class="block text-sm font-medium mb-2">Área temática *</label>
+    <select name="area_tematica" required
+        class="w-full border rounded-xl px-3 py-2 focus:outline-none focus:ring-2 focus:ring-teal-400 bg-white">
+        <option value="" disabled selected>Seleccioná un área...</option>
+        <option value="1">1. Síntesis de nanomateriales</option>
+        <option value="2">2. Autoensamblado</option>
+        <option value="3">3. Nanobiointerfaces y procesos biológicos</option>
+        <option value="4">4. Superficies</option>
+        <option value="5">5. Propiedades de nanomateriales</option>
+        <option value="6">6. Aplicaciones de nanomateriales en ambiente, energía, agro, alimentos y catálisis</option>
+        <option value="7">7. Nanotecnología y Salud</option>
+    </select>
+</div>
 
         <div class="mb-2">
             <label class="block text-sm font-medium mb-2">Resumen *</label>
@@ -139,6 +153,15 @@
 
             <div id="quill-editor" class="border rounded-xl bg-white"></div>
             <input type="hidden" name="contenido_html" id="contenido_html"/>
+            <div class="mt-3 bg-blue-50 border border-blue-200 rounded-xl px-4 py-3 text-xs text-gray-600">
+    <p class="font-semibold text-blue-700 mb-1">📚 Formato de referencias bibliográficas</p>
+    <p class="mb-1">Usá el formato <strong>APA</strong> para las citas. Ejemplos:</p>
+    <ul class="space-y-1 text-gray-500 font-mono">
+        <li>Apellido, N. (año). Título del artículo. <em>Nombre de la Revista</em>, <em>vol</em>(número), páginas.</li>
+        <li class="text-gray-400">Ej: García, A. (2023). Synthesis of gold nanoparticles. <em>ACS Nano</em>, <em>17</em>(3), 1234–1245.</li>
+    </ul>
+    <p class="mt-2 text-gray-400">Las referencias van al final del resumen, numeradas entre corchetes [1], [2]...</p>
+</div>
         </div>
 
                 <!-- Presentación oral -->
