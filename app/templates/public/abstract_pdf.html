@@ -3,82 +3,143 @@
 <head>
     <meta charset="UTF-8">
     <style>
-        body {
-            font-family: "Times New Roman", Times, serif;
-            font-size: 11pt;
+        @page {
             margin: 2.5cm;
+        }
+        body {
+            font-family: Arial, sans-serif;
+            font-size: 10pt;
             color: #000;
         }
+
+        /* Encabezado */
+        .header {
+            border-bottom: 2px solid #0d3b6e;
+            padding-bottom: 0.3cm;
+            margin-bottom: 0.5cm;
+            display: flex;
+            justify-content: space-between;
+            align-items: flex-end;
+        }
+        .header-logo {
+            font-size: 18pt;
+            font-weight: bold;
+            color: #0d3b6e;
+            letter-spacing: -0.5px;
+        }
+        .header-logo span {
+            color: #1a9b7a;
+        }
+        .header-info {
+            font-size: 8pt;
+            color: #666;
+            text-align: right;
+        }
+
+        /* Título */
         h1 {
-            font-size: 13pt;
+            font-size: 14pt;
             font-weight: bold;
             text-align: center;
+            margin-top: 0.4cm;
             margin-bottom: 0.3cm;
+            line-height: 1.3;
         }
+
+        /* Autores */
         .autores {
             text-align: center;
-            font-size: 11pt;
+            font-size: 10pt;
             margin-bottom: 0.2cm;
+            line-height: 1.4;
         }
+
+        /* Afiliaciones */
         .afiliaciones {
             text-align: center;
             font-size: 9pt;
             color: #444;
-            margin-bottom: 0.3cm;
+            margin-bottom: 0.2cm;
+            line-height: 1.4;
         }
+
+        /* Email */
         .email {
             text-align: center;
             font-size: 9pt;
             color: #444;
             margin-bottom: 0.2cm;
         }
+
+        /* Área */
         .area {
             text-align: center;
             font-size: 9pt;
             color: #666;
-            margin-bottom: 0.8cm;
+            margin-bottom: 0.5cm;
         }
+
+        /* Separador */
         hr {
             border: none;
             border-top: 1px solid #ccc;
-            margin-bottom: 0.6cm;
+            margin: 0.4cm 0;
         }
+
+        /* Sección título */
         .seccion-titulo {
-            font-size: 10pt;
+            font-size: 9pt;
             font-weight: bold;
             text-transform: uppercase;
             letter-spacing: 0.05cm;
-            color: #333;
-            margin-top: 0.6cm;
-            margin-bottom: 0.3cm;
+            color: #0d3b6e;
+            margin-top: 0.4cm;
+            margin-bottom: 0.2cm;
         }
+
+        /* Contenido resumen */
         .contenido {
             text-align: justify;
+            font-size: 10pt;
             line-height: 1.5;
         }
+
+        /* Referencias */
         .referencias {
             font-size: 9pt;
             text-align: left;
             line-height: 1.4;
         }
+
         sup {
             font-size: 7pt;
-            color: #008080;
+            color: #1a9b7a;
         }
+
+        /* Footer */
         .footer {
             position: fixed;
-            bottom: 1cm;
-            left: 2.5cm;
-            right: 2.5cm;
+            bottom: 0.8cm;
+            left: 0;
+            right: 0;
             text-align: center;
             font-size: 8pt;
             color: #999;
             border-top: 1px solid #eee;
-            padding-top: 0.3cm;
+            padding-top: 0.2cm;
         }
     </style>
 </head>
 <body>
+
+    <!-- Encabezado -->
+    <div class="header">
+        <div class="header-logo">NANO<span>2026</span></div>
+        <div class="header-info">
+            XXIV Encuentro de Superficies y Materiales Nanoestructurados<br>
+            3, 4 y 5 de junio de 2026 · Campus UNSAM · San Martín, Buenos Aires
+        </div>
+    </div>
 
     <!-- Título -->
     <h1>{{ abstract.titulo | striptags }}</h1>
@@ -116,7 +177,7 @@
         '6': 'Aplicaciones de nanomateriales en ambiente, energía, agro, alimentos y catálisis',
         '7': 'Nanotecnología y Salud'
     } %}
-    <p class="area">Área: {{ areas.get(abstract.area_tematica, '—') }}</p>
+    <p class="area">Área temática: <strong>{{ areas.get(abstract.area_tematica, '—') }}</strong></p>
 
     <hr>
 
@@ -134,6 +195,7 @@
     </div>
     {% endif %}
 
+    <!-- Footer -->
     <div class="footer">
         NANO2026 · XXIV Encuentro de Superficies y Materiales Nanoestructurados · Campus UNSAM
     </div>
