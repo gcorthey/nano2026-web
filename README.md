@@ -1,4 +1,3 @@
-cat > ~/dev/congreso_nano/README.md << 'EOF'
 # NANO2026 — Web del Congreso
 
 Sistema web para el **XXIV Encuentro de Superficies y Materiales Nanoestructurados (NANO2026)**  
