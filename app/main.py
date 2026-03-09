@@ -487,3 +487,11 @@ def admin_delete_abstract(abstract_id: int, current_user: models.User = Depends(
     db.delete(abstract)
     db.commit()
     return RedirectResponse(url="/admin", status_code=303)
+
+
+@app.get("/circulares", response_class=HTMLResponse)
+def circulares(request: Request):
+    return templates.TemplateResponse("public/circulares.html", {"request": request})
+@app.get("/contacto", response_class=HTMLResponse)
+def contacto(request: Request):
+    return templates.TemplateResponse("public/contacto.html", {"request": request})

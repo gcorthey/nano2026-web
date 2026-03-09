@@ -43,7 +43,7 @@
 
         <!-- Título -->
         <div class="mb-4">
-            <label class="block text-sm font-medium mb-1">Título del trabajo *</label>
+            <label class="block text-sm font-bold mb-1">Título del trabajo *</label>
             <div id="titulo-editor-char-panel" class="hidden mb-2 border rounded-xl bg-gray-50 p-3 space-y-3">
                 {% include "public/char_panel_content.html" %}
             </div>
@@ -53,7 +53,7 @@
 
         <!-- Autores -->
         <div class="mb-6">
-            <label class="block text-sm font-medium mb-2">Autores *</label>
+            <label class="block text-sm font-bold mb-2">Autores *</label>
             <div id="autores-list" class="space-y-2 mb-2"></div>
             <button type="button" onclick="agregarAutor()"
                 class="text-sm text-teal-600 border border-teal-400 rounded-lg px-3 py-1.5 hover:bg-teal-50 transition">
@@ -64,7 +64,7 @@
 
         <!-- Afiliaciones -->
         <div class="mb-6">
-            <label class="block text-sm font-medium mb-2">Afiliaciones *</label>
+            <label class="block text-sm font-bold mb-2">Afiliaciones *</label>
             <div id="afiliaciones-list" class="space-y-2 mb-2"></div>
             <button type="button" onclick="agregarAfiliacion()"
                 class="text-sm text-teal-600 border border-teal-400 rounded-lg px-3 py-1.5 hover:bg-teal-50 transition">
@@ -74,14 +74,14 @@
 
         <!-- Email -->
         <div class="mb-6">
-            <label class="block text-sm font-medium mb-1">Email del autor presentador *</label>
+            <label class="block text-sm font-bold mb-1">Email del autor presentador *</label>
             <input type="email" name="email_autor" required
                 class="w-full border rounded-xl px-3 py-2 focus:outline-none focus:ring-2 focus:ring-teal-400"/>
         </div>
 
         <!-- Área temática -->
         <div class="mb-6">
-            <label class="block text-sm font-medium mb-2">Área temática *</label>
+            <label class="block text-sm font-bold mb-2">Área temática *</label>
             <select name="area_tematica" required
                 class="w-full border rounded-xl px-3 py-2 focus:outline-none focus:ring-2 focus:ring-teal-400 bg-white">
                 <option value="" disabled selected>Seleccioná un área...</option>
@@ -112,17 +112,20 @@
 
         <!-- Resumen -->
         <div class="mb-6">
-            <label class="block text-sm font-medium mb-2">Resumen *</label>
+            <label class="block text-sm font-bold mb-2">Resumen *</label>
             <div id="quill-editor-char-panel" class="hidden mb-2 border rounded-xl bg-gray-50 p-3 space-y-3">
                 {% include "public/char_panel_content.html" %}
             </div>
             <div id="quill-editor" class="border rounded-xl bg-white"></div>
+            <div class="flex justify-end mt-1">
+                <span id="char-counter" class="text-xs text-gray-400">0 / 2500 caracteres</span>
+            </div>
             <input type="hidden" name="contenido_html" id="contenido_html"/>
         </div>
 
         <!-- Referencias -->
         <div class="mb-6">
-            <label class="block text-sm font-medium mb-2">Referencias bibliográficas</label>
+            <label class="block text-sm font-bold mb-2">Referencias bibliográficas</label>
            
             <div id="referencias-editor-char-panel" class="hidden mb-2 border rounded-xl bg-gray-50 p-3 space-y-3">
                 {% include "public/char_panel_content.html" %}
@@ -266,6 +269,22 @@
 
     const quillTitulo = crearEditorTitulo('titulo-editor', 'Escribí el título del trabajo aquí...');
     const quill = crearEditorResumen('quill-editor', 'Escribí el resumen aquí...');
+    const MAX_CHARS = 2500;
+    const charCounter = document.getElementById('char-counter');
+    quill.on('text-change', function() {
+        const len = quill.getText().trim().length;
+        charCounter.textContent = len + ' / ' + MAX_CHARS + ' caracteres';
+        if (len > MAX_CHARS) {
+            charCounter.classList.add('text-red-500', 'font-semibold');
+            charCounter.classList.remove('text-gray-400');
+            const delta = quill.getContents();
+            let count = 0;
+            quill.deleteText(MAX_CHARS, quill.getLength());
+        } else {
+            charCounter.classList.remove('text-red-500', 'font-semibold');
+            charCounter.classList.add('text-gray-400');
+        }
+    });
     const quillReferencias = new Quill('#referencias-editor', {
     theme: 'snow',
     modules: {
@@ -314,11 +333,11 @@ window.addEventListener('load', function() {
 });
 
 quillReferencias.setContents([
-    { insert: '[1] García, A.; Perez, B. ' },
+    { insert: '1. García, A.; Perez, B. ' },
     { insert: 'ACS Nano ', attributes: { italic: true } },
     { insert: '17', attributes: { bold: true } },
     { insert: ' (2026) 1121-1125 \n' },
-    { insert: '[2] \n' }
+    { insert: '2. \n' }
 ]);
     function toggleChars(panelId) {
         document.getElementById(panelId).classList.toggle('hidden');

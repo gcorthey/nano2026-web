@@ -13,16 +13,30 @@
     NANO<span class="text-teal-400">2026</span>
 </a>
             <!-- Desktop menu -->
-            <div class="hidden md:flex items-center gap-5 text-sm text-gray-300">
-                <a href="/" class="hover:text-white transition">Inicio</a>
-                <a href="/about" class="hover:text-white transition">Sobre el NANO</a>
-                <a href="/programa" class="hover:text-white transition">Programa</a>
-                <a href="/speakers" class="hover:text-white transition">Conferencias</a>
-                <a href="/venue" class="hover:text-white transition">Sede</a>
-                <a href="/submit" class="bg-teal-500 hover:bg-teal-400 text-white px-4 py-1.5 rounded-full transition font-medium">
-                    Enviar resumen
-                </a>
-            </div>
+<div class="hidden md:flex items-center gap-5 text-sm text-gray-300">
+    <a href="/" class="hover:text-white transition">Inicio</a>
+    <!-- Dropdown Sobre el NANO -->
+    <div class="relative group">
+        <button class="hover:text-white transition flex items-center gap-1">
+            Sobre el NANO
+            <svg class="w-3 h-3" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7"/>
+            </svg>
+        </button>
+        <div class="absolute left-0 top-full mt-1 bg-white text-gray-700 rounded-xl shadow-lg py-2 w-44 hidden group-hover:block z-50">
+            <a href="/about" class="block px-4 py-2 text-sm hover:bg-gray-50">Sobre el encuentro</a>
+            <a href="/circulares" class="block px-4 py-2 text-sm hover:bg-gray-50">Circulares</a>
+            <a href="/contacto" class="block px-4 py-2 text-sm hover:bg-gray-50">Contacto</a>
+        </div>
+    </div>
+    
+    <a href="/programa" class="hover:text-white transition">Programa</a>
+    <a href="/speakers" class="hover:text-white transition">Conferencias</a>
+    <a href="/venue" class="hover:text-white transition">Sede</a>
+    <a href="/submit" class="bg-teal-500 hover:bg-teal-400 text-white px-4 py-1.5 rounded-full transition font-medium">
+        Enviar resumen
+    </a>
+</div>
             <!-- Hamburger -->
             <button id="menu-btn" class="md:hidden text-gray-300 hover:text-white focus:outline-none">
                 <svg id="icon-open" class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -35,10 +49,13 @@
         </div>
         <!-- Mobile menu -->
         <div id="mobile-menu" class="hidden md:hidden mt-3 flex flex-col gap-3 text-sm text-gray-300 pb-2">
-            <a href="/" class="hover:text-white transition">Inicio</a>            
+            <a href="/" class="hover:text-white transition">Inicio</a>       
+            <a href="/about" class="hover:text-white transition">Sobre el NANO</a>
+            <a href="/circulares" class="hover:text-white transition pl-3 text-gray-400">↳ Circulares</a>     
+            <a href="/contacto" class="hover:text-white transition pl-3 text-gray-400">↳ Contacto</a>  
             <a href="/programa" class="hover:text-white transition">Programa</a>
-            <a href="/speakers" class="hover:text-white transition">Speakers</a>
-            <a href="/venue" class="hover:text-white transition">Venue</a>
+            <a href="/speakers" class="hover:text-white transition">Conferencias</a>
+            <a href="/venue" class="hover:text-white transition">Sede</a>
             <a href="/submit" class="bg-teal-500 hover:bg-teal-400 text-white px-4 py-2 rounded-full transition font-medium text-center">
                 Enviar resumen
             </a>
