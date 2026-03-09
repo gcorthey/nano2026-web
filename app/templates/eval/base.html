@@ -1,0 +1,20 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <title>Evaluador — Congreso</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+</head>
+<body class="bg-gray-100 min-h-screen">
+    <nav class="bg-teal-700 text-white px-6 py-3 flex items-center justify-between">
+        <span class="font-bold text-lg">Panel Evaluador</span>
+        <div class="flex gap-6 text-sm">
+            <a href="/eval" class="hover:underline">Mis resúmenes</a>
+            <a href="/logout" class="hover:underline text-red-300">Salir</a>
+        </div>
+    </nav>
+    <div class="max-w-4xl mx-auto py-8 px-4">
+        {% block content %}{% endblock %}
+    </div>
+</body>
+</html>

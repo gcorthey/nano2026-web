@@ -1,0 +1,145 @@
+{% extends "public/base.html" %}
+{% block content %}
+
+<!-- Hero -->
+<div class="relative rounded-2xl overflow-hidden mb-12" style="min-height: 420px; background: linear-gradient(135deg, #0a1628 0%, #0d3b6e 50%, #1a6b4a 100%);">
+    <div class="absolute inset-0 opacity-20" style="background-image: url('https://upload.wikimedia.org/wikipedia/commons/thumb/a/a0/Citrobacter_freundii_bacteria.jpg/1200px-Citrobacter_freundii_bacteria.jpg'); background-size: cover; background-position: center;"></div>
+    <div class="relative z-10 flex flex-col items-center justify-center text-center px-8 py-20">
+        <div class="bg-white bg-opacity-10 backdrop-blur rounded-2xl px-8 py-6 mb-6 inline-block">
+            <p class="text-teal-300 text-sm font-semibold tracking-widest uppercase mb-1">XXIV Encuentro de Superficies y Materiales Nanoestructurados</p>
+            <h1 class="text-6xl font-black text-white tracking-tight">NANO<span class="text-teal-400">2026</span></h1>
+        </div>
+        <p class="text-white text-xl font-light mb-2">3, 4 y 5 de junio de 2026</p>
+        <p class="text-teal-300 text-lg mb-8">Campus UNSAM · San Martín, Buenos Aires</p>
+        <div class="flex flex-wrap gap-4 justify-center">
+            <a href="/submit" class="bg-teal-500 hover:bg-teal-400 text-white font-semibold px-8 py-3 rounded-full transition shadow-lg">
+                Enviar resumen →
+            </a>
+            <a href="/abstracts" class="bg-white bg-opacity-20 hover:bg-opacity-30 text-white font-semibold px-8 py-3 rounded-full transition backdrop-blur">
+                Ver resúmenes
+            </a>
+        </div>
+    </div>
+</div>
+
+<!-- Contadores -->
+<div class="grid grid-cols-3 gap-6 mb-12">
+    <div class="bg-white rounded-2xl shadow p-6 text-center border-t-4 border-teal-500">
+        <p class="text-4xl font-black text-teal-600">{{ total_abstracts }}</p>
+        <p class="text-gray-500 text-sm mt-1">Resúmenes recibidos</p>
+    </div>
+    <div class="bg-white rounded-2xl shadow p-6 text-center border-t-4 border-blue-500">
+        <p class="text-4xl font-black text-blue-600">300-500</p>
+        <p class="text-gray-500 text-sm mt-1">Asistentes esperados</p>
+    </div>
+    <div class="bg-white rounded-2xl shadow p-6 text-center border-t-4 border-indigo-500">
+        <p class="text-4xl font-black text-indigo-600">5</p>
+        <p class="text-gray-500 text-sm mt-1">Conferencias plenarias</p>
+    </div>
+</div>
+
+<!-- Sobre el congreso -->
+<div class="grid grid-cols-2 gap-8 mb-12">
+    <div class="bg-white rounded-2xl shadow p-8">
+        <h2 class="text-xl font-bold text-gray-800 mb-4">Sobre el NANO2026</h2>
+        <p class="text-gray-600 leading-relaxed">
+            El NANO26 es el encuentro anual de la comunidad de nanotecnología en Argentina. 
+            Después del NANO25 realizado en Tucumán, la comunidad decidió llevarlo a cabo 
+            en el área metropolitana. El <strong>INS-EByN-UNSAM</strong> se ofrece como sede, 
+            en colaboración con UBA, CNEA, FAN, UNLP y CONICET.
+        </p>
+        <p class="text-gray-600 leading-relaxed mt-3">
+            Se hará particular hincapié en generar un espacio de interacción con empresas 
+            y se espera atraer sponsors públicos y privados.
+        </p>
+    </div>
+    <div class="bg-white rounded-2xl shadow p-8">
+        <h2 class="text-xl font-bold text-gray-800 mb-4">Estructura del congreso</h2>
+        <ul class="space-y-2 text-gray-600">
+            <li class="flex items-center gap-2"><span class="text-teal-500 font-bold">→</span> 2 días y medio de sesiones</li>
+            <li class="flex items-center gap-2"><span class="text-teal-500 font-bold">→</span> 5 Conferencias Plenarias</li>
+            <li class="flex items-center gap-2"><span class="text-teal-500 font-bold">→</span> 2 Sesiones semiplenarias paralelas</li>
+            <li class="flex items-center gap-2"><span class="text-teal-500 font-bold">→</span> 2 Sesiones de pósters</li>
+            <li class="flex items-center gap-2"><span class="text-teal-500 font-bold">→</span> Taller para estudiantes (2 de junio)</li>
+            <li class="flex items-center gap-2"><span class="text-teal-500 font-bold">→</span> Mesa de empresas e industria</li>
+        </ul>
+    </div>
+</div>
+<!-- Galería visual -->
+<div class="grid grid-cols-3 gap-4 mb-12">
+    <img src="https://images.unsplash.com/photo-1576086213369-97a306d36557?w=600&q=80"
+        class="rounded-2xl object-cover w-full h-48 shadow" alt="Microscopía"/>
+    <img src="https://images.unsplash.com/photo-1507413245164-6160d8298b31?w=600&q=80"
+        class="rounded-2xl object-cover w-full h-48 shadow" alt="Laboratorio"/>
+    <img src="https://images.unsplash.com/photo-1581093458791-9f3c3900df4b?w=600&q=80"
+        class="rounded-2xl object-cover w-full h-48 shadow" alt="Nanotecnología"/>
+</div>
+<!-- Áreas temáticas -->
+<div class="bg-white rounded-2xl shadow p-8 mb-12">
+    <h2 class="text-xl font-bold text-gray-800 mb-6">Áreas temáticas</h2>
+    <div class="grid grid-cols-2 gap-3 sm:grid-cols-3 lg:grid-cols-4">
+        {% for area in [
+            ('🔬', 'Síntesis de nanomateriales'),
+            ('⚛️', 'Autoensamblado'),
+            ('🧬', 'Nanobiointerfaces'),
+            ('🌐', 'Superficies'),
+            ('💡', 'Propiedades de nanomateriales'),
+            ('🌱', 'Nano y Ambiente/Agro'),
+            ('⚡', 'Energía y Catálisis'),
+            ('🏥', 'Nanotecnología y Salud'),
+            ('💻', 'Nanoelectrónica'),
+            ('🤖', 'IA aplicada a Nano'),
+        ] %}
+        <div class="bg-gray-50 rounded-xl px-4 py-3 flex items-center gap-2 text-sm text-gray-700">
+            <span class="text-lg">{{ area[0] }}</span>
+            <span>{{ area[1] }}</span>
+        </div>
+        {% endfor %}
+    </div>
+</div>
+
+<!-- Inscripción -->
+<div class="bg-gradient-to-r from-teal-600 to-blue-700 rounded-2xl shadow p-8 mb-12 text-white">
+    <h2 class="text-xl font-bold mb-6">Costos de inscripción</h2>
+    <div class="overflow-x-auto">
+        <table class="w-full text-sm">
+            <thead>
+                <tr class="text-teal-200 text-xs uppercase">
+                    <th class="text-left py-2 pr-8">Categoría</th>
+                    <th class="text-center py-2 px-4">Inscripción temprana<br><span class="font-normal normal-case">hasta 15/4/26</span></th>
+                    <th class="text-center py-2 px-4">Segunda inscripción<br><span class="font-normal normal-case">hasta 28/5/26</span></th>
+                </tr>
+            </thead>
+            <tbody class="divide-y divide-white divide-opacity-20">
+                <tr>
+                    <td class="py-3 pr-8">Estudiantes de grado</td>
+                    <td class="text-center py-3 px-4 font-bold">$80</td>
+                    <td class="text-center py-3 px-4 font-bold">$100</td>
+                </tr>
+                <tr>
+                    <td class="py-3 pr-8">Estudiantes de posgrado</td>
+                    <td class="text-center py-3 px-4 font-bold">$100</td>
+                    <td class="text-center py-3 px-4 font-bold">$120</td>
+                </tr>
+                <tr>
+                    <td class="py-3 pr-8">Investigadores</td>
+                    <td class="text-center py-3 px-4 font-bold">$120</td>
+                    <td class="text-center py-3 px-4 font-bold">$150</td>
+                </tr>
+            </tbody>
+        </table>
+    </div>
+    <p class="text-teal-200 text-xs mt-4">* Precios en USD. Igual que NANO2025.</p>
+</div>
+
+<!-- Organizado por -->
+<div class="bg-white rounded-2xl shadow p-8 mb-4">
+    <h2 class="text-xl font-bold text-gray-800 mb-6">Organizado por</h2>
+    <div class="flex flex-wrap gap-4 items-center justify-center">
+        {% for inst in ['UNSAM', 'UBA', 'CNEA', 'CONICET', 'UNLP', 'FAN', 'ADIMRA', 'UNAHUR'] %}
+        <span class="bg-gray-100 text-gray-700 px-5 py-2 rounded-full text-sm font-medium">{{ inst }}</span>
+        {% endfor %}
+    </div>
+</div>
+
+{% endblock %}

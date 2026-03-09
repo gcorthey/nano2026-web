@@ -1,0 +1,114 @@
+{% extends "public/base.html" %}
+{% block content %}
+
+<!-- Hero -->
+<div class="relative rounded-2xl overflow-hidden mb-12" style="min-height: 220px; background: linear-gradient(135deg, #1a1a2e 0%, #16213e 60%, #0f3460 100%);">
+    <div class="absolute inset-0 opacity-30" style="background-image: url('https://images.unsplash.com/photo-1562774053-701939374585?w=1400&q=80'); background-size: cover; background-position: center;"></div>
+    <div class="relative z-10 flex flex-col items-center justify-center text-center px-8 py-16">
+        <h1 class="text-4xl font-black text-white mb-2">Venue</h1>
+        <p class="text-blue-300 text-lg">Campus UNSAM · San Martín, Buenos Aires</p>
+    </div>
+</div>
+
+<!-- Mapa + info -->
+<div class="grid grid-cols-2 gap-8 mb-10">
+    <div class="bg-white rounded-2xl shadow p-8">
+        <h2 class="text-xl font-bold text-gray-800 mb-4">Universidad Nacional de San Martín</h2>
+        <p class="text-gray-600 leading-relaxed mb-4">
+            El NANO2026 se realizará en el <strong>Campus UNSAM</strong>, ubicado en el 
+            Partido de San Martín, provincia de Buenos Aires. El campus alberga 
+            institutos de investigación de excelencia incluyendo el 
+            <strong>INS-EByN</strong> (Instituto de Nanosistemas).
+        </p>
+        <div class="space-y-3 text-sm">
+            <div class="flex items-start gap-3">
+                <span class="text-teal-500 text-lg">📍</span>
+                <div>
+                    <p class="font-medium text-gray-800">Dirección</p>
+                    <p class="text-gray-500">Campus Miguelete, 25 de Mayo y Francia<br>San Martín, Buenos Aires</p>
+                </div>
+            </div>
+            <div class="flex items-start gap-3">
+                <span class="text-teal-500 text-lg">📅</span>
+                <div>
+                    <p class="font-medium text-gray-800">Fechas</p>
+                    <p class="text-gray-500">3, 4 y 5 de junio de 2026<br>Taller previo: 2 de junio (tarde)</p>
+                </div>
+            </div>
+            <div class="flex items-start gap-3">
+                <span class="text-teal-500 text-lg">🚇</span>
+                <div>
+                    <p class="font-medium text-gray-800">Cómo llegar</p>
+                    <p class="text-gray-500">Tren Mitre — Estación San Martín<br>Acceso en auto por Av. Francia</p>
+                </div>
+            </div>
+        </div>
+        <a href="https://maps.google.com/?q=UNSAM+Campus+Miguelete+San+Martin+Buenos+Aires" target="_blank"
+            class="mt-6 inline-block bg-teal-500 hover:bg-teal-400 text-white px-5 py-2 rounded-full text-sm font-medium transition">
+            Ver en Google Maps →
+        </a>
+    </div>
+
+    <div class="rounded-2xl overflow-hidden shadow">
+        <iframe
+            src="https://www.google.com/maps/embed?pb=!1m18!1m12!1m3!1d3286.5!2d-58.5583!3d-34.5765!2m3!1f0!2f0!3f0!3m2!1i1024!2i768!4f13.1!3m3!1m2!1s0x95bcb6b2f0a8b8e7%3A0x1234!2sUNSAM%20Campus%20Miguelete!5e0!3m2!1ses!2sar!4v1234567890"
+            width="100%" height="100%" style="min-height: 320px; border:0;" allowfullscreen="" loading="lazy">
+        </iframe>
+    </div>
+</div>
+
+<!-- Fotos del campus -->
+<div class="mb-10">
+    <h2 class="text-xl font-bold text-gray-800 mb-4">El campus</h2>
+    <div class="grid grid-cols-3 gap-4">
+        <img src="https://images.unsplash.com/photo-1562774053-701939374585?w=600&q=80"
+            class="rounded-2xl object-cover w-full h-48 shadow" alt="Campus universitario"/>
+        <img src="https://images.unsplash.com/photo-1541829070764-84a7d30dd3f3?w=600&q=80"
+            class="rounded-2xl object-cover w-full h-48 shadow" alt="Auditorio"/>
+        <img src="https://images.unsplash.com/photo-1497366216548-37526070297c?w=600&q=80"
+            class="rounded-2xl object-cover w-full h-48 shadow" alt="Sala de conferencias"/>
+    </div>
+</div>
+
+<!-- Info práctica -->
+<div class="grid grid-cols-2 gap-8">
+    <div class="bg-white rounded-2xl shadow p-8">
+        <h2 class="text-xl font-bold text-gray-800 mb-4">🏨 Alojamiento sugerido</h2>
+        <p class="text-gray-500 text-sm mb-4">Hoteles cercanos al campus en San Martín y zona norte del GBA:</p>
+        <ul class="space-y-3 text-sm text-gray-600">
+            <li class="flex items-center gap-2">
+                <span class="text-teal-500">★</span>
+                <span><strong>Zona Palermo/Villa Urquiza</strong> — Bien conectado por tren Mitre</span>
+            </li>
+            <li class="flex items-center gap-2">
+                <span class="text-teal-500">★</span>
+                <span><strong>San Martín centro</strong> — A minutos del campus</span>
+            </li>
+            <li class="flex items-center gap-2">
+                <span class="text-teal-500">★</span>
+                <span><strong>Buenos Aires centro</strong> — Tren directo, 30 min</span>
+            </li>
+        </ul>
+        <p class="text-gray-400 text-xs mt-4">Más información de alojamiento próximamente.</p>
+    </div>
+
+    <div class="bg-white rounded-2xl shadow p-8">
+        <h2 class="text-xl font-bold text-gray-800 mb-4">✈️ Cómo llegar desde el exterior</h2>
+        <ul class="space-y-3 text-sm text-gray-600">
+            <li class="flex items-start gap-2">
+                <span class="text-blue-500 mt-0.5">→</span>
+                <span><strong>Aeropuerto Internacional Ezeiza (EZE)</strong> — 45 min en auto / Remis ~$25 USD</span>
+            </li>
+            <li class="flex items-start gap-2">
+                <span class="text-blue-500 mt-0.5">→</span>
+                <span><strong>Aeroparque Jorge Newbery (AEP)</strong> — 30 min en auto o tren+tren</span>
+            </li>
+            <li class="flex items-start gap-2">
+                <span class="text-blue-500 mt-0.5">→</span>
+                <span>Desde Buenos Aires centro: <strong>Tren Mitre línea San Martín</strong> directo al campus</span>
+            </li>
+        </ul>
+    </div>
+</div>
+
+{% endblock %}
