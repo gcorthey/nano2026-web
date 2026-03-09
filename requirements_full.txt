@@ -1,3 +1,4 @@
+cat > requirements.txt << 'EOF'
 fastapi==0.135.1
 uvicorn==0.41.0
 sqlalchemy==2.0.48
@@ -11,3 +12,4 @@ lxml==6.0.2
 pillow==12.1.1
 reportlab==4.4.10
 html5lib==1.1
+EOF
