@@ -63,15 +63,15 @@ def logout():
 @app.get("/submit", response_class=HTMLResponse)
 def submit_form(request: Request):
     return templates.TemplateResponse("public/submit.html", {"request": request})
-
 @app.post("/submit", response_class=HTMLResponse)
 def submit_abstract(
     request: Request,
     titulo: str = Form(...),
-    autor: str = Form(...),
-    afiliacion: str = Form(...),
+    presentacion_oral: int = Form(...),
     email_autor: str = Form(...),
     contenido_html: str = Form(...),
+    autor_count: int = Form(...),
+    afil_count: int = Form(...),
     db: Session = Depends(get_db)
 ):
     if not contenido_html or contenido_html.strip() == "<p></p>":
@@ -79,20 +79,58 @@ def submit_abstract(
             "request": request,
             "error": "El resumen no puede estar vacío."
         })
+
     abstract = models.Abstract(
         titulo=titulo,
-        autor=autor,
-        afiliacion=afiliacion,
+        autor="",  # se llena abajo con el presentador
+        afiliacion="",
         email_autor=email_autor,
         contenido_html=contenido_html,
+        presentacion_oral=presentacion_oral,
     )
     db.add(abstract)
+    db.flush()  # para obtener el id
+
+    # Guardar afiliaciones
+    for i in range(1, afil_count + 1):
+        from fastapi import Request as FastRequest
+        nombre_afil = request._form.get(f"afil_nombre_{i}", "").strip()
+        if nombre_afil:
+            afil = models.Afiliacion(
+                abstract_id=abstract.id,
+                nombre=nombre_afil,
+                orden=i
+            )
+            db.add(afil)
+
+    # Guardar autores
+    presentador_idx = request._form.get("presentador", "1")
+    autor_presentador = ""
+    for i in range(1, autor_count + 1):
+        nombre_autor = request._form.get(f"autor_nombre_{i}", "").strip()
+        afils_str = request._form.get(f"autor_afils_{i}", "").strip()
+        if nombre_autor:
+            es_presentador = 1 if str(i) == str(presentador_idx) else 0
+            autor = models.Autor(
+                abstract_id=abstract.id,
+                nombre=nombre_autor,
+                orden=i,
+                es_presentador=es_presentador,
+                afiliaciones_ids=afils_str
+            )
+            db.add(autor)
+            if es_presentador:
+                autor_presentador = nombre_autor
+
+    # Actualizar campo autor con el presentador
+    abstract.autor = autor_presentador
+
     db.commit()
+
     return templates.TemplateResponse("public/submit.html", {
         "request": request,
         "success": True
     })
-
 # --- Admin: lista de abstracts ---
 @app.get("/admin", response_class=HTMLResponse)
 def admin_abstracts(

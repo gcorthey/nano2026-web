@@ -1,98 +1,317 @@
-<!DOCTYPE html>
-<html lang="es">
-<head>
-    <meta charset="UTF-8">
-    <title>Enviar Resumen — Congreso</title>
-    <script src="https://cdn.tailwindcss.com"></script>
-    <link href="https://cdn.quilljs.com/1.3.6/quill.snow.css" rel="stylesheet">
-    <style>
-        .ql-editor { min-height: 150px; font-size: 1rem; }
-    </style>
-</head>
-<body class="bg-gray-100 min-h-screen py-10">
-    <div class="max-w-2xl mx-auto bg-white p-8 rounded shadow">
-        <h1 class="text-2xl font-bold mb-2">Envío de resumen</h1>
-        <p class="text-gray-500 text-sm mb-6">Completá el formulario. El resumen quedará pendiente de revisión.</p>
+{% extends "public/base.html" %}
+{% block content %}
 
-        {% if success %}
-            <div class="bg-green-100 border border-green-400 text-green-800 px-4 py-3 rounded mb-6">
-                ✅ Resumen enviado correctamente. Recibirás novedades por email.
-            </div>
-        {% endif %}
+<link href="https://cdn.quilljs.com/1.3.6/quill.snow.css" rel="stylesheet">
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/katex@0.16.9/dist/katex.min.css">
+<script src="https://cdn.jsdelivr.net/npm/katex@0.16.9/dist/katex.min.js"></script>
+<style>
+    .ql-editor { min-height: 350px; font-size: 1rem; }
+    #quill-editor { resize: vertical; overflow: auto; min-height: 390px; }
+    #quill-editor .ql-editor { min-height: inherit; }
+</style>
 
-        {% if error %}
-            <div class="bg-red-100 border border-red-400 text-red-800 px-4 py-3 rounded mb-6">
-                ❌ {{ error }}
-            </div>
-        {% endif %}
-
-        <form method="post" action="/submit">
-            <div class="mb-4">
-                <label class="block text-sm font-medium mb-1">Título de la presentación *</label>
-                <input type="text" name="titulo" required
-                    class="w-full border rounded px-3 py-2 focus:outline-none focus:ring-2 focus:ring-blue-400"/>
-            </div>
-            <div class="mb-4">
-                <label class="block text-sm font-medium mb-1">Autor/a principal *</label>
-                <input type="text" name="autor" required
-                    class="w-full border rounded px-3 py-2 focus:outline-none focus:ring-2 focus:ring-blue-400"/>
-            </div>
-            <div class="mb-4">
-                <label class="block text-sm font-medium mb-1">Afiliación institucional *</label>
-                <input type="text" name="afiliacion" required
-                    class="w-full border rounded px-3 py-2 focus:outline-none focus:ring-2 focus:ring-blue-400"/>
-            </div>
-            <div class="mb-6">
-                <label class="block text-sm font-medium mb-1">Email de contacto *</label>
-                <input type="email" name="email_autor" required
-                    class="w-full border rounded px-3 py-2 focus:outline-none focus:ring-2 focus:ring-blue-400"/>
-            </div>
-
-            <!-- Letras griegas -->
-            <div class="mb-2">
-                <label class="block text-sm font-medium mb-1">Resumen *</label>
-                <div class="flex flex-wrap gap-1 mb-1">
-                    <span class="text-xs text-gray-400 self-center mr-1">Insertar:</span>
-                    {% for letra in ['α','β','γ','δ','ε','ζ','η','θ','λ','μ','ν','π','ρ','σ','τ','φ','χ','ψ','ω','Α','Β','Γ','Δ','Ε','Θ','Λ','Μ','Π','Σ','Φ','Ψ','Ω'] %}
-                    <button type="button" onclick="insertGreek('{{ letra }}')"
-                        class="px-1 py-0.5 text-sm border rounded hover:bg-gray-100">{{ letra }}</button>
-                    {% endfor %}
-                </div>
-                <div id="quill-editor" class="border rounded bg-white"></div>
-                <input type="hidden" name="contenido_html" id="contenido_html"/>
-            </div>
-            <p class="text-xs text-gray-400 mb-6">Usá la barra del editor para negrita, cursiva, superíndice y subíndice.</p>
-
-            <button type="submit"
-                class="w-full bg-blue-600 text-white py-2 rounded hover:bg-blue-700 transition font-medium">
-                Enviar resumen
-            </button>
-        </form>
+<!-- Hero -->
+<div class="relative rounded-2xl overflow-hidden mb-10" style="min-height: 160px; background: linear-gradient(135deg, #0a1628 0%, #0d3b6e 60%, #1a6b4a 100%);">
+    <div class="relative z-10 flex flex-col items-center justify-center text-center px-8 py-12">
+        <h1 class="text-3xl font-black text-white mb-2">Envío de resumen</h1>
+        <p class="text-teal-300">Completá el formulario. El resumen quedará pendiente de revisión.</p>
     </div>
+</div>
 
-    <script src="https://cdn.quilljs.com/1.3.6/quill.js"></script>
-    <script>
-        const quill = new Quill('#quill-editor', {
-            theme: 'snow',
-            modules: {
-                toolbar: [
-                    ['bold', 'italic'],
-                    [{ 'script': 'sub'}, { 'script': 'super' }],
-                    ['clean']
-                ]
-            },
-            placeholder: 'Escribí el resumen aquí...',
-        });
+<div class="max-w-2xl mx-auto bg-white rounded-2xl shadow p-8">
 
-        function insertGreek(char) {
-            const range = quill.getSelection(true);
-            quill.insertText(range.index, char);
-            quill.setSelection(range.index + 1);
+    {% if success %}
+    <div class="bg-green-100 border border-green-400 text-green-800 px-4 py-3 rounded-xl mb-6">
+        ✅ Resumen enviado correctamente. Recibirás novedades por email.
+    </div>
+    {% endif %}
+
+    {% if error %}
+    <div class="bg-red-100 border border-red-400 text-red-800 px-4 py-3 rounded-xl mb-6">
+        ❌ {{ error }}
+    </div>
+    {% endif %}
+
+    <form method="post" action="/submit">
+
+        <div class="mb-4">
+            <label class="block text-sm font-medium mb-1">Título del trabajo *</label>
+            <input type="text" name="titulo" required
+                class="w-full border rounded-xl px-3 py-2 focus:outline-none focus:ring-2 focus:ring-teal-400"/>
+        </div>
+
+
+
+<!-- Autores -->
+<div class="mb-6">
+    <label class="block text-sm font-medium mb-2">Autores *</label>
+    <div id="autores-list" class="space-y-2 mb-2"></div>
+    <button type="button" onclick="agregarAutor()"
+        class="text-sm text-teal-600 border border-teal-400 rounded-lg px-3 py-1.5 hover:bg-teal-50 transition">
+        + Agregar autor
+    </button>
+    <p class="text-xs text-gray-400 mt-1">Marcá el autor que va a presentar. Los superíndices de afiliación se asignan abajo.</p>
+</div>
+
+<!-- Afiliaciones -->
+<div class="mb-6">
+    <label class="block text-sm font-medium mb-2">Afiliaciones *</label>
+    <div id="afiliaciones-list" class="space-y-2 mb-2"></div>
+    <button type="button" onclick="agregarAfiliacion()"
+        class="text-sm text-teal-600 border border-teal-400 rounded-lg px-3 py-1.5 hover:bg-teal-50 transition">
+        + Agregar afiliación
+    </button>
+</div>
+
+<!-- Email del autor presentador -->
+<div class="mb-6">
+    <label class="block text-sm font-medium mb-1">Email del autor presentador *</label>
+    <input type="email" name="email_autor" required
+        class="w-full border rounded-xl px-3 py-2 focus:outline-none focus:ring-2 focus:ring-teal-400"/>
+</div>
+
+        <div class="mb-2">
+            <label class="block text-sm font-medium mb-2">Resumen *</label>
+
+            <!-- Panel de caracteres especiales (oculto por defecto) -->
+            <div id="char-panel" class="hidden mb-2 border rounded-xl bg-gray-50 p-3 space-y-3">
+
+                <div class="pb-2 border-b">
+                    <p class="text-xs text-gray-400 font-semibold uppercase tracking-wider mb-1">Ecuaciones LaTeX</p>
+                    <button type="button" onclick="insertFormula()"
+                        class="px-3 py-1.5 text-sm border rounded bg-white hover:bg-teal-50 hover:border-teal-400 transition font-medium">
+                        √ Insertar ecuación
+                    </button>
+                    <p class="text-xs text-gray-400 mt-1">Ejemplos: <code>\frac{1}{2}</code> · <code>E=mc^2</code> · <code>\int_0^\infty</code></p>
+                </div>
+
+                <div>
+                    <p class="text-xs text-gray-400 font-semibold uppercase tracking-wider mb-1">Letras griegas minúsculas</p>
+                    <div class="flex flex-wrap gap-1">
+                        {% for c in ['α','β','γ','δ','ε','ζ','η','θ','ι','κ','λ','μ','ν','ξ','π','ρ','σ','τ','υ','φ','χ','ψ','ω'] %}
+                        <button type="button" onclick="insertChar('{{ c }}')"
+                            class="px-2 py-1 text-sm border rounded bg-white hover:bg-teal-50 hover:border-teal-400 transition">{{ c }}</button>
+                        {% endfor %}
+                    </div>
+                </div>
+
+                <div>
+                    <p class="text-xs text-gray-400 font-semibold uppercase tracking-wider mb-1">Letras griegas mayúsculas</p>
+                    <div class="flex flex-wrap gap-1">
+                        {% for c in ['Α','Β','Γ','Δ','Ε','Ζ','Η','Θ','Λ','Μ','Ν','Ξ','Π','Ρ','Σ','Τ','Υ','Φ','Χ','Ψ','Ω'] %}
+                        <button type="button" onclick="insertChar('{{ c }}')"
+                            class="px-2 py-1 text-sm border rounded bg-white hover:bg-teal-50 hover:border-teal-400 transition">{{ c }}</button>
+                        {% endfor %}
+                    </div>
+                </div>
+
+                <div>
+                    <p class="text-xs text-gray-400 font-semibold uppercase tracking-wider mb-1">Símbolos matemáticos</p>
+                    <div class="flex flex-wrap gap-1">
+                        {% for c in ['±','×','÷','≈','≠','≤','≥','∞','√','∑','∫','∂','∇','∝','∈','∉','⊂','⊃','∪','∩','‰','°'] %}
+                        <button type="button" onclick="insertChar('{{ c }}')"
+                            class="px-2 py-1 text-sm border rounded bg-white hover:bg-teal-50 hover:border-teal-400 transition">{{ c }}</button>
+                        {% endfor %}
+                    </div>
+                </div>
+
+                <div>
+                    <p class="text-xs text-gray-400 font-semibold uppercase tracking-wider mb-1">Símbolos científicos</p>
+                    <div class="flex flex-wrap gap-1">
+                        {% for c in ['Å','µ','ħ','ℏ','ℓ','℃','℉','∆','⊗','⟨','⟩'] %}
+                        <button type="button" onclick="insertChar('{{ c }}')"
+                            class="px-2 py-1 text-sm border rounded bg-white hover:bg-teal-50 hover:border-teal-400 transition">{{ c }}</button>
+                        {% endfor %}
+                    </div>
+                </div>
+
+                <div>
+                    <p class="text-xs text-gray-400 font-semibold uppercase tracking-wider mb-1">Flechas</p>
+                    <div class="flex flex-wrap gap-1">
+                        {% for c in ['→','←','↑','↓','↔','↕','⇒','⇐','⇔','⇌','⟶','⟵','⟷'] %}
+                        <button type="button" onclick="insertChar('{{ c }}')"
+                            class="px-2 py-1 text-sm border rounded bg-white hover:bg-teal-50 hover:border-teal-400 transition">{{ c }}</button>
+                        {% endfor %}
+                    </div>
+                </div>
+
+            </div>
+
+            <div id="quill-editor" class="border rounded-xl bg-white"></div>
+            <input type="hidden" name="contenido_html" id="contenido_html"/>
+        </div>
+
+                <!-- Presentación oral -->
+<div class="mb-6 bg-teal-50 border border-teal-200 rounded-xl px-5 py-4">
+    <label class="block text-sm font-medium mb-2">¿Querés que tu resumen sea considerado para presentación oral? *</label>
+    <div class="flex gap-6">
+        <label class="flex items-center gap-2 cursor-pointer">
+            <input type="radio" name="presentacion_oral" value="1" required>
+            <span class="font-medium text-teal-700">Sí</span>
+        </label>
+        <label class="flex items-center gap-2 cursor-pointer">
+            <input type="radio" name="presentacion_oral" value="0">
+            <span class="font-medium text-gray-600">No, solo póster</span>
+        </label>
+    </div>
+</div>
+
+        <p class="text-xs text-gray-400 mb-6">Usá la barra del editor para negrita, cursiva, superíndice, subíndice, caracteres especiales y ecuaciones LaTeX.</p>
+
+        <button type="submit"
+            class="w-full bg-teal-500 hover:bg-teal-400 text-white py-3 rounded-full transition font-semibold text-lg shadow">
+            Enviar resumen →
+        </button>
+
+    </form>
+</div>
+
+<script>
+    let autorCount = 0;
+    let afiliacionCount = 0;
+
+    function agregarAutor() {
+        autorCount++;
+        const div = document.createElement('div');
+        div.className = 'flex gap-2 items-center';
+        div.id = `autor-row-${autorCount}`;
+        div.innerHTML = `
+            <span class="text-gray-400 text-sm w-5">${autorCount}.</span>
+            <input type="text" name="autor_nombre_${autorCount}" placeholder="Nombre completo" required
+                class="flex-1 border rounded-lg px-3 py-1.5 text-sm focus:outline-none focus:ring-2 focus:ring-teal-400"/>
+            <input type="text" name="autor_afils_${autorCount}" placeholder="Afil. ej: 1,2"
+                class="w-24 border rounded-lg px-3 py-1.5 text-sm focus:outline-none focus:ring-2 focus:ring-teal-400"
+                title="Números de afiliación separados por coma"/>
+            <label class="flex items-center gap-1 text-xs text-gray-500 whitespace-nowrap cursor-pointer">
+                <input type="radio" name="presentador" value="${autorCount}"> Presenta
+            </label>
+            <button type="button" onclick="document.getElementById('autor-row-${autorCount}').remove()"
+                class="text-red-400 hover:text-red-600 text-lg leading-none">×</button>
+        `;
+        document.getElementById('autores-list').appendChild(div);
+        // Seleccionar automáticamente como presentador si es el primero
+        if (autorCount === 1) {
+            div.querySelector('input[type=radio]').checked = true;
         }
+    }
 
-        document.querySelector('form').addEventListener('submit', function() {
-            document.getElementById('contenido_html').value = quill.root.innerHTML;
+    function agregarAfiliacion() {
+        afiliacionCount++;
+        const div = document.createElement('div');
+        div.className = 'flex gap-2 items-center';
+        div.id = `afil-row-${afiliacionCount}`;
+        div.innerHTML = `
+            <span class="text-gray-400 text-sm w-5">${afiliacionCount}.</span>
+            <input type="text" name="afil_nombre_${afiliacionCount}" placeholder="Institución, ciudad, país" required
+                class="flex-1 border rounded-lg px-3 py-1.5 text-sm focus:outline-none focus:ring-2 focus:ring-teal-400"/>
+            <button type="button" onclick="document.getElementById('afil-row-${afiliacionCount}').remove()"
+                class="text-red-400 hover:text-red-600 text-lg leading-none">×</button>
+        `;
+        document.getElementById('afiliaciones-list').appendChild(div);
+    }
+
+    // Agregar campos ocultos con contadores al enviar
+    document.addEventListener('DOMContentLoaded', function() {
+        // Agregar primer autor y afiliación por defecto
+        agregarAutor();
+        agregarAfiliacion();
+
+        document.querySelector('form').addEventListener('submit', function(e) {
+            // Guardar contadores
+            const hAutores = document.createElement('input');
+            hAutores.type = 'hidden';
+            hAutores.name = 'autor_count';
+            hAutores.value = autorCount;
+            this.appendChild(hAutores);
+
+            const hAfils = document.createElement('input');
+            hAfils.type = 'hidden';
+            hAfils.name = 'afil_count';
+            hAfils.value = afiliacionCount;
+            this.appendChild(hAfils);
         });
-    </script>
-</body>
-</html>
+    });
+</script>
+<script>window.katex = katex;</script>
+<script src="https://cdn.quilljs.com/1.3.6/quill.js"></script>
+<script>
+    window.katex = katex;
+
+    const quill = new Quill('#quill-editor', {
+        theme: 'snow',
+        modules: {
+            toolbar: [
+                ['bold', 'italic'],
+                [{ 'script': 'sub' }, { 'script': 'super' }],
+                ['clean']
+            ],
+            formula: true
+        },
+        placeholder: 'Escribí el resumen aquí...',
+    });
+
+    window.addEventListener('load', function() {
+        const toolbar = quill.getModule('toolbar');
+        const groups = toolbar.container.querySelectorAll('.ql-formats');
+        const scriptGroup = groups[1];
+
+        // Botón ∫ fórmula
+        const btnFormula = document.createElement('button');
+        btnFormula.innerHTML = '∫';
+        btnFormula.title = 'Insertar ecuación LaTeX';
+        btnFormula.type = 'button';
+        btnFormula.style.cssText = 'font-size:13px; font-weight:bold; padding: 0 6px; cursor:pointer; border-left: 1px solid #ccc; margin-left: 4px;';
+        btnFormula.onclick = insertFormula;
+        scriptGroup.appendChild(btnFormula);
+
+        // Botón Ω caracteres especiales
+        const btnOmega = document.createElement('button');
+        btnOmega.innerHTML = 'Ω';
+        btnOmega.title = 'Caracteres especiales';
+        btnOmega.type = 'button';
+        btnOmega.style.cssText = 'font-size:13px; font-weight:bold; padding: 0 6px; cursor:pointer;';
+        btnOmega.onclick = toggleChars;
+        scriptGroup.appendChild(btnOmega);
+
+        // Separador
+        const sep = document.createElement('span');
+        sep.style.cssText = 'display:inline-block; width:1px; background:#ccc; margin: 3px 4px; height:16px; vertical-align:middle;';
+        scriptGroup.appendChild(sep);
+
+        // Mover clean al mismo grupo
+        const allGroups = toolbar.container.querySelectorAll('.ql-formats');
+        const cleanGroup = allGroups[allGroups.length - 1];
+        const cleanBtn = cleanGroup ? cleanGroup.querySelector('.ql-clean') : null;
+        if (cleanBtn) {
+            scriptGroup.appendChild(cleanBtn);
+            cleanGroup.remove();
+        }
+    });
+
+    function toggleChars() {
+        document.getElementById('char-panel').classList.toggle('hidden');
+    }
+
+    function insertChar(char) {
+        const range = quill.getSelection(true);
+        quill.insertText(range.index, char);
+        quill.setSelection(range.index + 1);
+        quill.focus();
+    }
+
+    function insertFormula() {
+        const latex = prompt('Escribí la ecuación en LaTeX:\nEjemplos: \\frac{1}{2}  |  E=mc^2  |  \\int_0^\\infty');
+        if (latex) {
+            const range = quill.getSelection(true);
+            quill.insertEmbed(range.index, 'formula', latex);
+            quill.setSelection(range.index + 1);
+            quill.focus();
+        }
+    }
+
+    document.querySelector('form').addEventListener('submit', function() {
+        document.getElementById('contenido_html').value = quill.root.innerHTML;
+    });
+</script>
+
+{% endblock %}

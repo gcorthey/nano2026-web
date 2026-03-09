@@ -31,10 +31,31 @@ class Abstract(Base):
     afiliacion = Column(String, nullable=False)
     email_autor = Column(String, nullable=False)
     contenido_html = Column(Text, nullable=False)
+    presentacion_oral = Column(Integer, default=0)  # 1 = sí
     estado = Column(Enum(EstadoEnum), default=EstadoEnum.pendiente)
     fecha_envio = Column(DateTime, default=datetime.utcnow)
     reviews = relationship("Review", back_populates="abstract")
     asignaciones = relationship("Asignacion", back_populates="abstract")
+    autores = relationship("Autor", back_populates="abstract", order_by="Autor.orden")
+    afiliaciones = relationship("Afiliacion", back_populates="abstract", order_by="Afiliacion.orden")
+
+class Autor(Base):
+    __tablename__ = "autores"
+    id = Column(Integer, primary_key=True, index=True)
+    abstract_id = Column(Integer, ForeignKey("abstracts.id"), nullable=False)
+    nombre = Column(String, nullable=False)
+    orden = Column(Integer, nullable=False)
+    es_presentador = Column(Integer, default=0)  # 1 = sí
+    afiliaciones_ids = Column(String, nullable=True)  # ej: "1,2"
+    abstract = relationship("Abstract", back_populates="autores")
+
+class Afiliacion(Base):
+    __tablename__ = "afiliaciones"
+    id = Column(Integer, primary_key=True, index=True)
+    abstract_id = Column(Integer, ForeignKey("abstracts.id"), nullable=False)
+    nombre = Column(String, nullable=False)
+    orden = Column(Integer, nullable=False)
+    abstract = relationship("Abstract", back_populates="afiliaciones")
 
 class Review(Base):
     __tablename__ = "reviews"
