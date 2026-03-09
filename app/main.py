@@ -488,7 +488,63 @@ def admin_delete_abstract(abstract_id: int, current_user: models.User = Depends(
     db.commit()
     return RedirectResponse(url="/admin", status_code=303)
 
+@app.get("/admin/abstracts/{abstract_id}/edit", response_class=HTMLResponse)
+def admin_edit_abstract_form(abstract_id: int, request: Request, current_user: models.User = Depends(require_admin), db: Session = Depends(get_db)):
+    abstract = db.query(models.Abstract).filter(models.Abstract.id == abstract_id).first()
+    if not abstract:
+        raise HTTPException(status_code=404, detail="No encontrado")
+    return templates.TemplateResponse("admin/abstract_edit.html", {
+        "request": request,
+        "abstract": abstract,
+    })
 
+@app.post("/admin/abstracts/{abstract_id}/edit")
+def admin_edit_abstract(
+    abstract_id: int,
+    request: Request,
+    titulo: str = Form(...),
+    email_autor: str = Form(...),
+    contenido_html: str = Form(...),
+    referencias_html: str = Form(""),
+    area_tematica: str = Form(...),
+    presentacion_oral: int = Form(...),
+    autor_count: int = Form(...),
+    afil_count: int = Form(...),
+    current_user: models.User = Depends(require_admin),
+    db: Session = Depends(get_db)
+):
+    abstract = db.query(models.Abstract).filter(models.Abstract.id == abstract_id).first()
+    if not abstract:
+        raise HTTPException(status_code=404, detail="No encontrado")
+    abstract.titulo = titulo
+    abstract.email_autor = email_autor
+    abstract.contenido_html = contenido_html
+    abstract.referencias_html = referencias_html
+    abstract.area_tematica = area_tematica
+    abstract.presentacion_oral = presentacion_oral
+    # Borrar autores y afiliaciones anteriores
+    db.query(models.Autor).filter(models.Autor.abstract_id == abstract_id).delete()
+    db.query(models.Afiliacion).filter(models.Afiliacion.abstract_id == abstract_id).delete()
+    db.flush()
+    # Guardar afiliaciones nuevas
+    for i in range(1, afil_count + 1):
+        nombre_afil = request._form.get(f"afil_nombre_{i}", "").strip()
+        if nombre_afil:
+            db.add(models.Afiliacion(abstract_id=abstract_id, nombre=nombre_afil, orden=i))
+    # Guardar autores nuevos
+    presentador_idx = request._form.get("presentador", "1")
+    autor_presentador = ""
+    for i in range(1, autor_count + 1):
+        nombre_autor = request._form.get(f"autor_nombre_{i}", "").strip()
+        afils_str = request._form.get(f"autor_afils_{i}", "").strip()
+        if nombre_autor:
+            es_presentador = 1 if str(i) == str(presentador_idx) else 0
+            db.add(models.Autor(abstract_id=abstract_id, nombre=nombre_autor, orden=i, es_presentador=es_presentador, afiliaciones_ids=afils_str))
+            if es_presentador:
+                autor_presentador = nombre_autor
+    abstract.autor = autor_presentador
+    db.commit()
+    return RedirectResponse(url=f"/admin/abstracts/{abstract_id}", status_code=303)
 @app.get("/circulares", response_class=HTMLResponse)
 def circulares(request: Request):
     return templates.TemplateResponse("public/circulares.html", {"request": request})

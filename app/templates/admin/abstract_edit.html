@@ -1,0 +1,339 @@
+{% extends "admin/base.html" %}
+{% block content %}
+
+<link href="https://fonts.googleapis.com/css2?family=Lato:ital@0;1&display=swap" rel="stylesheet">
+<link href="https://cdn.quilljs.com/1.3.6/quill.snow.css" rel="stylesheet">
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/katex@0.16.9/dist/katex.min.css">
+<script src="https://cdn.jsdelivr.net/npm/katex@0.16.9/dist/katex.min.js"></script>
+<style>
+    .ql-editor { font-family: 'Lato', sans-serif; font-size: 1rem; }
+    .ql-editor em, .ql-editor i { font-style: italic !important; font-weight: normal !important; }
+    #titulo-editor .ql-editor { min-height: 42px; max-height: 80px; }
+    #quill-editor { min-height: 390px; }
+    #quill-editor .ql-editor { min-height: 350px; }
+    #referencias-editor .ql-editor { min-height: 120px; }
+</style>
+
+<a href="/admin/abstracts/{{ abstract.id }}" class="text-blue-600 text-sm hover:underline">← Volver al detalle</a>
+
+<div class="mt-4 bg-white rounded-2xl shadow p-8">
+    <h1 class="text-xl font-bold mb-6">Editar resumen #{{ abstract.id }}</h1>
+
+    <form method="post" action="/admin/abstracts/{{ abstract.id }}/edit">
+
+        <!-- Título -->
+        <div class="mb-6">
+            <label class="block text-sm font-bold mb-1">Título *</label>
+            <div id="titulo-editor-char-panel" class="hidden mb-2 border rounded-xl bg-gray-50 p-3 space-y-3">
+                {% include "public/char_panel_content.html" %}
+            </div>
+            <div id="titulo-editor" class="border rounded-xl bg-white"></div>
+            <input type="hidden" name="titulo" id="titulo-hidden"/>
+        </div>
+
+        <!-- Autores -->
+        <div class="mb-6">
+            <label class="block text-sm font-bold mb-2">Autores *</label>
+            <div id="autores-list" class="space-y-2 mb-2"></div>
+            <button type="button" onclick="agregarAutor()"
+                class="text-sm text-teal-600 border border-teal-400 rounded-lg px-3 py-1.5 hover:bg-teal-50 transition">
+                + Agregar autor
+            </button>
+        </div>
+
+        <!-- Afiliaciones -->
+        <div class="mb-6">
+            <label class="block text-sm font-bold mb-2">Afiliaciones *</label>
+            <div id="afiliaciones-list" class="space-y-2 mb-2"></div>
+            <button type="button" onclick="agregarAfiliacion()"
+                class="text-sm text-teal-600 border border-teal-400 rounded-lg px-3 py-1.5 hover:bg-teal-50 transition">
+                + Agregar afiliación
+            </button>
+        </div>
+
+        <!-- Email -->
+        <div class="mb-6">
+            <label class="block text-sm font-bold mb-1">Email del autor presentador *</label>
+            <input type="email" name="email_autor" required value="{{ abstract.email_autor }}"
+                class="w-full border rounded-xl px-3 py-2 focus:outline-none focus:ring-2 focus:ring-blue-400"/>
+        </div>
+
+        <!-- Área temática -->
+        <div class="mb-6">
+            <label class="block text-sm font-bold mb-2">Área temática *</label>
+            <select name="area_tematica" required
+                class="w-full border rounded-xl px-3 py-2 focus:outline-none focus:ring-2 focus:ring-blue-400 bg-white">
+                {% for val, label in [
+                    ('1', '1. Síntesis de nanomateriales'),
+                    ('2', '2. Autoensamblado'),
+                    ('3', '3. Nanobiointerfaces y procesos biológicos'),
+                    ('4', '4. Superficies'),
+                    ('5', '5. Propiedades de nanomateriales'),
+                    ('6', '6. Aplicaciones de nanomateriales en ambiente, energía, agro, alimentos y catálisis'),
+                    ('7', '7. Nanotecnología y Salud'),
+                ] %}
+                <option value="{{ val }}" {% if abstract.area_tematica == val %}selected{% endif %}>{{ label }}</option>
+                {% endfor %}
+            </select>
+        </div>
+
+        <!-- Presentación oral -->
+        <div class="mb-6 bg-blue-50 border border-blue-200 rounded-xl px-5 py-4">
+            <label class="block text-sm font-medium mb-2">¿Presentación oral?</label>
+            <div class="flex gap-6">
+                <label class="flex items-center gap-2 cursor-pointer">
+                    <input type="radio" name="presentacion_oral" value="1" {% if abstract.presentacion_oral %}checked{% endif %}>
+                    <span class="font-medium text-blue-700">Sí</span>
+                </label>
+                <label class="flex items-center gap-2 cursor-pointer">
+                    <input type="radio" name="presentacion_oral" value="0" {% if not abstract.presentacion_oral %}checked{% endif %}>
+                    <span class="font-medium text-gray-600">No, solo póster</span>
+                </label>
+            </div>
+        </div>
+
+        <!-- Resumen -->
+        <div class="mb-6">
+            <label class="block text-sm font-bold mb-2">Resumen *</label>
+            <div id="quill-editor-char-panel" class="hidden mb-2 border rounded-xl bg-gray-50 p-3 space-y-3">
+                {% include "public/char_panel_content.html" %}
+            </div>
+            <div id="quill-editor" class="border rounded-xl bg-white"></div>
+            <div class="flex justify-end mt-1">
+                <span id="char-counter" class="text-xs text-gray-400">0 / 2500 caracteres</span>
+            </div>
+            <input type="hidden" name="contenido_html" id="contenido_html"/>
+        </div>
+
+        <!-- Referencias -->
+        <div class="mb-6">
+            <label class="block text-sm font-bold mb-2">Referencias bibliográficas</label>
+            <div id="referencias-editor-char-panel" class="hidden mb-2 border rounded-xl bg-gray-50 p-3 space-y-3">
+                {% include "public/char_panel_content.html" %}
+            </div>
+            <div id="referencias-editor" class="border rounded-xl bg-white"></div>
+            <input type="hidden" name="referencias_html" id="referencias-hidden"/>
+        </div>
+
+        <div class="flex gap-3">
+            <button type="submit"
+                class="bg-blue-600 hover:bg-blue-700 text-white px-8 py-3 rounded-full font-semibold transition shadow">
+                Guardar cambios
+            </button>
+            <a href="/admin/abstracts/{{ abstract.id }}"
+                class="bg-gray-200 hover:bg-gray-300 text-gray-700 px-8 py-3 rounded-full font-semibold transition">
+                Cancelar
+            </a>
+        </div>
+
+    </form>
+</div>
+
+<!-- Datos para precargar -->
+<script>
+    const ABSTRACT_DATA = {
+        titulo_html: {{ abstract.titulo | tojson | safe }},
+        contenido_html: {{ abstract.contenido_html | tojson | safe }},
+        referencias_html: {{ (abstract.referencias_html or '') | tojson | safe }},
+        autores: [
+            {% for a in abstract.autores %}
+            { nombre: {{ a.nombre | tojson | safe }}, afils: {{ (a.afiliaciones_ids or '') | tojson | safe }}, presentador: {{ 1 if a.es_presentador else 0 }} },
+            {% endfor %}
+        ],
+        afiliaciones: [
+            {% for af in abstract.afiliaciones %}
+            { nombre: {{ af.nombre | tojson | safe }} },
+            {% endfor %}
+        ],
+    };
+</script>
+
+<script>
+    let autorCount = 0;
+    let afiliacionCount = 0;
+
+    function agregarAutor(nombre='', afils='', esPresentador=false) {
+        autorCount++;
+        const div = document.createElement('div');
+        div.className = 'flex gap-2 items-center';
+        div.id = `autor-row-${autorCount}`;
+        div.innerHTML = `
+            <span class="text-gray-400 text-sm w-5">${autorCount}.</span>
+            <input type="text" name="autor_nombre_${autorCount}" placeholder="Nombre completo" required value="${nombre}"
+                class="flex-1 border rounded-lg px-3 py-1.5 text-sm focus:outline-none focus:ring-2 focus:ring-blue-400"/>
+            <input type="text" name="autor_afils_${autorCount}" placeholder="Afil. ej: 1,2" value="${afils}"
+                class="w-24 border rounded-lg px-3 py-1.5 text-sm focus:outline-none focus:ring-2 focus:ring-blue-400"/>
+            <label class="flex items-center gap-1 text-xs text-gray-500 whitespace-nowrap cursor-pointer">
+                <input type="radio" name="presentador" value="${autorCount}" ${esPresentador ? 'checked' : ''}> Presenta
+            </label>
+            <button type="button" onclick="document.getElementById('autor-row-${autorCount}').remove()"
+                class="text-red-400 hover:text-red-600 text-lg leading-none">×</button>
+        `;
+        document.getElementById('autores-list').appendChild(div);
+    }
+
+    function agregarAfiliacion(nombre='') {
+        afiliacionCount++;
+        const div = document.createElement('div');
+        div.className = 'flex gap-2 items-center';
+        div.id = `afil-row-${afiliacionCount}`;
+        div.innerHTML = `
+            <span class="text-gray-400 text-sm w-5">${afiliacionCount}.</span>
+            <input type="text" name="afil_nombre_${afiliacionCount}" placeholder="Institución, ciudad, país" required value="${nombre}"
+                class="flex-1 border rounded-lg px-3 py-1.5 text-sm focus:outline-none focus:ring-2 focus:ring-blue-400"/>
+            <button type="button" onclick="document.getElementById('afil-row-${afiliacionCount}').remove()"
+                class="text-red-400 hover:text-red-600 text-lg leading-none">×</button>
+        `;
+        document.getElementById('afiliaciones-list').appendChild(div);
+    }
+</script>
+
+<script>window.katex = katex;</script>
+<script src="https://cdn.quilljs.com/1.3.6/quill.js"></script>
+<script>
+    let activeQuill = null;
+
+    function crearEditorTitulo(elementId, placeholder) {
+        const q = new Quill('#' + elementId, {
+            theme: 'snow',
+            modules: { toolbar: [['italic'], [{ 'script': 'sub' }, { 'script': 'super' }]] },
+            placeholder: placeholder,
+        });
+        window.addEventListener('load', function() {
+            const toolbar = q.getModule('toolbar');
+            const scriptGroup = toolbar.container.querySelectorAll('.ql-formats')[1];
+            const btnOmega = document.createElement('button');
+            btnOmega.innerHTML = 'Ω'; btnOmega.title = 'Caracteres especiales';
+            btnOmega.type = 'button';
+            btnOmega.style.cssText = 'font-size:13px; font-weight:bold; padding: 0 6px; cursor:pointer; border-left: 1px solid #ccc; margin-left: 4px;';
+            btnOmega.onclick = function() { toggleChars(elementId + '-char-panel'); };
+            scriptGroup.appendChild(btnOmega);
+        });
+        return q;
+    }
+
+    function crearEditorResumen(elementId, placeholder) {
+        const q = new Quill('#' + elementId, {
+            theme: 'snow',
+            modules: {
+                toolbar: [['bold', 'italic'], [{ 'script': 'sub' }, { 'script': 'super' }], ['clean']],
+                formula: true
+            },
+            placeholder: placeholder,
+        });
+        window.addEventListener('load', function() {
+            const toolbar = q.getModule('toolbar');
+            const groups = toolbar.container.querySelectorAll('.ql-formats');
+            const scriptGroup = groups[1];
+            const btnFormula = document.createElement('button');
+            btnFormula.innerHTML = '∫'; btnFormula.title = 'Insertar ecuación LaTeX';
+            btnFormula.type = 'button';
+            btnFormula.style.cssText = 'font-size:13px; font-weight:bold; padding: 0 6px; cursor:pointer; border-left: 1px solid #ccc; margin-left: 4px;';
+            btnFormula.onclick = function() { insertFormula(q); };
+            scriptGroup.appendChild(btnFormula);
+            const btnOmega = document.createElement('button');
+            btnOmega.innerHTML = 'Ω'; btnOmega.title = 'Caracteres especiales';
+            btnOmega.type = 'button';
+            btnOmega.style.cssText = 'font-size:13px; font-weight:bold; padding: 0 6px; cursor:pointer;';
+            btnOmega.onclick = function() { toggleChars(elementId + '-char-panel'); };
+            scriptGroup.appendChild(btnOmega);
+            const allGroups = toolbar.container.querySelectorAll('.ql-formats');
+            const cleanGroup = allGroups[allGroups.length - 1];
+            const cleanBtn = cleanGroup ? cleanGroup.querySelector('.ql-clean') : null;
+            if (cleanBtn) { scriptGroup.appendChild(cleanBtn); cleanGroup.remove(); }
+        });
+        return q;
+    }
+
+    const quillTitulo = crearEditorTitulo('titulo-editor', 'Título del trabajo...');
+    const quill = crearEditorResumen('quill-editor', 'Resumen...');
+    const quillReferencias = new Quill('#referencias-editor', {
+        theme: 'snow',
+        modules: {
+            toolbar: [['italic'], [{ 'script': 'sub' }, { 'script': 'super' }], ['clean']],
+            formula: true
+        },
+        placeholder: 'Referencias...',
+    });
+
+    window.addEventListener('load', function() {
+        const toolbar = quillReferencias.getModule('toolbar');
+        const groups = toolbar.container.querySelectorAll('.ql-formats');
+        const scriptGroup = groups[1];
+        const btnFormula = document.createElement('button');
+        btnFormula.innerHTML = '∫'; btnFormula.type = 'button';
+        btnFormula.style.cssText = 'font-size:13px; font-weight:bold; padding: 0 6px; cursor:pointer; border-left: 1px solid #ccc; margin-left: 4px;';
+        btnFormula.onclick = function() { insertFormula(quillReferencias); };
+        scriptGroup.appendChild(btnFormula);
+        const btnOmega = document.createElement('button');
+        btnOmega.innerHTML = 'Ω'; btnOmega.type = 'button';
+        btnOmega.style.cssText = 'font-size:13px; font-weight:bold; padding: 0 6px; cursor:pointer;';
+        btnOmega.onclick = function() { toggleChars('referencias-editor-char-panel'); };
+        scriptGroup.appendChild(btnOmega);
+    });
+
+    // Precargar contenido
+
+   document.addEventListener('DOMContentLoaded', function() {
+        setTimeout(function() {
+        // Título
+        quillTitulo.clipboard.dangerouslyPasteHTML(ABSTRACT_DATA.titulo_html);
+        // Resumen
+        quill.clipboard.dangerouslyPasteHTML(ABSTRACT_DATA.contenido_html);
+        // Referencias
+        if (ABSTRACT_DATA.referencias_html) quillReferencias.clipboard.dangerouslyPasteHTML(ABSTRACT_DATA.referencias_html);
+        // Autores
+        ABSTRACT_DATA.autores.forEach(a => agregarAutor(a.nombre, a.afils, a.presentador === 1));
+        // Afiliaciones
+        ABSTRACT_DATA.afiliaciones.forEach(af => agregarAfiliacion(af.nombre));
+  }, 100);
+        // Contador resumen
+        const MAX_CHARS = 2500;
+        const charCounter = document.getElementById('char-counter');
+        const updateCounter = () => {
+            const len = quill.getText().trim().length;
+            charCounter.textContent = len + ' / ' + MAX_CHARS + ' caracteres';
+            charCounter.className = len > MAX_CHARS ? 'text-xs text-red-500 font-semibold' : 'text-xs text-gray-400';
+        };
+        quill.on('text-change', updateCounter);
+        updateCounter();
+
+        // Submit
+        document.querySelector('form').addEventListener('submit', function() {
+            document.getElementById('titulo-hidden').value = quillTitulo.root.innerHTML;
+            document.getElementById('contenido_html').value = quill.root.innerHTML;
+            document.getElementById('referencias-hidden').value = quillReferencias.root.innerHTML;
+            const hA = document.createElement('input');
+            hA.type = 'hidden'; hA.name = 'autor_count'; hA.value = autorCount;
+            this.appendChild(hA);
+            const hAf = document.createElement('input');
+            hAf.type = 'hidden'; hAf.name = 'afil_count'; hAf.value = afiliacionCount;
+            this.appendChild(hAf);
+        });
+    });
+
+    function toggleChars(panelId) { document.getElementById(panelId).classList.toggle('hidden'); }
+    function insertChar(char) {
+        const q = activeQuill || quill;
+        const range = q.getSelection(true);
+        q.insertText(range.index, char);
+        q.setSelection(range.index + 1);
+        q.focus();
+    }
+    function insertFormula(q) {
+        const latex = prompt('Escribí la ecuación en LaTeX:');
+        if (latex) {
+            const range = q.getSelection(true);
+            q.insertEmbed(range.index, 'formula', latex);
+            q.setSelection(range.index + 1);
+            q.focus();
+        }
+    }
+    document.addEventListener('focusin', function(e) {
+        if (e.target.closest('#titulo-editor')) activeQuill = quillTitulo;
+        if (e.target.closest('#quill-editor')) activeQuill = quill;
+        if (e.target.closest('#referencias-editor')) activeQuill = quillReferencias;
+    });
+</script>
+
+{% endblock %}

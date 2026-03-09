@@ -8,7 +8,7 @@
     <!-- Encabezado -->
     <div class="flex flex-col md:flex-row md:items-start md:justify-between mb-4 gap-3">
         <div class="flex-1">
-            <h1 class="text-xl font-bold">{{ abstract.titulo | striptags }}</h1>
+            <h1 class="text-xl font-bold">{{ abstract.titulo | safe }}</h1>
 
             <!-- Autores con superíndices -->
             <p class="text-gray-700 mt-2">

@@ -8,7 +8,7 @@
     <!-- Encabezado -->
     <div class="flex flex-col md:flex-row md:items-start md:justify-between mb-4 gap-3">
         <div class="flex-1">
-            <h1 class="text-xl font-bold">{{ abstract.titulo | striptags }}</h1>
+            <h1 class="text-xl font-bold">{{ abstract.titulo | safe }}</h1>
 
             <!-- Autores con superíndices -->
             <p class="text-gray-700 mt-2">
@@ -88,11 +88,15 @@
 <div class="border-t pt-4 flex flex-wrap gap-3">
     <a href="/abstracts/{{ abstract.id }}/pdf" target="_blank"
         class="bg-gray-200 text-gray-700 px-4 py-2 rounded hover:bg-gray-300 text-sm inline-block">📄 Ver PDF</a>
+    <a href="/admin/abstracts/{{ abstract.id }}/edit"
+        class="bg-blue-600 text-white px-4 py-2 rounded hover:bg-blue-700 text-sm inline-block">✏️ Editar</a>
     <form method="post" action="/admin/abstracts/{{ abstract.id }}/delete"
         onsubmit="return confirm('¿Seguro que querés borrar este resumen? Esta acción no se puede deshacer.')">
         <button class="bg-red-100 text-red-700 px-4 py-2 rounded hover:bg-red-200 text-sm">🗑 Borrar resumen</button>
     </form>
 </div>
+
+
     
 
 </div>
