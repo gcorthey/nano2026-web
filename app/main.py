@@ -448,12 +448,6 @@ def abstract_pdf(abstract_id: int, db: Session = Depends(get_db)):
     )
 
 
-@app.get("/debug/aprobados")
-def debug_aprobados(db: Session = Depends(get_db)):
-    abstracts = db.query(models.Abstract).filter(
-        models.Abstract.estado == models.EstadoEnum.aprobado
-    ).all()
-    return [{"id": a.id, "titulo": a.titulo, "estado": a.estado} for a in abstracts]
 
 
 

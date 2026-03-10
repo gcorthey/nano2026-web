@@ -6,8 +6,9 @@ from fastapi.responses import RedirectResponse
 from sqlalchemy.orm import Session
 from app.database import get_db
 from app import models
+import os
 
-SECRET_KEY = "cambia-esto-por-una-clave-secreta-larga"
+SECRET_KEY = os.environ.get("SECRET_KEY", "50d5842e8962618c774c72ae20cbc6c58e9cea35c2a41aa2096b63f4c6a8d7f3")
 ALGORITHM = "HS256"
 ACCESS_TOKEN_EXPIRE_MINUTES = 60 * 8  # 8 horas
 
