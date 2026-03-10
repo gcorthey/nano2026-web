@@ -1,1 +1,3 @@
 venv/
+backup.log
+*.db
