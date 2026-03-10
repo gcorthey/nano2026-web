@@ -40,6 +40,15 @@
     {% endif %}
 
     <form method="post" action="/submit">
+        <!-- Instrucciones -->
+<div class="bg-blue-50 border border-blue-200 rounded-xl px-5 py-4 mb-6 text-sm text-blue-800 space-y-1">
+    <p class="font-semibold text-blue-900 mb-2">📋 Instrucciones para el envío</p>
+    <p>• Se aceptan hasta <strong>2 trabajos por inscripto</strong>.</p>
+    <p>• El resumen debe estar redactado en <strong>castellano</strong>.</p>
+    <p>• El cuerpo del resumen tiene un límite de <strong>2500 caracteres</strong>.</p>
+    <p>• Las referencias bibliográficas son opcionales, con un máximo de <strong>3 referencias</strong>.</p>
+    <p>• <strong>No se aceptan imágenes</strong> en el resumen.</p>
+</div>
 
         <!-- Título -->
         <div class="mb-4">
@@ -123,17 +132,25 @@
             <input type="hidden" name="contenido_html" id="contenido_html"/>
         </div>
 
-        <!-- Referencias -->
-        <div class="mb-6">
-            <label class="block text-sm font-bold mb-2">Referencias bibliográficas</label>
-           
-            <div id="referencias-editor-char-panel" class="hidden mb-2 border rounded-xl bg-gray-50 p-3 space-y-3">
-                {% include "public/char_panel_content.html" %}
-            </div>
-            <div id="referencias-editor" class="border rounded-xl bg-white"></div>
-            <input type="hidden" name="referencias_html" id="referencias-hidden"/>
-        </div>
+<!-- Referencias -->
+<div class="mb-6">
+    <label class="flex items-center gap-2 cursor-pointer mb-3">
+        <input type="checkbox" id="toggle-referencias" onchange="toggleReferencias(this)"
+            class="w-4 h-4 accent-teal-500">
+        <span class="text-sm font-bold">Agregar referencias bibliográficas</span>
+        <span class="text-xs text-gray-400">(opcional, máx. 3)</span>
+    </label>
 
+    <div id="referencias-wrapper" class="hidden">
+        <div id="referencias-editor-char-panel" class="hidden mb-2 border rounded-xl bg-gray-50 p-3 space-y-3">
+            {% include "public/char_panel_content.html" %}
+        </div>
+        <div id="referencias-editor" class="border rounded-xl bg-white"></div>
+    </div>
+
+    <input type="hidden" name="referencias_html" id="referencias-hidden"/>
+    <input type="hidden" name="tiene_referencias" id="tiene-referencias" value="0"/>
+</div>
         <p class="text-xs text-gray-400 mb-6">Usá la barra de cada editor para negrita, cursiva, superíndice, subíndice, caracteres especiales y ecuaciones LaTeX.</p>
 
         <button type="submit"
@@ -337,7 +354,8 @@ quillReferencias.setContents([
     { insert: 'ACS Nano ', attributes: { italic: true } },
     { insert: '17', attributes: { bold: true } },
     { insert: ' (2026) 1121-1125 \n' },
-    { insert: '2. \n' }
+    { insert: '2. \n' },
+    { insert: '3. \n' }
 ]);
     function toggleChars(panelId) {
         document.getElementById(panelId).classList.toggle('hidden');
@@ -360,6 +378,18 @@ quillReferencias.setContents([
             q.focus();
         }
     }
+    function toggleReferencias(checkbox) {
+    const wrapper = document.getElementById('referencias-wrapper');
+    const tieneRef = document.getElementById('tiene-referencias');
+    if (checkbox.checked) {
+        wrapper.classList.remove('hidden');
+        tieneRef.value = '1';
+    } else {
+        wrapper.classList.add('hidden');
+        tieneRef.value = '0';
+        document.getElementById('referencias-hidden').value = '';
+    }
+}
 
     // Rastrear foco
     document.addEventListener('focusin', function(e) {

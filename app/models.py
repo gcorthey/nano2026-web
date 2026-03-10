@@ -40,6 +40,7 @@ class Abstract(Base):
     afiliaciones = relationship("Afiliacion", back_populates="abstract", order_by="Afiliacion.orden")
     area_tematica = Column(String, nullable=True)
     referencias_html = Column(Text, nullable=True)
+    tiene_referencias = Column(Integer, default=0)  # 1 = sí, 0 = no
 
 class Autor(Base):
     __tablename__ = "autores"

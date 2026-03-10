@@ -73,6 +73,8 @@ def submit_abstract(
     autor_count: int = Form(...),
     afil_count: int = Form(...),
     area_tematica: str = Form(...),
+    referencias_html: str = Form(""),
+    tiene_referencias: int = Form(0),
     db: Session = Depends(get_db)
 ):
     if not contenido_html or contenido_html.strip() == "<p></p>":
@@ -82,14 +84,16 @@ def submit_abstract(
         })
 
     abstract = models.Abstract(
-        titulo=titulo,
-        autor="",  # se llena abajo con el presentador
-        afiliacion="",
-        email_autor=email_autor,
-        contenido_html=contenido_html,
-        presentacion_oral=presentacion_oral,
-        area_tematica=area_tematica,
-    )
+    titulo=titulo,
+    autor="",
+    afiliacion="",
+    email_autor=email_autor,
+    contenido_html=contenido_html,
+    referencias_html=referencias_html,
+    tiene_referencias=tiene_referencias,
+    presentacion_oral=presentacion_oral,
+    area_tematica=area_tematica,
+)
     db.add(abstract)
     db.flush()  # para obtener el id
 
@@ -320,7 +324,6 @@ def eval_detalle(
         "review": review,
         "current_user": current_user
     })
-
 @app.post("/eval/{abstract_id}", response_class=HTMLResponse)
 def eval_submit(
     abstract_id: int,
@@ -353,8 +356,15 @@ def eval_submit(
             comentario=comentario
         )
         db.add(review)
-    db.commit()
+
+    # Actualizar estado del abstract según la decisión del evaluador
     abstract = asig.abstract
+    if decision == "aprobado":
+        abstract.estado = models.EstadoEnum.aprobado
+    elif decision == "rechazado":
+        abstract.estado = models.EstadoEnum.rechazado
+
+    db.commit()
     return templates.TemplateResponse("eval/detalle.html", {
         "request": request,
         "abstract": abstract,
@@ -362,7 +372,6 @@ def eval_submit(
         "success": True,
         "current_user": current_user
     })
-
 from sqlalchemy import or_
 
 # --- Páginas públicas ---
