@@ -1,6 +1,7 @@
 import os
 from dotenv import load_dotenv
 load_dotenv()
+import httpx
 from datetime import datetime
 from fastapi import FastAPI, Request, Response, Depends, Form, HTTPException
 from fastapi.responses import HTMLResponse, RedirectResponse, StreamingResponse
@@ -698,8 +699,27 @@ async def contacto_post(
     nombre: str = Form(...),
     email: str = Form(...),
     subject: str = Form(...),
-    body: str = Form(...)
+    body: str = Form(...),
+    recaptcha_token: str = Form("")
 ):
+    # Verificar reCAPTCHA
+    async with httpx.AsyncClient() as client:
+        resp = await client.post(
+            "https://www.google.com/recaptcha/api/siteverify",
+            data={
+                "secret": os.getenv("RECAPTCHA_SECRET"),
+                "response": recaptcha_token
+            }
+        )
+        result = resp.json()
+    
+    if not result.get("success") or result.get("score", 0) < 0.5:
+        return templates.TemplateResponse("public/contacto.html", {
+            "request": request,
+            "error": "Verificación fallida. Por favor intentá de nuevo."
+        })
+
+    # ... resto del código de envío de mail
     mensaje = MessageSchema(
     subject=f"[NANO2026 Contacto] {subject}",
     recipients=["nano2026@unsam.edu.ar"],

@@ -89,10 +89,24 @@ San Martín, Buenos Aires</p>
                 <textarea name="body" rows="4" placeholder="Escribí tu consulta acá..."
                     class="w-full border rounded-xl px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-teal-400"></textarea>
             </div>
-            <button type="submit"
-                class="w-full bg-teal-500 hover:bg-teal-400 text-white py-2 rounded-full font-semibold transition">
-                Enviar mensaje →
-            </button>
+<button type="submit" id="submit-btn"
+    class="w-full bg-teal-500 hover:bg-teal-400 text-white py-2 rounded-full font-semibold transition">
+    Enviar mensaje →
+</button>
+<input type="hidden" name="recaptcha_token" id="recaptcha_token">
+
+<script src="https://www.google.com/recaptcha/api.js?render=6LcNRYYsAAAAAPb63qh5NSUrRt7IX--sDANkgCAR"></script>
+<script>
+document.querySelector('form').addEventListener('submit', function(e) {
+    e.preventDefault();
+    grecaptcha.ready(function() {
+        grecaptcha.execute('6LcNRYYsAAAAAPb63qh5NSUrRt7IX--sDANkgCAR', {action: 'contacto'}).then(function(token) {
+            document.getElementById('recaptcha_token').value = token;
+            e.target.submit();
+        });
+    });
+});
+</script>
         </form>
     </div>
 
