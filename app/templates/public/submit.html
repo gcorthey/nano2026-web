@@ -122,6 +122,8 @@
         <!-- Resumen -->
         <div class="mb-6">
             <label class="block text-sm font-bold mb-2">Resumen *</label>
+            <p class="text-xs text-gray-400 mb-6">Usá la barra de cada editor para negrita, cursiva, superíndice, subíndice, caracteres especiales y ecuaciones (LaTeX).</p>
+
             <div id="quill-editor-char-panel" class="hidden mb-2 border rounded-xl bg-gray-50 p-3 space-y-3">
                 {% include "public/char_panel_content.html" %}
             </div>
@@ -151,8 +153,7 @@
     <input type="hidden" name="referencias_html" id="referencias-hidden"/>
     <input type="hidden" name="tiene_referencias" id="tiene-referencias" value="0"/>
 </div>
-        <p class="text-xs text-gray-400 mb-6">Usá la barra de cada editor para negrita, cursiva, superíndice, subíndice, caracteres especiales y ecuaciones LaTeX.</p>
-
+        
         <button type="submit"
             class="w-full bg-teal-500 hover:bg-teal-400 text-white py-3 rounded-full transition font-semibold text-lg shadow">
             Enviar resumen →
