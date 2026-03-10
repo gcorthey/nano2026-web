@@ -545,3 +545,6 @@ def circulares(request: Request):
 @app.get("/contacto", response_class=HTMLResponse)
 def contacto(request: Request):
     return templates.TemplateResponse("public/contacto.html", {"request": request})
+@app.get("/inscripcion")
+def inscripcion(request: Request):
+    return templates.TemplateResponse("public/inscripcion.html", {"request": request})

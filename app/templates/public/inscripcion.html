@@ -1,0 +1,147 @@
+{% extends "public/base.html" %}
+{% block content %}
+
+<!-- Hero -->
+<div class="relative rounded-2xl overflow-hidden mb-10" style="min-height: 180px; background: linear-gradient(135deg, #0a1628 0%, #0d3b6e 60%, #1a6b4a 100%);">
+    <div class="relative z-10 flex flex-col items-center justify-center text-center px-8 py-12">
+        <h1 class="text-3xl font-black text-white mb-2">Inscripción</h1>
+        <p class="text-teal-300">3, 4 y 5 de junio de 2026 · Campus UNSAM</p>
+    </div>
+</div>
+
+<!-- Fila superior: dos cards -->
+<div class="grid grid-cols-1 md:grid-cols-2 gap-6 mb-6">
+
+    <!-- Card izquierda: Fechas importantes -->
+    <div class="bg-white rounded-2xl shadow p-6 flex flex-col gap-4">
+        <h2 class="text-lg font-bold text-gray-800">Fechas importantes</h2>
+        <div class="flex items-start gap-3">
+            <span class="text-teal-500 mt-0.5">
+                <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z"/>
+                </svg>
+            </span>
+            <div>
+                <p class="text-sm text-gray-500 mb-0.5">Inscripción temprana</p>
+                <p class="text-gray-700 font-medium">hasta el 15 de abril de 2026</p>
+            </div>
+        </div>
+        <div class="flex items-start gap-3">
+            <span class="text-blue-500 mt-0.5">
+                <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z"/>
+                </svg>
+            </span>
+            <div>
+                <p class="text-sm text-gray-500 mb-0.5">Segunda inscripción</p>
+                <p class="text-gray-700 font-medium">hasta el 28 de mayo de 2026</p>
+            </div>
+        </div>
+    </div>
+
+    <!-- Card derecha: Cómo inscribirse -->
+    <div class="bg-white rounded-2xl shadow p-6 flex flex-col gap-4">
+        <h2 class="text-lg font-bold text-gray-800">¿Cómo inscribirse?</h2>
+        <ol class="text-sm text-gray-600 space-y-2 mb-2">
+            <li class="flex items-start gap-2">
+                <span class="bg-teal-500 text-white text-xs font-bold rounded-full w-5 h-5 flex items-center justify-center flex-shrink-0 mt-0.5">1</span>
+                Completá el<a href="https://docs.google.com/forms/d/e/1FAIpQLScsHbIB9xOOcBGveXZbTLWGfk4KLcVGkdrqTGOXor5RBYGO9g/viewform?pli=1" class="text-teal-600 hover:underline">formulario de inscripción</a>
+            </li>
+            <li class="flex items-start gap-2">
+                <span class="bg-teal-500 text-white text-xs font-bold rounded-full w-5 h-5 flex items-center justify-center flex-shrink-0 mt-0.5">2</span>
+                Realizá la transferencia con los datos de la tabla de abajo
+            </li>
+            <li class="flex items-start gap-2">
+                <span class="bg-teal-500 text-white text-xs font-bold rounded-full w-5 h-5 flex items-center justify-center flex-shrink-0 mt-0.5">3</span>
+                Enviá el comprobante de pago a <a href="mailto:nano2026@unsam.edu.ar?subject=COMPROBANTE" class="text-teal-600 hover:underline">nano2026@unsam.edu.ar</a> 
+            </li>
+            <li class="flex items-start gap-2">
+                <span class="bg-teal-500 text-white text-xs font-bold rounded-full w-5 h-5 flex items-center justify-center flex-shrink-0 mt-0.5">4</span>
+                Recibirás confirmación de tu inscripción por email
+            </li>
+        </ol>
+    </div>
+
+</div>
+
+<!-- Fila inferior: tabla de precios (ancho completo) -->
+<div class="bg-gradient-to-r from-teal-600 to-blue-700 rounded-2xl shadow p-8 text-white mb-6">
+    <h2 class="text-lg font-bold mb-6">Costos de inscripción</h2>
+    <div class="overflow-x-auto">
+        <table class="w-full text-sm">
+            <thead>
+                <tr class="text-teal-200 text-xs uppercase">
+                    <th class="text-left py-2 pr-6">Categoría</th>
+                    <th class="text-center py-2 px-4">Temprana<br><span class="font-normal normal-case">hasta 15/4/26</span></th>
+                    <th class="text-center py-2 px-4">Segunda<br><span class="font-normal normal-case">hasta 28/5/26</span></th>
+                    <th class="text-center py-2 px-4">Tercera<br><span class="font-normal normal-case"></span></th>
+                </tr>
+            </thead>
+            <tbody class="divide-y divide-white divide-opacity-20">
+                <tr>
+                    <td class="py-3 pr-6">Estudiantes de grado</td>
+                    <td class="text-center py-3 px-4 font-bold">$80</td>
+                    <td class="text-center py-3 px-4 font-bold">$100</td>
+                    <td class="text-center py-3 px-4 font-bold">$100</td>
+                </tr>
+                <tr>
+                    <td class="py-3 pr-6">Estudiantes de posgrado</td>
+                    <td class="text-center py-3 px-4 font-bold">$100</td>
+                    <td class="text-center py-3 px-4 font-bold">$120</td>
+                    <td class="text-center py-3 px-4 font-bold">$120</td>
+                </tr>
+                <tr>
+                    <td class="py-3 pr-6">Investigadores</td>
+                    <td class="text-center py-3 px-4 font-bold">$120</td>
+                    <td class="text-center py-3 px-4 font-bold">$150</td>
+                    <td class="text-center py-3 px-4 font-bold">$150</td>
+                </tr>
+            </tbody>
+        </table>
+    </div>
+    <p class="text-teal-200 text-xs mt-4">* Precios en USD.</p>
+    <div class="mt-6 text-center">
+        <a href="https://forms.gle/qRTWnuQAiVNvWmX16" target="_blank"
+            class="bg-white text-teal-700 font-semibold px-8 py-3 rounded-full hover:bg-teal-50 transition shadow inline-block">
+            Inscribirse al congreso →
+        </a>
+    </div>
+</div>
+
+<!-- Datos bancarios (fuera del bloque de precios) -->
+<div class="bg-white rounded-2xl shadow p-6">
+    <h2 class="text-lg font-bold text-gray-800 mb-4">Datos para transferencia</h2>
+    <dl class="text-sm grid grid-cols-1 sm:grid-cols-2 gap-x-12 gap-y-3">
+        <div class="flex justify-between border-b border-gray-100 pb-2">
+            <dt class="text-gray-400">Razón Social</dt>
+            <dd class="font-medium text-gray-700 text-right">FUNDACION INST DE INV BIOTECNO</dd>
+        </div>
+        <div class="flex justify-between border-b border-gray-100 pb-2">
+            <dt class="text-gray-400">CUIT/CUIL</dt>
+            <dd class="font-mono font-medium text-gray-700">30-70782534-7</dd>
+        </div>
+        <div class="flex justify-between border-b border-gray-100 pb-2">
+            <dt class="text-gray-400">N° Cuenta CC $</dt>
+            <dd class="font-mono font-medium text-gray-700">476-001289/2</dd>
+        </div>
+        <div class="flex justify-between border-b border-gray-100 pb-2">
+            <dt class="text-gray-400">CBU</dt>
+            <dd class="font-mono font-medium text-gray-700">0720476420000000128922</dd>
+        </div>   
+        <div class="flex justify-between border-b border-gray-100 pb-2">
+            <dt class="text-gray-400">BANCO</dt>
+            <dd class="font-mono font-medium text-gray-700">SANTANDER</dd>
+        </div>      
+        <div class="flex justify-between border-b border-gray-100 pb-2">
+            <dt class="text-gray-400">Alias</dt>
+            <dd class="font-mono font-medium text-gray-700">FIIB.SANTANDER</dd>
+        </div>
+    </dl>
+    <p class="text-sm text-gray-500 mt-4">
+        Enviá el comprobante a 
+        <a href="mailto:nano2026@unsam.edu.ar?subject=COMPROBANTE" class="text-teal-600 hover:underline">nano2026@unsam.edu.ar</a> 
+        con asunto <span class="font-mono bg-gray-100 px-1 rounded text-xs">COMPROBANTE</span>
+    </p>
+</div>
+
+{% endblock %}
