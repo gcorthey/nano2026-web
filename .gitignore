@@ -4,3 +4,4 @@ backup.log
 __pycache__/
 *.pyc
 congreso.db
+.env

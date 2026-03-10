@@ -1,3 +1,6 @@
+import os
+from dotenv import load_dotenv
+load_dotenv()
 from datetime import datetime
 from fastapi import FastAPI, Request, Response, Depends, Form, HTTPException
 from fastapi.responses import HTMLResponse, RedirectResponse, StreamingResponse
@@ -14,8 +17,11 @@ from app.auth import (
 from xhtml2pdf import pisa
 import io
 import csv
+from fastapi_mail import FastMail, MessageSchema, ConnectionConfig
 
 models.Base.metadata.create_all(bind=engine)
+
+
 
 app = FastAPI(title="Congreso")
 app.mount("/static", StaticFiles(directory="app/static"), name="static")
@@ -672,3 +678,43 @@ def export_abstracts_csv(
         media_type="text/csv",
         headers={"Content-Disposition": "attachment; filename=abstracts.csv"}
     )
+
+
+
+mail_config = ConnectionConfig(
+    MAIL_USERNAME=os.getenv("MAIL_USERNAME"),
+    MAIL_PASSWORD=os.getenv("MAIL_PASSWORD"),
+    MAIL_FROM=os.getenv("MAIL_FROM"),
+    MAIL_PORT=587,
+    MAIL_SERVER="smtp.gmail.com",
+    MAIL_STARTTLS=True,
+    MAIL_SSL_TLS=False,
+    USE_CREDENTIALS=True
+)
+
+@app.post("/contacto", response_class=HTMLResponse)
+async def contacto_post(
+    request: Request,
+    nombre: str = Form(...),
+    email: str = Form(...),
+    subject: str = Form(...),
+    body: str = Form(...)
+):
+    mensaje = MessageSchema(
+        subject=f"[NANO2026 Contacto] {subject}",
+        recipients=["nano2026@unsam.edu.ar"],
+        body=f"Nombre: {nombre}\nEmail: {email}\n\n{body}",
+        subtype="plain"
+    )
+    fm = FastMail(mail_config)
+    try:
+        await fm.send_message(mensaje)
+        return templates.TemplateResponse("public/contacto.html", {
+            "request": request,
+            "success": True
+        })
+    except Exception as e:
+        return templates.TemplateResponse("public/contacto.html", {
+            "request": request,
+            "error": f"Error: {str(e)}"
+        })
