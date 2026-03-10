@@ -713,7 +713,8 @@ async def contacto_post(
         )
         result = resp.json()
     
-    if not result.get("success") or result.get("score", 0) < 0.5:
+    if not result.get("success"):
+        print("reCAPTCHA result:", result)
         return templates.TemplateResponse("public/contacto.html", {
             "request": request,
             "error": "Verificación fallida. Por favor intentá de nuevo."
