@@ -40,12 +40,20 @@
             ('2019', 'Buenos Aires'),
             ('2021', 'Mar del Plata'),
             ('2022', 'Río Cuarto'),
-            ('2025', 'Tucumán'),
+            ('2025', 'Tucumán', 'https://nano2025.fbqfcampus.net.ar/')
         ] %}
-        <div class="bg-gray-50 border rounded-xl px-3 py-2 text-sm">
-            <span class="font-semibold text-teal-600">{{ ed[0] }}</span>
-            <span class="text-gray-500 ml-1">{{ ed[1] }}</span>
-        </div>
+        {% if ed|length > 2 and ed[2] %}
+<a href="{{ ed[2] }}" target="_blank" class="bg-gray-50 border rounded-xl px-3 py-2 text-sm hover:border-teal-400 transition block">
+    <span class="font-semibold text-teal-600">{{ ed[0] }}</span>
+    <span class="text-gray-500 ml-1">{{ ed[1] }}</span>
+    <span class="text-xs text-teal-400 ml-1">↗</span>
+</a>
+{% else %}
+<div class="bg-gray-50 border rounded-xl px-3 py-2 text-sm">
+    <span class="font-semibold text-teal-600">{{ ed[0] }}</span>
+    <span class="text-gray-500 ml-1">{{ ed[1] }}</span>
+</div>
+{% endif %}
         {% endfor %}
         <div class="bg-teal-500 rounded-xl px-3 py-2 text-sm">
             <span class="font-semibold text-white">2026</span>
