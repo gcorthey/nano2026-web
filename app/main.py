@@ -701,11 +701,12 @@ async def contacto_post(
     body: str = Form(...)
 ):
     mensaje = MessageSchema(
-        subject=f"[NANO2026 Contacto] {subject}",
-        recipients=["nano2026@unsam.edu.ar"],
-        body=f"Nombre: {nombre}\nEmail: {email}\n\n{body}",
-        subtype="plain"
-    )
+    subject=f"[NANO2026 Contacto] {subject}",
+    recipients=["nano2026@unsam.edu.ar"],
+    reply_to=[email],
+    body=f"Nombre: {nombre}\nEmail: {email}\n\n{body}",
+    subtype="plain"
+)
     fm = FastMail(mail_config)
     try:
         await fm.send_message(mensaje)
