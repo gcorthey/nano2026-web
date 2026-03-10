@@ -41,6 +41,8 @@ class Abstract(Base):
     area_tematica = Column(String, nullable=True)
     referencias_html = Column(Text, nullable=True)
     tiene_referencias = Column(Integer, default=0)  # 1 = sí, 0 = no
+    tipo_asignado_admin = Column(String, nullable=True)  # 'oral', 'poster', o None
+    
 
 class Autor(Base):
     __tablename__ = "autores"

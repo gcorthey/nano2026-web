@@ -24,23 +24,57 @@
         <a href="?estado={{ estado_filtro }}&area=7" class="px-3 py-1 rounded border {% if area_filtro == '7' %}bg-red-500 text-white{% else %}bg-white{% endif %}">Nano y Salud</a>
     </div>
 </div>
+<!-- Botón exportar CSV -->
+<div class="flex justify-end mb-3">
+    <a href="/admin/abstracts/export/csv?estado={{ estado_filtro }}&area={{ area_filtro }}"
+        class="bg-white border border-gray-300 text-gray-600 text-sm px-4 py-1.5 rounded-lg hover:bg-gray-50 transition flex items-center gap-2">
+        <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-4l-4 4m0 0l-4-4m4 4V4"/>
+        </svg>
+        Exportar CSV
+    </a>
+</div>
+
+<!-- Barra asignación masiva -->
+<div id="barra-asignacion" class="hidden mb-3 bg-teal-50 border border-teal-200 rounded-xl px-4 py-3 flex items-center gap-3 flex-wrap">
+    <span class="text-sm text-teal-700 font-medium" id="selected-count">0 seleccionados</span>
+    <select id="evaluador-select" class="text-sm border rounded-lg px-3 py-1.5 bg-white focus:outline-none focus:ring-2 focus:ring-teal-400">
+        <option value="">— Seleccioná un evaluador</option>
+        {% for e in evaluadores %}
+        <option value="{{ e.id }}">{{ e.nombre }}</option>
+        {% endfor %}
+    </select>
+    <button onclick="asignarMasivo()"
+        class="bg-teal-600 text-white text-sm px-4 py-1.5 rounded-lg hover:bg-teal-700 transition">
+        Asignar evaluador
+    </button>
+    <button onclick="deselectAll()" class="text-sm text-gray-400 hover:text-gray-600">Cancelar</button>
+</div>
+<form id="form-asignacion-masiva" method="post" action="/admin/abstracts/asignar-masivo" class="hidden">
+    <input type="hidden" name="evaluador_id" id="form-evaluador-id">
+    <input type="hidden" name="abstract_ids" id="form-abstract-ids">
+</form>
 
 {% if abstracts %}
 <div class="bg-white rounded shadow overflow-x-auto">
     <table class="text-sm" id="tabla-abstracts" style="min-width: 800px; width: 100%;">
-        <thead class="bg-gray-50 text-gray-600 uppercase text-xs">
-            <tr>
-                <th class="px-4 py-3 text-left cursor-pointer hover:bg-gray-100 select-none" onclick="sortTable(0)"># <span class="sort-icon">↕</span></th>
-                <th class="px-4 py-3 text-left cursor-pointer hover:bg-gray-100 select-none" onclick="sortTable(1)">Título <span class="sort-icon">↕</span></th>
-                <th class="px-4 py-3 text-left cursor-pointer hover:bg-gray-100 select-none" onclick="sortTable(2)">Autores <span class="sort-icon">↕</span></th>
-                <th class="px-4 py-3 text-left cursor-pointer hover:bg-gray-100 select-none" onclick="sortTable(3)">Área <span class="sort-icon">↕</span></th>
-                <th class="px-4 py-3 text-center cursor-pointer hover:bg-gray-100 select-none" onclick="sortTable(4)">Tipo <span class="sort-icon">↕</span></th>
-                <th class="px-4 py-3 text-left cursor-pointer hover:bg-gray-100 select-none" onclick="sortTable(5)">Fecha <span class="sort-icon">↕</span></th>
-                <th class="px-4 py-3 text-left cursor-pointer hover:bg-gray-100 select-none" onclick="sortTable(6)">Estado <span class="sort-icon">↕</span></th>
-                <th class="px-4 py-3 text-left">Eval.</th>
-                <th class="px-4 py-3 text-left">Acciones</th>
-            </tr>
-        </thead>
+            <thead class="bg-gray-50 text-gray-600 uppercase text-xs">
+                <tr>
+                    <th class="px-4 py-3">    <input type="checkbox" id="check-all" onclick="toggleAll(this)" class="cursor-pointer"></th>
+                    <th class="px-4 py-3 text-left cursor-pointer hover:bg-gray-100 select-none" onclick="sortTable(0)"># <span class="sort-icon">↕</span></th>
+                    <th class="px-4 py-3 text-left cursor-pointer hover:bg-gray-100 select-none" onclick="sortTable(1)">Título <span class="sort-icon">↕</span></th>
+                    <th class="px-4 py-3 text-left cursor-pointer hover:bg-gray-100 select-none" onclick="sortTable(2)">Autores <span class="sort-icon">↕</span></th>
+                    <th class="px-4 py-3 text-left cursor-pointer hover:bg-gray-100 select-none" onclick="sortTable(3)">Área <span class="sort-icon">↕</span></th>
+                    <th class="px-4 py-3 text-center cursor-pointer hover:bg-gray-100 select-none" onclick="sortTable(4)">Tipo solicitado <span class="sort-icon">↕</span></th>
+                    <th class="px-4 py-3 text-center cursor-pointer hover:bg-gray-100 select-none" onclick="sortTable(5)">Tipo evaluador <span class="sort-icon">↕</span></th>
+                    <th class="px-4 py-3 text-center cursor-pointer hover:bg-gray-100 select-none" onclick="sortTable(6)">Tipo admin <span class="sort-icon">↕</span></th>
+                    <th class="px-4 py-3 text-left cursor-pointer hover:bg-gray-100 select-none" onclick="sortTable(7)">Evaluador <span class="sort-icon">↕</span></th>
+                    <th class="px-4 py-3 text-left cursor-pointer hover:bg-gray-100 select-none" onclick="sortTable(8)">Email presentador <span class="sort-icon">↕</span></th>
+                    <th class="px-4 py-3 text-left cursor-pointer hover:bg-gray-100 select-none" onclick="sortTable(9)">Fecha <span class="sort-icon">↕</span></th>
+                    <th class="px-4 py-3 text-left cursor-pointer hover:bg-gray-100 select-none" onclick="sortTable(10)">Estado <span class="sort-icon">↕</span></th>
+                    <th class="px-4 py-3 text-left">Acciones</th>
+                </tr>
+            </thead>
         <tbody class="divide-y divide-gray-100">
             {% for a in abstracts %}
             {% set area_info = {
@@ -54,6 +88,7 @@
             } %}
             {% set info = area_info.get(a.area_tematica, ('—', 'bg-gray-100 text-gray-500')) %}
             <tr class="hover:bg-gray-50">
+                <td class="px-4 py-3">     <input type="checkbox" class="row-check cursor-pointer" value="{{ a.id }}" onchange="updateBarra()"></td>
                 <td class="px-4 py-3 text-gray-400">{{ a.id }}</td>
                 <td class="px-4 py-3 font-medium" style="max-width: 200px;">
                     <div class="truncate">{{ a.titulo | striptags }}</div>
@@ -66,14 +101,57 @@
                 <td class="px-4 py-3">
                     <span class="px-2 py-1 rounded-full text-xs font-medium {{ info[1] }}">{{ info[0] }}</span>
                 </td>
+                <!-- Tipo solicitado -->
                 <td class="px-4 py-3 text-center">
                     {% if a.presentacion_oral %}
-                        <span class="text-teal-600" title="Solicita presentación oral">🎤</span>
+                        <span class="bg-teal-100 text-teal-700 px-2 py-0.5 rounded text-xs">🎤 Oral</span>
                     {% else %}
-                        <span class="text-gray-400" title="Solo póster">📋</span>
+                        <span class="bg-gray-100 text-gray-500 px-2 py-0.5 rounded text-xs">📋 Póster</span>
                     {% endif %}
                 </td>
+                <!-- Tipo recomendado por evaluador -->
+                <td class="px-4 py-3 text-center">
+                    {% if not a.presentacion_oral %}
+                        <span class="bg-gray-100 text-gray-400 px-2 py-0.5 rounded text-xs">📋 Póster</span>
+                    {% elif a.reviews %}
+                        {% set r = a.reviews[0] %}
+                        {% if r.recomienda_oral == 1 %}
+                            <span class="bg-teal-100 text-teal-700 px-2 py-0.5 rounded text-xs">🎤 Oral</span>
+                        {% elif r.recomienda_oral == 0 %}
+                            <span class="bg-gray-100 text-gray-500 px-2 py-0.5 rounded text-xs">📋 Póster</span>
+                        {% else %}
+                            <span class="text-gray-300 text-xs">—</span>
+                        {% endif %}
+                    {% else %}
+                        <span class="text-gray-300 text-xs">—</span>
+                    {% endif %}
+                </td>
+                <!-- Tipo asignado por admin -->
+                <td class="px-4 py-3 text-center">
+                    <form method="post" action="/admin/abstracts/{{ a.id }}/tipo">
+                        <select name="tipo_asignado_admin" onchange="this.form.submit()"
+                            class="text-xs border rounded px-1 py-0.5 bg-white focus:outline-none focus:ring-1 focus:ring-teal-400">
+                            <option value="" {% if not a.tipo_asignado_admin %}selected{% endif %}>— Sin asignar</option>
+                            <option value="oral" {% if a.tipo_asignado_admin == 'oral' %}selected{% endif %}>🎤 Oral</option>
+                            <option value="poster" {% if a.tipo_asignado_admin == 'poster' %}selected{% endif %}>📋 Póster</option>
+                        </select>
+                    </form>
+                </td>
+                <!-- Evaluador asignado -->
+                <td class="px-4 py-3 text-gray-600 text-sm">
+                    {% if a.asignaciones %}
+                        {% for asig in a.asignaciones %}
+                            <span>{{ asig.evaluador.nombre }}{% if not loop.last %}, {% endif %}</span>
+                        {% endfor %}
+                    {% else %}
+                        <span class="text-gray-300">—</span>
+                    {% endif %}
+                </td>
+                <!-- Email presentador -->
+                <td class="px-4 py-3 text-gray-500 text-sm">{{ a.email_autor }}</td>
+                <!-- Fecha -->
                 <td class="px-4 py-3 text-gray-400 whitespace-nowrap">{{ a.fecha_envio.strftime('%d/%m/%Y') }}</td>
+                <!-- Estado -->
                 <td class="px-4 py-3 whitespace-nowrap">
                     {% if a.estado.value == 'pendiente' %}
                         <span class="bg-yellow-100 text-yellow-800 px-2 py-0.5 rounded text-xs">Pendiente</span>
@@ -83,7 +161,6 @@
                         <span class="bg-red-100 text-red-800 px-2 py-0.5 rounded text-xs">Rechazado</span>
                     {% endif %}
                 </td>
-                <td class="px-4 py-3 text-gray-500 text-xs whitespace-nowrap">{{ a.asignaciones | length }} / {{ a.reviews | length }}</td>
                 <td class="px-4 py-3">
                     <a href="/admin/abstracts/{{ a.id }}" class="text-blue-600 hover:underline">Ver</a>
                 </td>
@@ -122,6 +199,39 @@
 
         rows.forEach(r => tbody.appendChild(r));
     }
+    function toggleAll(cb) {
+    document.querySelectorAll('.row-check').forEach(c => c.checked = cb.checked);
+    updateBarra();
+}
+
+function updateBarra() {
+    const checked = document.querySelectorAll('.row-check:checked');
+    const barra = document.getElementById('barra-asignacion');
+    document.getElementById('selected-count').textContent = checked.length + ' seleccionados';
+    if (checked.length > 0) {
+        barra.classList.remove('hidden');
+    } else {
+        barra.classList.add('hidden');
+    }
+}
+
+function deselectAll() {
+    document.querySelectorAll('.row-check').forEach(c => c.checked = false);
+    document.getElementById('check-all').checked = false;
+    updateBarra();
+}
+
+function asignarMasivo() {
+    const evaluadorId = document.getElementById('evaluador-select').value;
+    if (!evaluadorId) {
+        alert('Seleccioná un evaluador primero.');
+        return;
+    }
+    const ids = Array.from(document.querySelectorAll('.row-check:checked')).map(c => c.value);
+    document.getElementById('form-evaluador-id').value = evaluadorId;
+    document.getElementById('form-abstract-ids').value = ids.join(',');
+    document.getElementById('form-asignacion-masiva').submit();
+}
 </script>
 
 {% endblock %}

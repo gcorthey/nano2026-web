@@ -1,6 +1,6 @@
 from datetime import datetime
 from fastapi import FastAPI, Request, Response, Depends, Form, HTTPException
-from fastapi.responses import HTMLResponse, RedirectResponse
+from fastapi.responses import HTMLResponse, RedirectResponse, StreamingResponse
 from fastapi.staticfiles import StaticFiles
 from fastapi.templating import Jinja2Templates
 from sqlalchemy.orm import Session
@@ -13,12 +13,19 @@ from app.auth import (
 )
 from xhtml2pdf import pisa
 import io
+import csv
 
 models.Base.metadata.create_all(bind=engine)
 
 app = FastAPI(title="Congreso")
 app.mount("/static", StaticFiles(directory="app/static"), name="static")
 templates = Jinja2Templates(directory="app/templates")
+
+import re
+
+def strip_tags(text: str) -> str:
+    return re.sub(r'<[^>]+>', '', text or '').strip()
+
 
 # --- Crea admin por defecto si no existe ---
 def create_default_admin():
@@ -139,7 +146,6 @@ def submit_abstract(
     })
 # --- Admin: lista de abstracts ---
 @app.get("/admin", response_class=HTMLResponse)
-@app.get("/admin", response_class=HTMLResponse)
 def admin_abstracts(
     request: Request,
     estado: str = "todos",
@@ -153,12 +159,14 @@ def admin_abstracts(
     if area != "todas":
         query = query.filter(models.Abstract.area_tematica == area)
     abstracts = query.order_by(models.Abstract.fecha_envio.desc()).all()
+    evaluadores = db.query(models.User).filter(models.User.role == "evaluador").all()
     return templates.TemplateResponse("admin/abstracts.html", {
         "request": request,
         "abstracts": abstracts,
         "estado_filtro": estado,
         "area_filtro": area,
-        "current_user": current_user
+        "current_user": current_user,
+        "evaluadores": evaluadores
     })
 
 # --- Admin: detalle de abstract ---
@@ -172,7 +180,7 @@ def admin_abstract_detail(
     abstract = db.query(models.Abstract).filter(models.Abstract.id == abstract_id).first()
     if not abstract:
         raise HTTPException(status_code=404, detail="No encontrado")
-    evaluadores = db.query(models.User).filter(models.User.role == models.RoleEnum.evaluador).all()
+    evaluadores = db.query(models.User).filter(models.User.role == "evaluador").all()
     asignados_ids = [a.evaluador_id for a in abstract.asignaciones]
     evaluadores_disponibles = [e for e in evaluadores if e.id not in asignados_ids]
     reviews = db.query(models.Review).filter(models.Review.abstract_id == abstract_id).all()
@@ -198,14 +206,37 @@ def admin_reject(abstract_id: int, current_user: models.User = Depends(require_a
     abstract.estado = models.EstadoEnum.rechazado
     db.commit()
     return RedirectResponse(url=f"/admin/abstracts/{abstract_id}", status_code=302)
+    
 
 # --- Admin: asignar/desasignar evaluador ---
 @app.post("/admin/abstracts/{abstract_id}/asignar")
 def admin_asignar(abstract_id: int, evaluador_id: int = Form(...), current_user: models.User = Depends(require_admin), db: Session = Depends(get_db)):
-    asig = models.Asignacion(abstract_id=abstract_id, evaluador_id=evaluador_id)
-    db.add(asig)
+    db.query(models.Asignacion).filter(
+        models.Asignacion.abstract_id == abstract_id
+    ).delete()
+    db.add(models.Asignacion(abstract_id=abstract_id, evaluador_id=evaluador_id))
     db.commit()
     return RedirectResponse(url=f"/admin/abstracts/{abstract_id}", status_code=302)
+
+
+@app.post("/admin/abstracts/asignar-masivo")
+def admin_asignar_masivo(
+    request: Request,
+    evaluador_id: int = Form(...),
+    abstract_ids: str = Form(...),
+    current_user: models.User = Depends(require_admin),
+    db: Session = Depends(get_db)
+):
+    ids = [int(i) for i in abstract_ids.split(",") if i.strip().isdigit()]
+    for abstract_id in ids:
+        # Borrar cualquier asignación previa
+        db.query(models.Asignacion).filter(
+            models.Asignacion.abstract_id == abstract_id
+        ).delete()
+        db.add(models.Asignacion(abstract_id=abstract_id, evaluador_id=evaluador_id))
+    db.commit()
+    return RedirectResponse(url="/admin", status_code=303)
+
 
 @app.post("/admin/abstracts/{abstract_id}/desasignar/{evaluador_id}")
 def admin_desasignar(abstract_id: int, evaluador_id: int, current_user: models.User = Depends(require_admin), db: Session = Depends(get_db)):
@@ -348,12 +379,14 @@ def eval_submit(
         review.decision = decision
         review.comentario = comentario
         review.fecha = datetime.utcnow()
+        review.recomienda_oral = recomienda_oral
     else:
         review = models.Review(
             abstract_id=abstract_id,
             evaluador_id=current_user.id,
             decision=decision,
-            comentario=comentario
+            comentario=comentario,
+            recomienda_oral=recomienda_oral
         )
         db.add(review)
 
@@ -407,7 +440,6 @@ def abstracts_publicos(
     if afiliacion:
         query = query.filter(models.Abstract.afiliacion.ilike(f"%{afiliacion}%"))
     abstracts = query.order_by(models.Abstract.fecha_envio.desc()).all()
-    print("DEBUG abstracts:", len(abstracts), [a.titulo for a in abstracts])
     return templates.TemplateResponse("public/abstracts.html", {
         "request": request,
         "abstracts": abstracts,
@@ -557,3 +589,86 @@ def contacto(request: Request):
 @app.get("/inscripcion")
 def inscripcion(request: Request):
     return templates.TemplateResponse("public/inscripcion.html", {"request": request})
+
+@app.post("/admin/abstracts/{abstract_id}/tipo")
+def admin_asignar_tipo(
+    abstract_id: int,
+    tipo_asignado_admin: str = Form(""),
+    current_user: models.User = Depends(require_admin),
+    db: Session = Depends(get_db)
+):
+    abstract = db.query(models.Abstract).filter(models.Abstract.id == abstract_id).first()
+    if not abstract:
+        raise HTTPException(status_code=404, detail="No encontrado")
+    abstract.tipo_asignado_admin = tipo_asignado_admin if tipo_asignado_admin else None
+    db.commit()
+    return RedirectResponse(url="/admin", status_code=303)
+
+@app.get("/admin/abstracts/export/csv")
+def export_abstracts_csv(
+    estado: str = "todos",
+    area: str = "todas",
+    current_user: models.User = Depends(require_admin),
+    db: Session = Depends(get_db)
+):
+    query = db.query(models.Abstract)
+    if estado != "todos":
+        query = query.filter(models.Abstract.estado == estado)
+    if area != "todas":
+        query = query.filter(models.Abstract.area_tematica == area)
+    abstracts = query.order_by(models.Abstract.fecha_envio.desc()).all()
+
+    output = io.StringIO()
+    writer = csv.writer(output)
+    writer.writerow([
+        "ID", "Título", "Autores", "Email presentador", "Área",
+        "Tipo solicitado", "Tipo evaluador", "Tipo admin",
+        "Evaluador asignado", "Estado", "Fecha envío"
+    ])
+    area_nombres = {
+    '1': 'Síntesis de nanomateriales',
+    '2': 'Autoensamblado',
+    '3': 'Nanobiointerfaces y procesos biológicos',
+    '4': 'Superficies',
+    '5': 'Propiedades de nanomateriales',
+    '6': 'Aplicaciones de nanomateriales en ambiente, energía, agro, alimentos y catálisis',
+    '7': 'Nanotecnología y Salud',
+}
+    
+    for a in abstracts:
+        autores = ", ".join(
+            f"{au.nombre}{'*' if au.es_presentador else ''}"
+            for au in a.autores
+        )
+        tipo_eval = "—"
+        if not a.presentacion_oral:
+            tipo_eval = "Póster"
+        elif a.reviews:
+            r = a.reviews[0]
+            if r.recomienda_oral == 1:
+                tipo_eval = "Oral"
+            elif r.recomienda_oral == 0:
+                tipo_eval = "Póster"
+
+        evaluador = a.asignaciones[0].evaluador.nombre if a.asignaciones else "—"
+
+        writer.writerow([
+            a.id,
+            strip_tags(a.titulo),
+            autores,
+            a.email_autor,
+            area_nombres.get(a.area_tematica, "—"),
+            "Oral" if a.presentacion_oral else "Póster",
+            tipo_eval,
+            a.tipo_asignado_admin or "Sin asignar",
+            evaluador,
+            a.estado.value,
+            a.fecha_envio.strftime("%d/%m/%Y %H:%M")
+        ])
+
+    output.seek(0)
+    return StreamingResponse(
+        iter([output.getvalue()]),
+        media_type="text/csv",
+        headers={"Content-Disposition": "attachment; filename=abstracts.csv"}
+    )
