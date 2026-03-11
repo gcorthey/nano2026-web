@@ -469,7 +469,9 @@ async def eval_submit(
         subject = f"[NANO2026] Abstract #{abstract.id} aceptado"
         body = (
             f"Hola,\n\n"
-            f"Tu abstract \"{strip_tags(abstract.titulo)}\" fue aceptado.\n\n"
+            f"Nos alegra mucho contarte que tu abstract \"{strip_tags(abstract.titulo)}\" fue aceptado para NANO2026.\n\n"
+            f"¡Felicitaciones! Gracias por tu aporte y por ser parte de esta edición.\n\n"
+            f"¡Nos vemos en el encuentro!\n\n"
             f"Saludos cordiales,\n"
             f"Comité organizador NANO2026\n"
         )
@@ -578,7 +580,9 @@ async def eval_send_revision_email(
         subject = f"[NANO2026] Abstract #{abstract.id} rechazado"
         body = (
             f"Hola,\n\n"
-            f"Tu abstract \"{strip_tags(abstract.titulo)}\" no fue aceptado en esta edición.\n\n"
+            f"Gracias por enviar tu abstract \"{strip_tags(abstract.titulo)}\".\n\n"
+            f"Tras la evaluación del comité, en esta oportunidad no pudo ser aceptado para esta edición.\n\n"
+            f"Valoramos mucho tu participación y esperamos poder contar con futuras postulaciones.\n\n"
             f"Comentarios del evaluador:\n{review.comentario.strip()}\n\n"
             f"Saludos cordiales,\n"
             f"Comité organizador NANO2026\n"
