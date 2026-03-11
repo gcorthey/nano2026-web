@@ -61,36 +61,34 @@
         </div>
     </div>
 
-
-   
-
     <!-- Card derecha: Cómo inscribirse -->
     <div class="bg-white rounded-2xl shadow p-6 flex flex-col gap-4">
         <h2 class="text-lg font-bold text-gray-800">¿Cómo inscribirse?</h2>
         <ol class="text-sm text-gray-600 space-y-6 mb-2">
             <li class="flex items-start gap-2">
                 <span class="bg-teal-500 text-white text-xs font-bold rounded-full w-5 h-5 flex items-center justify-center flex-shrink-0 mt-0.5">1</span>
-                Completá el<a href="https://docs.google.com/forms/d/e/1FAIpQLScsHbIB9xOOcBGveXZbTLWGfk4KLcVGkdrqTGOXor5RBYGO9g/viewform?pli=1" class="text-teal-600 hover:underline">formulario de inscripción</a>
+                Completá el <a href="https://docs.google.com/forms/d/e/1FAIpQLScsHbIB9xOOcBGveXZbTLWGfk4KLcVGkdrqTGOXor5RBYGO9g/viewform?pli=1" class="text-teal-600 hover:underline">formulario de inscripción</a>
             </li>
             <li class="flex items-start gap-2">
                 <span class="bg-teal-500 text-white text-xs font-bold rounded-full w-5 h-5 flex items-center justify-center flex-shrink-0 mt-0.5">2</span>
                 Realizá la transferencia del monto correspondiente a tu categoría (ver tabla) a la cuenta bancaria indicada más abajo.
             </li>
-<li class="flex items-start gap-2">
-    <span class="bg-teal-500 text-white text-xs font-bold rounded-full w-5 h-5 flex items-center justify-center flex-shrink-0 mt-0.5">3</span>
-    Enviá el comprobante a 
-    <span class="inline-flex items-center gap-1">
-        <a href="mailto:nano2026+pago@unsam.edu.ar" class="text-teal-600 hover:underline">nano2026+pago@unsam.edu.ar</a>
-        <button onclick="copyEmail(this)" class="text-gray-400 hover:text-teal-500 transition mt-0.5" title="Copiar email">
-    <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 16H6a2 2 0 01-2-2V6a2 2 0 012-2h8a2 2 0 012 2v2m-6 12h8a2 2 0 002-2v-8a2 2 0 00-2-2h-8a2 2 0 00-2 2v8a2 2 0 002 2z"/>
-    </svg>
-</button>
-    </span>
-</li>
+            <li class="flex items-start gap-2">
+                <span class="bg-teal-500 text-white text-xs font-bold rounded-full w-5 h-5 flex items-center justify-center flex-shrink-0 mt-0.5">3</span>
+                <span>Enviá el comprobante a
+                    <span class="inline-flex items-center gap-1">
+                        <a href="mailto:nano2026+pago@unsam.edu.ar" class="text-teal-600 hover:underline">nano2026+pago@unsam.edu.ar</a>
+                        <button onclick="copyText(this, 'nano2026+pago@unsam.edu.ar')" class="text-gray-400 hover:text-teal-500 transition" title="Copiar email">
+                            <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 16H6a2 2 0 01-2-2V6a2 2 0 012-2h8a2 2 0 012 2v2m-6 12h8a2 2 0 002-2v-8a2 2 0 00-2-2h-8a2 2 0 00-2 2v8a2 2 0 002 2z"/>
+                            </svg>
+                        </button>
+                    </span>
+                </span>
+            </li>
             <li class="flex items-start gap-2">
                 <span class="bg-teal-500 text-white text-xs font-bold rounded-full w-5 h-5 flex items-center justify-center flex-shrink-0 mt-0.5">4</span>
-                Recibirás confirmación de tu inscripción por email
+                Recibirás confirmación de tu inscripción por email.
             </li>
         </ol>
     </div>
@@ -123,7 +121,7 @@
                     <td class="text-center py-3 px-4 font-bold">90</td>
                     <td class="text-center py-3 px-4 font-bold">100</td>
                 </tr>
-                                <tr>
+                <tr>
                     <td class="py-3 pr-6">Postdoctorando</td>
                     <td class="text-center py-3 px-4 font-bold">50</td>
                     <td class="text-center py-3 px-4 font-bold">100</td>
@@ -135,7 +133,7 @@
                     <td class="text-center py-3 px-4 font-bold">120</td>
                     <td class="text-center py-3 px-4 font-bold">150</td>
                 </tr>
-                                <tr>
+                <tr>
                     <td class="py-3 pr-6">Industria | Empresa | Sector profesional | Emprendimiento</td>
                     <td class="text-center py-3 px-4 font-bold">80</td>
                     <td class="text-center py-3 px-4 font-bold">160</td>
@@ -144,8 +142,7 @@
             </tbody>
         </table>
     </div>
-    <p class="text-teal-200 text-xs mt-4">* Valores en dólares. Dólar oficial BNA tipo vendedor cotización al día de la transferencia. <a href="https://bna.com.ar/Personas" target="_blank"
-             class="text-teal-200 hover:underline">Ver Cotización BNA</a></p>
+    <p class="text-teal-200 text-xs mt-4">* Valores en dólares. Dólar oficial BNA tipo vendedor cotización al día de la transferencia. <a href="https://bna.com.ar/Personas" target="_blank" class="text-teal-200 hover:underline">Ver Cotización BNA</a></p>
     <div class="mt-6 text-center">
         <a href="https://forms.gle/qRTWnuQAiVNvWmX16" target="_blank"
             class="bg-white text-teal-700 font-semibold px-8 py-3 rounded-full hover:bg-teal-50 transition shadow inline-block">
@@ -154,7 +151,7 @@
     </div>
 </div>
 
-<!-- Datos bancarios (fuera del bloque de precios) -->
+<!-- Datos bancarios -->
 <div class="bg-white rounded-2xl shadow p-6">
     <h2 class="text-lg font-bold text-gray-800 mb-4">Datos para transferencia</h2>
     <dl class="text-sm grid grid-cols-1 sm:grid-cols-2 gap-x-12 gap-y-3">
@@ -166,37 +163,66 @@
             <dt class="text-gray-400">CUIT/CUIL</dt>
             <dd class="font-mono font-medium text-gray-700">30-70782534-7</dd>
         </div>
-        <div class="flex justify-between border-b border-gray-100 pb-2">
+        <div class="flex justify-between items-center border-b border-gray-100 pb-2">
             <dt class="text-gray-400">N° Cuenta CC $</dt>
-            <dd class="font-mono font-medium text-gray-700">476-001289/2</dd>
+            <dd class="flex items-center gap-1 font-mono font-medium text-gray-700">
+                476-001289/2
+                <button onclick="copyText(this, '476-001289/2')" class="text-gray-400 hover:text-teal-500 transition" title="Copiar">
+                    <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 16H6a2 2 0 01-2-2V6a2 2 0 012-2h8a2 2 0 012 2v2m-6 12h8a2 2 0 002-2v-8a2 2 0 00-2-2h-8a2 2 0 00-2 2v8a2 2 0 002 2z"/>
+                    </svg>
+                </button>
+            </dd>
         </div>
-        <div class="flex justify-between border-b border-gray-100 pb-2">
+        <div class="flex justify-between items-center border-b border-gray-100 pb-2">
             <dt class="text-gray-400">CBU</dt>
-            <dd class="font-mono font-medium text-gray-700">0720476420000000128922</dd>
-        </div>   
+            <dd class="flex items-center gap-1 font-mono font-medium text-gray-700">
+                0720476420000000128922
+                <button onclick="copyText(this, '0720476420000000128922')" class="text-gray-400 hover:text-teal-500 transition" title="Copiar">
+                    <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 16H6a2 2 0 01-2-2V6a2 2 0 012-2h8a2 2 0 012 2v2m-6 12h8a2 2 0 002-2v-8a2 2 0 00-2-2h-8a2 2 0 00-2 2v8a2 2 0 002 2z"/>
+                    </svg>
+                </button>
+            </dd>
+        </div>
         <div class="flex justify-between border-b border-gray-100 pb-2">
             <dt class="text-gray-400">BANCO</dt>
             <dd class="font-mono font-medium text-gray-700">SANTANDER</dd>
-        </div>      
-        <div class="flex justify-between border-b border-gray-100 pb-2">
+        </div>
+        <div class="flex justify-between items-center border-b border-gray-100 pb-2">
             <dt class="text-gray-400">Alias</dt>
-            <dd class="font-mono font-medium text-gray-700">FIIB.SANTANDER</dd>
+            <dd class="flex items-center gap-1 font-mono font-medium text-gray-700">
+                FIIB.SANTANDER
+                <button onclick="copyText(this, 'FIIB.SANTANDER')" class="text-gray-400 hover:text-teal-500 transition" title="Copiar">
+                    <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 16H6a2 2 0 01-2-2V6a2 2 0 012-2h8a2 2 0 012 2v2m-6 12h8a2 2 0 002-2v-8a2 2 0 00-2-2h-8a2 2 0 00-2 2v8a2 2 0 002 2z"/>
+                    </svg>
+                </button>
+            </dd>
         </div>
     </dl>
-<p class="text-sm text-gray-500 mt-4">
-    Enviá el comprobante a 
-    <a href="mailto:nano2026+pago@unsam.edu.ar?" class="text-teal-600 hover:underline">nano2026+pago@unsam.edu.ar</a>
-    <button onclick="copyEmail()" title="Copiar email" class="ml-1 text-gray-400 hover:text-teal-500 transition align-middle">
-        <svg id="icon-copy" class="w-4 h-4 inline" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 16H6a2 2 0 01-2-2V6a2 2 0 012-2h8a2 2 0 012 2v2m-6 12h8a2 2 0 002-2v-8a2 2 0 00-2-2h-8a2 2 0 00-2 2v8a2 2 0 002 2z"/>
-        </svg>
-    </button>.
-    <script>
-function copyEmail(btn) {
-    navigator.clipboard.writeText('nano2026+pago@unsam.edu.ar');
+    <p class="text-sm text-gray-500 mt-4">
+        Enviá el comprobante a
+        <span class="inline-flex items-center gap-1">
+            <a href="mailto:nano2026+pago@unsam.edu.ar" class="text-teal-600 hover:underline">nano2026+pago@unsam.edu.ar</a>
+            <button onclick="copyText(this, 'nano2026+pago@unsam.edu.ar')" class="text-gray-400 hover:text-teal-500 transition" title="Copiar email">
+                <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 16H6a2 2 0 01-2-2V6a2 2 0 012-2h8a2 2 0 012 2v2m-6 12h8a2 2 0 002-2v-8a2 2 0 00-2-2h-8a2 2 0 00-2 2v8a2 2 0 002 2z"/>
+                </svg>
+            </button>
+        </span>        
+    </p>
+</div>
+
+<script>
+function copyText(btn, text) {
+    navigator.clipboard.writeText(text);
+    const original = btn.innerHTML;
     btn.innerHTML = '<svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"/></svg>';
+    btn.classList.add('text-teal-500');
     setTimeout(() => {
-        btn.innerHTML = '<svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 16H6a2 2 0 01-2-2V6a2 2 0 012-2h8a2 2 0 012 2v2m-6 12h8a2 2 0 002-2v-8a2 2 0 00-2-2h-8a2 2 0 00-2 2v8a2 2 0 002 2z"/></svg>';
+        btn.innerHTML = original;
+        btn.classList.remove('text-teal-500');
     }, 1500);
 }
 </script>
