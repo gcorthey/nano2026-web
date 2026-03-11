@@ -1,21 +1,57 @@
 {% extends "eval/base.html" %}
 {% block content %}
 
-<h1 class="text-2xl font-bold mb-6">Resúmenes asignados a vos</h1>
+<h1 class="text-2xl font-bold mb-6">Resúmenes asignados a {{ current_user.nombre }}</h1>
 
 {% if asignaciones %}
+<div class="bg-white rounded shadow p-4 mb-4">
+    <div class="mb-3">
+        <p class="text-xs font-semibold text-gray-500 uppercase mb-2">Filtrar por área</p>
+        <div class="flex flex-wrap gap-2">
+            <button type="button" class="filter-area-btn px-3 py-1 rounded-full text-xs bg-teal-600 text-white" data-area="all">Todas</button>
+            <button type="button" class="filter-area-btn px-3 py-1 rounded-full text-xs bg-gray-100 text-gray-700" data-area="1">Síntesis</button>
+            <button type="button" class="filter-area-btn px-3 py-1 rounded-full text-xs bg-gray-100 text-gray-700" data-area="2">Autoensamblado</button>
+            <button type="button" class="filter-area-btn px-3 py-1 rounded-full text-xs bg-gray-100 text-gray-700" data-area="3">Nanobio</button>
+            <button type="button" class="filter-area-btn px-3 py-1 rounded-full text-xs bg-gray-100 text-gray-700" data-area="4">Superficies</button>
+            <button type="button" class="filter-area-btn px-3 py-1 rounded-full text-xs bg-gray-100 text-gray-700" data-area="5">Propiedades</button>
+            <button type="button" class="filter-area-btn px-3 py-1 rounded-full text-xs bg-gray-100 text-gray-700" data-area="6">Aplicaciones</button>
+            <button type="button" class="filter-area-btn px-3 py-1 rounded-full text-xs bg-gray-100 text-gray-700" data-area="7">Nano y Salud</button>
+        </div>
+    </div>
+    <div>
+        <p class="text-xs font-semibold text-gray-500 uppercase mb-2">Filtrar por evaluación</p>
+        <div class="flex flex-wrap gap-2">
+            <button type="button" class="filter-eval-btn px-3 py-1 rounded-full text-xs bg-teal-600 text-white" data-eval="all">Todas</button>
+            <button type="button" class="filter-eval-btn px-3 py-1 rounded-full text-xs bg-gray-100 text-gray-700" data-eval="pendiente">Pendiente</button>
+            <button type="button" class="filter-eval-btn px-3 py-1 rounded-full text-xs bg-gray-100 text-gray-700" data-eval="aprobado">Aprobado</button>
+            <button type="button" class="filter-eval-btn px-3 py-1 rounded-full text-xs bg-gray-100 text-gray-700" data-eval="revisar">Requiere revisión</button>
+            <button type="button" class="filter-eval-btn px-3 py-1 rounded-full text-xs bg-gray-100 text-gray-700" data-eval="rechazado">Rechazado</button>
+        </div>
+    </div>
+</div>
+
 <div class="bg-white rounded shadow overflow-x-auto">
-    <table class="text-sm" style="min-width: 600px; width: 100%;">
+    <table id="eval-table" class="text-sm" style="min-width: 600px; width: 100%;">
         <thead class="bg-gray-50 text-gray-600 uppercase text-xs">
             <tr>
-                <th class="px-4 py-3 text-left">Título</th>
-                <th class="px-4 py-3 text-left">Autores</th>
-                <th class="px-4 py-3 text-left">Área</th>
-                <th class="px-4 py-3 text-left">Tu evaluación</th>
-                <th class="px-4 py-3 text-left">Acción</th>
+                <th class="px-4 py-3 text-left">
+                    <button type="button" class="sort-btn flex items-center gap-1 hover:text-teal-700" data-col="0">Título <span class="sort-indicator">↕</span></button>
+                </th>
+                <th class="px-4 py-3 text-left">
+                    <button type="button" class="sort-btn flex items-center gap-1 hover:text-teal-700" data-col="1">Autores <span class="sort-indicator">↕</span></button>
+                </th>
+                <th class="px-4 py-3 text-left">
+                    <button type="button" class="sort-btn flex items-center gap-1 hover:text-teal-700" data-col="2">Área <span class="sort-indicator">↕</span></button>
+                </th>
+                <th class="px-4 py-3 text-left">
+                    <button type="button" class="sort-btn flex items-center gap-1 hover:text-teal-700" data-col="3">Tu evaluación <span class="sort-indicator">↕</span></button>
+                </th>
+                <th class="px-4 py-3 text-left">
+                    <button type="button" class="sort-btn flex items-center gap-1 hover:text-teal-700" data-col="4">Acción <span class="sort-indicator">↕</span></button>
+                </th>
             </tr>
         </thead>
-        <tbody class="divide-y divide-gray-100">
+        <tbody id="eval-table-body" class="divide-y divide-gray-100">
             {% for asig in asignaciones %}
             {% set review = reviews_map.get(asig.abstract_id) %}
             {% set area_info = {
@@ -28,9 +64,10 @@
                 '7': ('Nano y Salud', 'bg-red-100 text-red-800'),
             } %}
             {% set info = area_info.get(asig.abstract.area_tematica, ('—', 'bg-gray-100 text-gray-500')) %}
-            <tr class="hover:bg-gray-50">
-                <td class="px-4 py-3 font-medium" style="max-width: 200px;">
-                    <div class="truncate">{{ asig.abstract.titulo | striptags }}</div>
+            {% set eval_status = review.decision.value if review and review.decision else 'pendiente' %}
+            <tr class="hover:bg-gray-50 eval-row" data-area="{{ asig.abstract.area_tematica or '' }}" data-eval="{{ eval_status }}">
+                <td class="px-4 py-3 font-medium align-top" style="min-width: 320px; max-width: 520px;">
+                    <div class="whitespace-normal break-words leading-snug">{{ asig.abstract.titulo | striptags }}</div>
                 </td>
                 <td class="px-4 py-3 text-gray-600" style="max-width: 180px;">
                     {% for autor in asig.abstract.autores %}
@@ -55,7 +92,13 @@
                 </td>
                 <td class="px-4 py-3">
                     <a href="/eval/{{ asig.abstract_id }}" class="text-teal-600 hover:underline font-medium">
-                        {% if review and review.decision %}Editar{% else %}Evaluar{% endif %}
+                        {% if asig.abstract.estado and asig.abstract.estado.value in ['aprobado', 'rechazado'] %}
+                            Ver
+                        {% elif review and review.decision %}
+                            Editar
+                        {% else %}
+                            Evaluar
+                        {% endif %}
                     </a>
                 </td>
             </tr>
@@ -67,6 +110,90 @@
 <div class="bg-white rounded shadow p-8 text-center text-gray-400">
     Todavía no tenés resúmenes asignados.
 </div>
+{% endif %}
+
+{% if asignaciones %}
+<script>
+    const table = document.getElementById('eval-table');
+    const tbody = document.getElementById('eval-table-body');
+    const sortButtons = table.querySelectorAll('.sort-btn');
+    const areaButtons = document.querySelectorAll('.filter-area-btn');
+    const evalButtons = document.querySelectorAll('.filter-eval-btn');
+    const rows = Array.from(tbody.querySelectorAll('.eval-row'));
+    const sortState = {};
+    let selectedArea = 'all';
+    let selectedEval = 'all';
+
+    function getCellText(row, colIndex) {
+        const cell = row.children[colIndex];
+        return (cell ? cell.innerText : '').trim().toLowerCase();
+    }
+
+    function setIndicators(activeCol, direction) {
+        sortButtons.forEach((btn) => {
+            const col = Number(btn.dataset.col);
+            const indicator = btn.querySelector('.sort-indicator');
+            if (!indicator) return;
+            if (col !== activeCol) indicator.textContent = '↕';
+            else indicator.textContent = direction === 'asc' ? '↑' : '↓';
+        });
+    }
+
+    function sortTableByColumn(colIndex) {
+        const current = sortState[colIndex] || 'desc';
+        const next = current === 'asc' ? 'desc' : 'asc';
+        sortState[colIndex] = next;
+
+        const rows = Array.from(tbody.querySelectorAll('tr'));
+        rows.sort((a, b) => {
+            const textA = getCellText(a, colIndex);
+            const textB = getCellText(b, colIndex);
+            const cmp = textA.localeCompare(textB, 'es', { numeric: true, sensitivity: 'base' });
+            return next === 'asc' ? cmp : -cmp;
+        });
+
+        rows.forEach((row) => tbody.appendChild(row));
+        setIndicators(colIndex, next);
+    }
+
+    sortButtons.forEach((btn) => {
+        btn.addEventListener('click', () => sortTableByColumn(Number(btn.dataset.col)));
+    });
+
+    function styleActive(buttons, activeValue, key) {
+        buttons.forEach((btn) => {
+            const selected = btn.dataset[key] === activeValue;
+            btn.classList.toggle('bg-teal-600', selected);
+            btn.classList.toggle('text-white', selected);
+            btn.classList.toggle('bg-gray-100', !selected);
+            btn.classList.toggle('text-gray-700', !selected);
+        });
+    }
+
+    function applyFilters() {
+        rows.forEach((row) => {
+            const areaOk = selectedArea === 'all' || row.dataset.area === selectedArea;
+            const evalOk = selectedEval === 'all' || row.dataset.eval === selectedEval;
+            row.style.display = areaOk && evalOk ? '' : 'none';
+        });
+    }
+
+    areaButtons.forEach((btn) => {
+        btn.addEventListener('click', () => {
+            selectedArea = btn.dataset.area;
+            styleActive(areaButtons, selectedArea, 'area');
+            applyFilters();
+        });
+    });
+
+    evalButtons.forEach((btn) => {
+        btn.addEventListener('click', () => {
+            selectedEval = btn.dataset.eval;
+            styleActive(evalButtons, selectedEval, 'eval');
+            applyFilters();
+        });
+    });
+</script>
 {% endif %}
 
 {% endblock %}

@@ -165,4 +165,20 @@
 </div>
 {% endif %}
 
+<div class="bg-white rounded shadow p-6 mt-6">
+    <h2 class="font-semibold mb-3">Historial</h2>
+    {% if logs %}
+    <div class="space-y-2">
+        {% for log in logs %}
+        <div class="border rounded p-3 text-sm">
+            <p class="text-gray-800">{{ log.details }}</p>
+            <p class="text-xs text-gray-500 mt-1">{{ log.created_at.strftime('%d/%m/%Y %H:%M') }} · {{ log.event_type }}</p>
+        </div>
+        {% endfor %}
+    </div>
+    {% else %}
+    <p class="text-sm text-gray-500">Sin eventos registrados todavía.</p>
+    {% endif %}
+</div>
+
 {% endblock %}

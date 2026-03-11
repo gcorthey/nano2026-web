@@ -43,6 +43,7 @@ class Abstract(Base):
     referencias_html = Column(Text, nullable=True)
     tiene_referencias = Column(Integer, default=0)  # 1 = sí, 0 = no
     tipo_asignado_admin = Column(String, nullable=True)  # 'oral', 'poster', o None
+    logs = relationship("AbstractLog", back_populates="abstract", order_by="AbstractLog.created_at")
     
 
 class Autor(Base):
@@ -107,3 +108,13 @@ class Speaker(Base):
     nombre = Column(String, nullable=False)
     afiliacion = Column(String)
     bio = Column(Text)
+
+class AbstractLog(Base):
+    __tablename__ = "abstract_logs"
+    id = Column(Integer, primary_key=True, index=True)
+    abstract_id = Column(Integer, ForeignKey("abstracts.id"), nullable=False, index=True)
+    created_at = Column(DateTime, default=datetime.utcnow, nullable=False)
+    event_type = Column(String, nullable=False)
+    details = Column(Text, nullable=False)
+    actor_email = Column(String, nullable=True)
+    abstract = relationship("Abstract", back_populates="logs")

@@ -231,11 +231,15 @@ def admin_abstract_detail(
     asignados_ids = [a.evaluador_id for a in abstract.asignaciones]
     evaluadores_disponibles = [e for e in evaluadores if e.id not in asignados_ids]
     reviews = db.query(models.Review).filter(models.Review.abstract_id == abstract_id).all()
+    logs = db.query(models.AbstractLog).filter(
+        models.AbstractLog.abstract_id == abstract_id
+    ).order_by(models.AbstractLog.created_at.desc()).all()
     return templates.TemplateResponse("admin/abstract_detail.html", {
         "request": request,
         "abstract": abstract,
         "evaluadores_disponibles": evaluadores_disponibles,
         "reviews": reviews,
+        "logs": logs,
         "current_user": current_user
     })
 
@@ -397,16 +401,20 @@ def eval_detalle(
         models.Review.abstract_id == abstract_id,
         models.Review.evaluador_id == current_user.id
     ).first()
+    logs = db.query(models.AbstractLog).filter(
+        models.AbstractLog.abstract_id == abstract_id
+    ).order_by(models.AbstractLog.created_at.desc()).all()
     return templates.TemplateResponse("eval/detalle.html", {
         "request": request,
         "abstract": abstract,
         "review": review,
         "current_user": current_user,
         "mail_sent": mail_sent,
-        "mail_error": mail_error
+        "mail_error": mail_error,
+        "logs": logs
     })
 @app.post("/eval/{abstract_id}", response_class=HTMLResponse)
-def eval_submit(
+async def eval_submit(
     abstract_id: int,
     request: Request,
     decision: str = Form(...),
@@ -425,6 +433,8 @@ def eval_submit(
         models.Review.abstract_id == abstract_id,
         models.Review.evaluador_id == current_user.id
     ).first()
+    previous_decision = review.decision.value if (review and review.decision) else None
+
     if review:
         review.decision = decision
         review.comentario = comentario
@@ -450,21 +460,72 @@ def eval_submit(
         abstract.estado = models.EstadoEnum.rechazado
 
     db.commit()
+
+    decision_mail_sent = False
+    decision_mail_error = False
+    decision_mail_skipped = False
+
+    if decision == "aprobado":
+        subject = f"[NANO2026] Abstract #{abstract.id} aceptado"
+        body = (
+            f"Hola,\n\n"
+            f"Tu abstract \"{strip_tags(abstract.titulo)}\" fue aceptado.\n\n"
+            f"Saludos cordiales,\n"
+            f"Comité organizador NANO2026\n"
+        )
+        event_type = "acceptance_email_sent"
+        details = (
+            f"Correo de aceptación enviado a {abstract.email_autor} "
+            f"por {current_user.nombre} ({current_user.email})."
+        )
+        existing_mail_log = db.query(models.AbstractLog).filter(
+            models.AbstractLog.abstract_id == abstract.id,
+            models.AbstractLog.event_type == event_type
+        ).first()
+        should_send_mail = not (previous_decision == decision and existing_mail_log)
+
+        if should_send_mail:
+            mensaje = MessageSchema(
+                subject=subject,
+                recipients=[abstract.email_autor],
+                body=body,
+                subtype="plain"
+            )
+
+            fm = FastMail(mail_config)
+            try:
+                await fm.send_message(mensaje)
+                db.add(models.AbstractLog(
+                    abstract_id=abstract.id,
+                    event_type=event_type,
+                    details=details,
+                    actor_email=current_user.email
+                ))
+                db.commit()
+                decision_mail_sent = True
+            except Exception:
+                decision_mail_error = True
+        else:
+            decision_mail_skipped = True
+
     return templates.TemplateResponse("eval/detalle.html", {
         "request": request,
         "abstract": abstract,
         "review": review,
+        "logs": db.query(models.AbstractLog).filter(
+            models.AbstractLog.abstract_id == abstract.id
+        ).order_by(models.AbstractLog.created_at.desc()).all(),
         "success": True,
-        "current_user": current_user
+        "current_user": current_user,
+        "decision_mail_sent": decision_mail_sent,
+        "decision_mail_error": decision_mail_error,
+        "decision_mail_skipped": decision_mail_skipped
     })
 
 @app.post("/eval/{abstract_id}/send-revision")
 async def eval_send_revision_email(
     abstract_id: int,
     request: Request,
-    decision: str = Form(None),
-    comentario: str = Form(""),
-    recomienda_oral: int = Form(None),
     current_user: models.User = Depends(require_evaluador),
     db: Session = Depends(get_db)
 ):
@@ -480,56 +541,58 @@ async def eval_send_revision_email(
         models.Review.evaluador_id == current_user.id
     ).first()
 
-    if decision:
-        if review:
-            review.decision = decision
-            review.comentario = comentario
-            review.fecha = datetime.utcnow()
-            review.recomienda_oral = recomienda_oral
-        else:
-            review = models.Review(
-                abstract_id=abstract_id,
-                evaluador_id=current_user.id,
-                decision=decision,
-                comentario=comentario,
-                recomienda_oral=recomienda_oral
-            )
-            db.add(review)
-
-        abstract = asig.abstract
-        if decision == "aprobado":
-            abstract.estado = models.EstadoEnum.aprobado
-        elif decision == "revisar":
-            abstract.estado = models.EstadoEnum.revisar
-        elif decision == "rechazado":
-            abstract.estado = models.EstadoEnum.rechazado
-
-        db.flush()
-
-    if not review or review.decision != models.EstadoEnum.revisar:
+    if not review or review.decision not in (models.EstadoEnum.revisar, models.EstadoEnum.rechazado):
         return RedirectResponse(url=f"/eval/{abstract_id}?mail_error=no_review", status_code=303)
 
     if not (review.comentario or "").strip():
         return RedirectResponse(url=f"/eval/{abstract_id}?mail_error=no_comment", status_code=303)
 
     abstract = asig.abstract
-    token = create_revision_token(abstract.id, abstract.email_autor)
-    base_url = os.getenv("PUBLIC_BASE_URL", str(request.base_url).rstrip("/"))
-    edit_url = f"{base_url}/revision/{token}"
-
-    mensaje = MessageSchema(
-        subject=f"[NANO2026] Revisión solicitada para abstract #{abstract.id}",
-        recipients=[abstract.email_autor],
-        body=(
+    if review.decision == models.EstadoEnum.revisar:
+        token = create_revision_token(abstract.id, abstract.email_autor)
+        base_url = os.getenv("PUBLIC_BASE_URL", str(request.base_url).rstrip("/"))
+        edit_url = f"{base_url}/revision/{token}"
+        subject = f"[NANO2026] Revisión solicitada para abstract #{abstract.id}"
+        body = (
             f"Hola,\n\n"
             f"Tu abstract \"{strip_tags(abstract.titulo)}\" requiere correcciones.\n\n"
             f"Comentarios del evaluador:\n{review.comentario.strip()}\n\n"
             f"Editalo y reenviá la versión corregida desde este link:\n{edit_url}\n\n"
-            f"El enlace vence en 72 horas."
+            f"El enlace vence en 72 horas.\n\n"
             f"Saludos cordiales,\n"
-            f"Comité organizador NANO2026,\n"
+            f"Comité organizador NANO2026\n"
+        )
+        event_type = "revision_email_sent"
+        details = (
+            f"Correo de revisión enviado a {abstract.email_autor} "
+            f"por {current_user.nombre} ({current_user.email})."
+        )
+    else:
+        existing_rejection_log = db.query(models.AbstractLog).filter(
+            models.AbstractLog.abstract_id == abstract.id,
+            models.AbstractLog.event_type == "rejection_email_sent"
+        ).first()
+        if existing_rejection_log:
+            return RedirectResponse(url=f"/eval/{abstract_id}?mail_error=duplicate_rejection", status_code=303)
 
-        ),
+        subject = f"[NANO2026] Abstract #{abstract.id} rechazado"
+        body = (
+            f"Hola,\n\n"
+            f"Tu abstract \"{strip_tags(abstract.titulo)}\" no fue aceptado en esta edición.\n\n"
+            f"Comentarios del evaluador:\n{review.comentario.strip()}\n\n"
+            f"Saludos cordiales,\n"
+            f"Comité organizador NANO2026\n"
+        )
+        event_type = "rejection_email_sent"
+        details = (
+            f"Correo de rechazo (con comentarios) enviado a {abstract.email_autor} "
+            f"por {current_user.nombre} ({current_user.email})."
+        )
+
+    mensaje = MessageSchema(
+        subject=subject,
+        recipients=[abstract.email_autor],
+        body=body,
         subtype="plain"
     )
     fm = FastMail(mail_config)
@@ -538,6 +601,12 @@ async def eval_send_revision_email(
     except Exception:
         return RedirectResponse(url=f"/eval/{abstract_id}?mail_error=send_fail", status_code=303)
 
+    db.add(models.AbstractLog(
+        abstract_id=abstract.id,
+        event_type=event_type,
+        details=details,
+        actor_email=current_user.email
+    ))
     db.commit()
     return RedirectResponse(url=f"/eval/{abstract_id}?mail_sent=1", status_code=303)
 

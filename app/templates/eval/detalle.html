@@ -83,6 +83,21 @@
             ✅ Evaluación guardada correctamente.
         </div>
     {% endif %}
+    {% if decision_mail_sent %}
+        <div class="bg-emerald-100 border border-emerald-300 text-emerald-900 px-4 py-3 rounded mb-4">
+            ✉️ Notificación enviada al presentador por decisión final.
+        </div>
+    {% endif %}
+    {% if decision_mail_error %}
+        <div class="bg-red-100 border border-red-300 text-red-900 px-4 py-3 rounded mb-4">
+            Se guardó la evaluación, pero falló el envío del mail al presentador.
+        </div>
+    {% endif %}
+    {% if decision_mail_skipped %}
+        <div class="bg-gray-100 border border-gray-300 text-gray-700 px-4 py-3 rounded mb-4">
+            Evaluación guardada. No se reenvió mail porque ya se había notificado esta misma decisión.
+        </div>
+    {% endif %}
     {% if mail_sent %}
         <div class="bg-blue-100 border border-blue-300 text-blue-900 px-4 py-3 rounded mb-4">
             ✉️ Comentarios enviados al presentador.
@@ -90,7 +105,7 @@
     {% endif %}
     {% if mail_error == 'no_review' %}
         <div class="bg-yellow-100 border border-yellow-300 text-yellow-900 px-4 py-3 rounded mb-4">
-            Primero guardá la evaluación con decisión "Requiere revisión".
+            Primero guardá la evaluación con decisión "Requiere revisión" o "Rechazar".
         </div>
     {% elif mail_error == 'no_comment' %}
         <div class="bg-yellow-100 border border-yellow-300 text-yellow-900 px-4 py-3 rounded mb-4">
@@ -99,6 +114,10 @@
     {% elif mail_error == 'send_fail' %}
         <div class="bg-red-100 border border-red-300 text-red-900 px-4 py-3 rounded mb-4">
             No se pudo enviar el mail. Revisá la configuración SMTP.
+        </div>
+    {% elif mail_error == 'duplicate_rejection' %}
+        <div class="bg-gray-100 border border-gray-300 text-gray-700 px-4 py-3 rounded mb-4">
+            El mail de rechazo ya fue enviado previamente para este resumen.
         </div>
     {% endif %}
 
@@ -152,11 +171,52 @@
             Guardar evaluación
         </button>
 
-        <button formaction="/eval/{{ abstract.id }}/send-revision" formmethod="post"
-            class="bg-amber-600 text-white px-6 py-2 rounded hover:bg-amber-700 text-sm font-medium ml-2">
+        <button type="button" id="prepare-send-revision"
+            {% if not (review and review.decision and review.decision.value in ['revisar', 'rechazado'] and review.comentario and review.comentario.strip()) %}disabled{% endif %}
+            class="bg-amber-600 text-white px-6 py-2 rounded hover:bg-amber-700 text-sm font-medium ml-2 disabled:bg-gray-300 disabled:text-gray-500 disabled:cursor-not-allowed">
             Enviar comentarios al presentador
         </button>
+        <button id="confirm-send-revision" formaction="/eval/{{ abstract.id }}/send-revision" formmethod="post"
+            {% if not (review and review.decision and review.decision.value in ['revisar', 'rechazado'] and review.comentario and review.comentario.strip()) %}disabled{% endif %}
+            class="hidden bg-red-600 text-white px-6 py-2 rounded hover:bg-red-700 text-sm font-medium ml-2 disabled:bg-gray-300 disabled:text-gray-500 disabled:cursor-not-allowed">
+            Confirmar envío al presentador
+        </button>
     </form>
+    {% if not (review and review.decision and review.decision.value in ['revisar', 'rechazado'] and review.comentario and review.comentario.strip()) %}
+    <p class="text-xs text-gray-500 mt-2">Primero guardá una evaluación en "Requiere revisión" o "Rechazar" con comentario.</p>
+    {% endif %}
+    <p id="confirm-send-hint" class="hidden text-xs text-red-600 mt-2">
+        Confirmá para enviar el mail al presentador con los comentarios guardados.
+    </p>
 </div>
+
+<div class="bg-white rounded shadow p-6 mt-6">
+    <h2 class="font-semibold mb-3">Historial del resumen</h2>
+    {% if logs %}
+    <div class="space-y-2">
+        {% for log in logs %}
+        <div class="border rounded p-3 text-sm">
+            <p class="text-gray-800">{{ log.details }}</p>
+            <p class="text-xs text-gray-500 mt-1">{{ log.created_at.strftime('%d/%m/%Y %H:%M') }} · {{ log.event_type }}</p>
+        </div>
+        {% endfor %}
+    </div>
+    {% else %}
+    <p class="text-sm text-gray-500">Sin eventos registrados todavía.</p>
+    {% endif %}
+</div>
+
+<script>
+    const prepareBtn = document.getElementById('prepare-send-revision');
+    const confirmBtn = document.getElementById('confirm-send-revision');
+    const confirmHint = document.getElementById('confirm-send-hint');
+    if (prepareBtn && confirmBtn && confirmHint) {
+        prepareBtn.addEventListener('click', () => {
+            if (prepareBtn.disabled) return;
+            confirmBtn.classList.remove('hidden');
+            confirmHint.classList.remove('hidden');
+        });
+    }
+</script>
 
 {% endblock %}
