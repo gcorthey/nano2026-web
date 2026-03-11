@@ -11,6 +11,7 @@ import os
 SECRET_KEY = os.environ.get("SECRET_KEY", "50d5842e8962618c774c72ae20cbc6c58e9cea35c2a41aa2096b63f4c6a8d7f3")
 ALGORITHM = "HS256"
 ACCESS_TOKEN_EXPIRE_MINUTES = 60 * 8  # 8 horas
+REVISION_TOKEN_EXPIRE_HOURS = 72
 
 pwd_context = CryptContext(schemes=["bcrypt"], deprecated="auto")
 
@@ -25,6 +26,22 @@ def create_access_token(data: dict) -> str:
     expire = datetime.utcnow() + timedelta(minutes=ACCESS_TOKEN_EXPIRE_MINUTES)
     to_encode.update({"exp": expire})
     return jwt.encode(to_encode, SECRET_KEY, algorithm=ALGORITHM)
+
+def create_revision_token(abstract_id: int, email_autor: str) -> str:
+    expire = datetime.utcnow() + timedelta(hours=REVISION_TOKEN_EXPIRE_HOURS)
+    payload = {
+        "purpose": "abstract_revision",
+        "abstract_id": abstract_id,
+        "email_autor": email_autor,
+        "exp": expire,
+    }
+    return jwt.encode(payload, SECRET_KEY, algorithm=ALGORITHM)
+
+def verify_revision_token(token: str) -> dict:
+    payload = jwt.decode(token, SECRET_KEY, algorithms=[ALGORITHM])
+    if payload.get("purpose") != "abstract_revision":
+        raise JWTError("Token inválido")
+    return payload
 
 def get_token_from_cookie(request: Request) -> str | None:
     return request.cookies.get("access_token")

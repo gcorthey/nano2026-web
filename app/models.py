@@ -12,6 +12,7 @@ class EstadoEnum(str, enum.Enum):
     pendiente = "pendiente"
     aprobado = "aprobado"
     rechazado = "rechazado"
+    revisar = "revisar"
 
 class User(Base):
     __tablename__ = "users"

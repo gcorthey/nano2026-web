@@ -83,6 +83,24 @@
             ✅ Evaluación guardada correctamente.
         </div>
     {% endif %}
+    {% if mail_sent %}
+        <div class="bg-blue-100 border border-blue-300 text-blue-900 px-4 py-3 rounded mb-4">
+            ✉️ Comentarios enviados al presentador.
+        </div>
+    {% endif %}
+    {% if mail_error == 'no_review' %}
+        <div class="bg-yellow-100 border border-yellow-300 text-yellow-900 px-4 py-3 rounded mb-4">
+            Primero guardá la evaluación con decisión "Requiere revisión".
+        </div>
+    {% elif mail_error == 'no_comment' %}
+        <div class="bg-yellow-100 border border-yellow-300 text-yellow-900 px-4 py-3 rounded mb-4">
+            Agregá comentarios antes de enviarlos al presentador.
+        </div>
+    {% elif mail_error == 'send_fail' %}
+        <div class="bg-red-100 border border-red-300 text-red-900 px-4 py-3 rounded mb-4">
+            No se pudo enviar el mail. Revisá la configuración SMTP.
+        </div>
+    {% endif %}
 
     <form method="post" action="/eval/{{ abstract.id }}">
         <div class="mb-4">
@@ -92,6 +110,11 @@
                     <input type="radio" name="decision" value="aprobado" required
                         {% if review and review.decision and review.decision.value == 'aprobado' %}checked{% endif %}>
                     <span class="text-green-700 font-medium">Aprobar</span>
+                </label>
+                <label class="flex items-center gap-2 cursor-pointer">
+                    <input type="radio" name="decision" value="revisar"
+                        {% if review and review.decision and review.decision.value == 'revisar' %}checked{% endif %}>
+                    <span class="text-yellow-600 font-medium">Requiere revisión</span>
                 </label>
                 <label class="flex items-center gap-2 cursor-pointer">
                     <input type="radio" name="decision" value="rechazado"
@@ -127,6 +150,11 @@
 
         <button class="bg-teal-600 text-white px-6 py-2 rounded hover:bg-teal-700 text-sm font-medium">
             Guardar evaluación
+        </button>
+
+        <button formaction="/eval/{{ abstract.id }}/send-revision" formmethod="post"
+            class="bg-amber-600 text-white px-6 py-2 rounded hover:bg-amber-700 text-sm font-medium ml-2">
+            Enviar comentarios al presentador
         </button>
     </form>
 </div>

@@ -3,6 +3,7 @@ from dotenv import load_dotenv
 load_dotenv()
 import httpx
 from datetime import datetime
+from jose import JWTError
 from fastapi import FastAPI, Request, Response, Depends, Form, HTTPException
 from fastapi.responses import HTMLResponse, RedirectResponse, StreamingResponse
 from fastapi.staticfiles import StaticFiles
@@ -13,7 +14,7 @@ from fastapi.responses import HTMLResponse, RedirectResponse, StreamingResponse
 from app import models
 from app.auth import (
     hash_password, verify_password, create_access_token, require_admin,
-    require_evaluador, get_current_user
+    require_evaluador, get_current_user, create_revision_token, verify_revision_token
 )
 from xhtml2pdf import pisa
 import io
@@ -32,6 +33,45 @@ import re
 
 def strip_tags(text: str) -> str:
     return re.sub(r'<[^>]+>', '', text or '').strip()
+
+def apply_abstract_edit_from_form(abstract: models.Abstract, form_data, db: Session):
+    abstract.titulo = form_data.get("titulo", "").strip()
+    abstract.email_autor = form_data.get("email_autor", "").strip()
+    abstract.contenido_html = form_data.get("contenido_html", "").strip()
+    abstract.referencias_html = form_data.get("referencias_html", "")
+    abstract.area_tematica = form_data.get("area_tematica", "").strip()
+    abstract.presentacion_oral = int(form_data.get("presentacion_oral", 0))
+
+    autor_count = int(form_data.get("autor_count", 0))
+    afil_count = int(form_data.get("afil_count", 0))
+
+    db.query(models.Autor).filter(models.Autor.abstract_id == abstract.id).delete()
+    db.query(models.Afiliacion).filter(models.Afiliacion.abstract_id == abstract.id).delete()
+    db.flush()
+
+    for i in range(1, afil_count + 1):
+        nombre_afil = form_data.get(f"afil_nombre_{i}", "").strip()
+        if nombre_afil:
+            db.add(models.Afiliacion(abstract_id=abstract.id, nombre=nombre_afil, orden=i))
+
+    presentador_idx = form_data.get("presentador", "1")
+    autor_presentador = ""
+    for i in range(1, autor_count + 1):
+        nombre_autor = form_data.get(f"autor_nombre_{i}", "").strip()
+        afils_str = form_data.get(f"autor_afils_{i}", "").strip()
+        if nombre_autor:
+            es_presentador = 1 if str(i) == str(presentador_idx) else 0
+            db.add(models.Autor(
+                abstract_id=abstract.id,
+                nombre=nombre_autor,
+                orden=i,
+                es_presentador=es_presentador,
+                afiliaciones_ids=afils_str
+            ))
+            if es_presentador:
+                autor_presentador = nombre_autor
+
+    abstract.autor = autor_presentador
 
 
 # --- Crea admin por defecto si no existe ---
@@ -342,7 +382,8 @@ def eval_detalle(
     abstract_id: int,
     request: Request,
     current_user: models.User = Depends(require_evaluador),
-    recomienda_oral: int = Form(None),
+    mail_sent: int = 0,
+    mail_error: str = "",
     db: Session = Depends(get_db)
 ):
     asig = db.query(models.Asignacion).filter(
@@ -360,7 +401,9 @@ def eval_detalle(
         "request": request,
         "abstract": abstract,
         "review": review,
-        "current_user": current_user
+        "current_user": current_user,
+        "mail_sent": mail_sent,
+        "mail_error": mail_error
     })
 @app.post("/eval/{abstract_id}", response_class=HTMLResponse)
 def eval_submit(
@@ -401,6 +444,8 @@ def eval_submit(
     abstract = asig.abstract
     if decision == "aprobado":
         abstract.estado = models.EstadoEnum.aprobado
+    elif decision == "revisar":
+        abstract.estado = models.EstadoEnum.revisar
     elif decision == "rechazado":
         abstract.estado = models.EstadoEnum.rechazado
 
@@ -411,6 +456,151 @@ def eval_submit(
         "review": review,
         "success": True,
         "current_user": current_user
+    })
+
+@app.post("/eval/{abstract_id}/send-revision")
+async def eval_send_revision_email(
+    abstract_id: int,
+    request: Request,
+    decision: str = Form(None),
+    comentario: str = Form(""),
+    recomienda_oral: int = Form(None),
+    current_user: models.User = Depends(require_evaluador),
+    db: Session = Depends(get_db)
+):
+    asig = db.query(models.Asignacion).filter(
+        models.Asignacion.abstract_id == abstract_id,
+        models.Asignacion.evaluador_id == current_user.id
+    ).first()
+    if not asig:
+        raise HTTPException(status_code=403, detail="No tenés acceso a este resumen")
+
+    review = db.query(models.Review).filter(
+        models.Review.abstract_id == abstract_id,
+        models.Review.evaluador_id == current_user.id
+    ).first()
+
+    if decision:
+        if review:
+            review.decision = decision
+            review.comentario = comentario
+            review.fecha = datetime.utcnow()
+            review.recomienda_oral = recomienda_oral
+        else:
+            review = models.Review(
+                abstract_id=abstract_id,
+                evaluador_id=current_user.id,
+                decision=decision,
+                comentario=comentario,
+                recomienda_oral=recomienda_oral
+            )
+            db.add(review)
+
+        abstract = asig.abstract
+        if decision == "aprobado":
+            abstract.estado = models.EstadoEnum.aprobado
+        elif decision == "revisar":
+            abstract.estado = models.EstadoEnum.revisar
+        elif decision == "rechazado":
+            abstract.estado = models.EstadoEnum.rechazado
+
+        db.flush()
+
+    if not review or review.decision != models.EstadoEnum.revisar:
+        return RedirectResponse(url=f"/eval/{abstract_id}?mail_error=no_review", status_code=303)
+
+    if not (review.comentario or "").strip():
+        return RedirectResponse(url=f"/eval/{abstract_id}?mail_error=no_comment", status_code=303)
+
+    abstract = asig.abstract
+    token = create_revision_token(abstract.id, abstract.email_autor)
+    base_url = os.getenv("PUBLIC_BASE_URL", str(request.base_url).rstrip("/"))
+    edit_url = f"{base_url}/revision/{token}"
+
+    mensaje = MessageSchema(
+        subject=f"[NANO2026] Revisión solicitada para abstract #{abstract.id}",
+        recipients=[abstract.email_autor],
+        body=(
+            f"Hola,\n\n"
+            f"Tu abstract \"{strip_tags(abstract.titulo)}\" requiere correcciones.\n\n"
+            f"Comentarios del evaluador:\n{review.comentario.strip()}\n\n"
+            f"Editalo y reenviá la versión corregida desde este link:\n{edit_url}\n\n"
+            f"El enlace vence en 72 horas."
+            f"Saludos cordiales,\n"
+            f"Comité organizador NANO2026,\n"
+
+        ),
+        subtype="plain"
+    )
+    fm = FastMail(mail_config)
+    try:
+        await fm.send_message(mensaje)
+    except Exception:
+        return RedirectResponse(url=f"/eval/{abstract_id}?mail_error=send_fail", status_code=303)
+
+    db.commit()
+    return RedirectResponse(url=f"/eval/{abstract_id}?mail_sent=1", status_code=303)
+
+@app.get("/revision/{token}", response_class=HTMLResponse)
+def revision_edit_form(
+    token: str,
+    request: Request,
+    db: Session = Depends(get_db)
+):
+    try:
+        payload = verify_revision_token(token)
+        abstract_id = int(payload.get("abstract_id"))
+        email_autor = payload.get("email_autor", "")
+    except (JWTError, ValueError):
+        raise HTTPException(status_code=400, detail="Link inválido o vencido")
+
+    abstract = db.query(models.Abstract).filter(models.Abstract.id == abstract_id).first()
+    if not abstract or abstract.email_autor != email_autor:
+        raise HTTPException(status_code=404, detail="Resumen no encontrado")
+
+    return templates.TemplateResponse("admin/abstract_edit.html", {
+        "request": request,
+        "abstract": abstract,
+        "presenter_mode": True,
+        "base_template": "public/base.html",
+        "revision_token": token
+    })
+
+@app.post("/revision/{token}", response_class=HTMLResponse)
+async def revision_edit_submit(
+    token: str,
+    request: Request,
+    db: Session = Depends(get_db)
+):
+    try:
+        payload = verify_revision_token(token)
+        abstract_id = int(payload.get("abstract_id"))
+        email_autor = payload.get("email_autor", "")
+    except (JWTError, ValueError):
+        raise HTTPException(status_code=400, detail="Link inválido o vencido")
+
+    abstract = db.query(models.Abstract).filter(models.Abstract.id == abstract_id).first()
+    if not abstract or abstract.email_autor != email_autor:
+        raise HTTPException(status_code=404, detail="Resumen no encontrado")
+
+    form_data = await request.form()
+    apply_abstract_edit_from_form(abstract, form_data, db)
+    abstract.estado = models.EstadoEnum.pendiente
+    # Al reenviar correcciones, reiniciar evaluaciones previas para que vuelva a "Pendiente"
+    for review in abstract.reviews:
+        review.decision = None
+        review.comentario = None
+        review.recomienda_oral = None
+        review.fecha = datetime.utcnow()
+    db.commit()
+
+    return templates.TemplateResponse("admin/abstract_edit.html", {
+        "request": request,
+        "abstract": abstract,
+        "presenter_mode": True,
+        "base_template": "public/base.html",
+        "revision_token": token,
+        "success_revision_submit": True
     })
 from sqlalchemy import or_
 
@@ -558,33 +748,7 @@ def admin_edit_abstract(
     abstract = db.query(models.Abstract).filter(models.Abstract.id == abstract_id).first()
     if not abstract:
         raise HTTPException(status_code=404, detail="No encontrado")
-    abstract.titulo = titulo
-    abstract.email_autor = email_autor
-    abstract.contenido_html = contenido_html
-    abstract.referencias_html = referencias_html
-    abstract.area_tematica = area_tematica
-    abstract.presentacion_oral = presentacion_oral
-    # Borrar autores y afiliaciones anteriores
-    db.query(models.Autor).filter(models.Autor.abstract_id == abstract_id).delete()
-    db.query(models.Afiliacion).filter(models.Afiliacion.abstract_id == abstract_id).delete()
-    db.flush()
-    # Guardar afiliaciones nuevas
-    for i in range(1, afil_count + 1):
-        nombre_afil = request._form.get(f"afil_nombre_{i}", "").strip()
-        if nombre_afil:
-            db.add(models.Afiliacion(abstract_id=abstract_id, nombre=nombre_afil, orden=i))
-    # Guardar autores nuevos
-    presentador_idx = request._form.get("presentador", "1")
-    autor_presentador = ""
-    for i in range(1, autor_count + 1):
-        nombre_autor = request._form.get(f"autor_nombre_{i}", "").strip()
-        afils_str = request._form.get(f"autor_afils_{i}", "").strip()
-        if nombre_autor:
-            es_presentador = 1 if str(i) == str(presentador_idx) else 0
-            db.add(models.Autor(abstract_id=abstract_id, nombre=nombre_autor, orden=i, es_presentador=es_presentador, afiliaciones_ids=afils_str))
-            if es_presentador:
-                autor_presentador = nombre_autor
-    abstract.autor = autor_presentador
+    apply_abstract_edit_from_form(abstract, request._form, db)
     db.commit()
     return RedirectResponse(url=f"/admin/abstracts/{abstract_id}", status_code=303)
 @app.get("/circulares", response_class=HTMLResponse)

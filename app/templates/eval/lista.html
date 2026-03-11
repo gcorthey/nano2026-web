@@ -44,6 +44,8 @@
                     {% if review and review.decision %}
                         {% if review.decision.value == 'aprobado' %}
                             <span class="bg-green-100 text-green-800 px-2 py-0.5 rounded text-xs">Aprobado</span>
+                        {% elif review.decision.value == 'revisar' %}
+                            <span class="bg-orange-100 text-orange-800 px-2 py-0.5 rounded text-xs">Requiere revisión</span>
                         {% else %}
                             <span class="bg-red-100 text-red-800 px-2 py-0.5 rounded text-xs">Rechazado</span>
                         {% endif %}

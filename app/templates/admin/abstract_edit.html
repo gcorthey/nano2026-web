@@ -1,4 +1,4 @@
-{% extends "admin/base.html" %}
+{% extends base_template if base_template is defined else "admin/base.html" %}
 {% block content %}
 
 <link href="https://fonts.googleapis.com/css2?family=Lato:ital@0;1&display=swap" rel="stylesheet">
@@ -14,12 +14,22 @@
     #referencias-editor .ql-editor { min-height: 120px; }
 </style>
 
+{% if presenter_mode %}
+<a href="/" class="text-blue-600 text-sm hover:underline">← Volver al inicio</a>
+{% else %}
 <a href="/admin/abstracts/{{ abstract.id }}" class="text-blue-600 text-sm hover:underline">← Volver al detalle</a>
+{% endif %}
 
 <div class="mt-4 bg-white rounded-2xl shadow p-8">
     <h1 class="text-xl font-bold mb-6">Editar resumen #{{ abstract.id }}</h1>
 
-    <form method="post" action="/admin/abstracts/{{ abstract.id }}/edit">
+    {% if success_revision_submit %}
+    <div class="bg-green-100 border border-green-300 text-green-800 px-4 py-3 rounded-xl mb-5">
+        Cambios enviados correctamente. El resumen volvió a estado pendiente para nueva evaluación.
+    </div>
+    {% endif %}
+
+    <form method="post" action="{% if presenter_mode %}/revision/{{ revision_token }}{% else %}/admin/abstracts/{{ abstract.id }}/edit{% endif %}">
 
         <!-- Título -->
         <div class="mb-6">
@@ -118,9 +128,9 @@
         <div class="flex gap-3">
             <button type="submit"
                 class="bg-blue-600 hover:bg-blue-700 text-white px-8 py-3 rounded-full font-semibold transition shadow">
-                Guardar cambios
+                {% if presenter_mode %}Enviar versión corregida{% else %}Guardar cambios{% endif %}
             </button>
-            <a href="/admin/abstracts/{{ abstract.id }}"
+            <a href="{% if presenter_mode %}/{% else %}/admin/abstracts/{{ abstract.id }}{% endif %}"
                 class="bg-gray-200 hover:bg-gray-300 text-gray-700 px-8 py-3 rounded-full font-semibold transition">
                 Cancelar
             </a>
