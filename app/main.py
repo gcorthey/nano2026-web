@@ -20,6 +20,7 @@ from xhtml2pdf import pisa
 import io
 import csv
 from fastapi_mail import FastMail, MessageSchema, ConnectionConfig
+from types import SimpleNamespace
 
 models.Base.metadata.create_all(bind=engine)
 
@@ -33,6 +34,38 @@ import re
 
 def strip_tags(text: str) -> str:
     return re.sub(r'<[^>]+>', '', text or '').strip()
+
+def get_accepted_with_revision_ids(db: Session) -> set[int]:
+    rows = db.query(models.AbstractLog.abstract_id).filter(
+        models.AbstractLog.event_type == "revision_email_sent"
+    ).distinct().all()
+    return {abstract_id for (abstract_id,) in rows}
+
+def build_admin_abstracts_query(
+    db: Session,
+    estado: str,
+    area: str,
+    aprobado_tipo: str
+):
+    query = db.query(models.Abstract)
+
+    if estado != "todos":
+        query = query.filter(models.Abstract.estado == estado)
+    if area != "todas":
+        query = query.filter(models.Abstract.area_tematica == area)
+
+    accepted_with_revision_ids = get_accepted_with_revision_ids(db)
+    if estado == "aprobado":
+        if aprobado_tipo == "aprobado":
+            if accepted_with_revision_ids:
+                query = query.filter(~models.Abstract.id.in_(accepted_with_revision_ids))
+        elif aprobado_tipo == "aprobado_con_rev":
+            if accepted_with_revision_ids:
+                query = query.filter(models.Abstract.id.in_(accepted_with_revision_ids))
+            else:
+                query = query.filter(models.Abstract.id == -1)
+
+    return query, accepted_with_revision_ids
 
 def apply_abstract_edit_from_form(abstract: models.Abstract, form_data, db: Session):
     abstract.titulo = form_data.get("titulo", "").strip()
@@ -197,21 +230,23 @@ def admin_abstracts(
     request: Request,
     estado: str = "todos",
     area: str = "todas",
+    aprobado_tipo: str = "todos",
     current_user: models.User = Depends(require_admin),
     db: Session = Depends(get_db)
 ):
-    query = db.query(models.Abstract)
-    if estado != "todos":
-        query = query.filter(models.Abstract.estado == estado)
-    if area != "todas":
-        query = query.filter(models.Abstract.area_tematica == area)
+    query, accepted_with_revision_ids = build_admin_abstracts_query(db, estado, area, aprobado_tipo)
     abstracts = query.order_by(models.Abstract.fecha_envio.desc()).all()
+    for abstract in abstracts:
+        abstract.acceptance_flag = SimpleNamespace(
+            minor_revision=1 if abstract.id in accepted_with_revision_ids else 0
+        )
     evaluadores = db.query(models.User).filter(models.User.role == "evaluador").all()
     return templates.TemplateResponse("admin/abstracts.html", {
         "request": request,
         "abstracts": abstracts,
         "estado_filtro": estado,
         "area_filtro": area,
+        "aprobado_tipo_filtro": aprobado_tipo,
         "current_user": current_user,
         "evaluadores": evaluadores
     })
@@ -852,14 +887,11 @@ def admin_asignar_tipo(
 def export_abstracts_csv(
     estado: str = "todos",
     area: str = "todas",
+    aprobado_tipo: str = "todos",
     current_user: models.User = Depends(require_admin),
     db: Session = Depends(get_db)
 ):
-    query = db.query(models.Abstract)
-    if estado != "todos":
-        query = query.filter(models.Abstract.estado == estado)
-    if area != "todas":
-        query = query.filter(models.Abstract.area_tematica == area)
+    query, accepted_with_revision_ids = build_admin_abstracts_query(db, estado, area, aprobado_tipo)
     abstracts = query.order_by(models.Abstract.fecha_envio.desc()).all()
 
     output = io.StringIO()
@@ -906,7 +938,7 @@ def export_abstracts_csv(
             tipo_eval,
             a.tipo_asignado_admin or "Sin asignar",
             evaluador,
-            a.estado.value,
+            "aprobado_con_rev" if a.estado == models.EstadoEnum.aprobado and a.id in accepted_with_revision_ids else a.estado.value,
             a.fecha_envio.strftime("%d/%m/%Y %H:%M")
         ])
 
