@@ -256,6 +256,8 @@ def admin_abstracts(
 def admin_abstract_detail(
     abstract_id: int,
     request: Request,
+    mail_sent: int = 0,
+    mail_error: str = "",
     current_user: models.User = Depends(require_admin),
     db: Session = Depends(get_db)
 ):
@@ -275,6 +277,8 @@ def admin_abstract_detail(
         "evaluadores_disponibles": evaluadores_disponibles,
         "reviews": reviews,
         "logs": logs,
+        "mail_sent": mail_sent,
+        "mail_error": mail_error,
         "current_user": current_user
     })
 
@@ -502,9 +506,20 @@ async def eval_submit(
 
     if decision == "aprobado":
         subject = f"[NANO2026] Abstract #{abstract.id} aceptado"
+        oral_note = ""
+        if abstract.presentacion_oral:
+            oral_note = (
+                "Próximamente nos contactaremos"
+                "para comunicarte la decisión del comité organizador respecto a la modalidad (oral o poster).\n\n"
+            )
+        else:
+            oral_note = ("La modalidad de tu presentación es póster.\n\n"
+
+            )
         body = (
             f"Hola,\n\n"
             f"Nos alegra mucho contarte que tu abstract \"{strip_tags(abstract.titulo)}\" fue aceptado para NANO2026.\n\n"
+            f"{oral_note}"
             f"¡Felicitaciones! Gracias por tu aporte y por ser parte de esta edición.\n\n"
             f"¡Nos vemos en el encuentro!\n\n"
             f"Saludos cordiales,\n"
@@ -885,7 +900,69 @@ def admin_asignar_tipo(
         raise HTTPException(status_code=404, detail="No encontrado")
     abstract.tipo_asignado_admin = tipo_asignado_admin if tipo_asignado_admin else None
     db.commit()
-    return RedirectResponse(url="/admin", status_code=303)
+    return RedirectResponse(url=f"/admin/abstracts/{abstract_id}", status_code=303)
+
+@app.post("/admin/abstracts/{abstract_id}/send-decision")
+async def admin_send_presentation_decision(
+    abstract_id: int,
+    current_user: models.User = Depends(require_admin),
+    db: Session = Depends(get_db)
+):
+    abstract = db.query(models.Abstract).filter(models.Abstract.id == abstract_id).first()
+    if not abstract:
+        raise HTTPException(status_code=404, detail="No encontrado")
+
+    if abstract.estado != models.EstadoEnum.aprobado:
+        return RedirectResponse(url=f"/admin/abstracts/{abstract_id}?mail_error=not_approved", status_code=303)
+
+    if abstract.tipo_asignado_admin not in ("oral", "poster"):
+        return RedirectResponse(url=f"/admin/abstracts/{abstract_id}?mail_error=no_type", status_code=303)
+
+    event_type = "presentation_decision_email_sent"
+    existing_mail_log = db.query(models.AbstractLog).filter(
+        models.AbstractLog.abstract_id == abstract.id,
+        models.AbstractLog.event_type == event_type,
+        models.AbstractLog.details.ilike(f"%tipo={abstract.tipo_asignado_admin}%")
+    ).first()
+    if existing_mail_log:
+        return RedirectResponse(url=f"/admin/abstracts/{abstract_id}?mail_error=duplicate_type_mail", status_code=303)
+
+    presentation_label = "presentación oral" if abstract.tipo_asignado_admin == "oral" else "sesión de póster"
+    subject = f"[NANO2026] Modalidad asignada para abstract #{abstract.id}"
+    body = (
+        f"Hola,\n\n"
+        f"Te escribimos para confirmarte que tu abstract \"{strip_tags(abstract.titulo)}\" "
+        f"fue asignado a la modalidad de {presentation_label} en NANO2026.\n\n"
+        f"En breve compartiremos más información sobre el programa y la organización del evento.\n\n"
+        f"Saludos cordiales,\n"
+        f"Comité organizador NANO2026\n"
+    )
+    details = (
+        f"Correo de modalidad enviado a {abstract.email_autor} "
+        f"por {current_user.nombre} ({current_user.email}); tipo={abstract.tipo_asignado_admin}."
+    )
+
+    mensaje = MessageSchema(
+        subject=subject,
+        recipients=[abstract.email_autor],
+        body=body,
+        subtype="plain"
+    )
+
+    fm = FastMail(mail_config)
+    try:
+        await fm.send_message(mensaje)
+    except Exception:
+        return RedirectResponse(url=f"/admin/abstracts/{abstract_id}?mail_error=send_fail", status_code=303)
+
+    db.add(models.AbstractLog(
+        abstract_id=abstract.id,
+        event_type=event_type,
+        details=details,
+        actor_email=current_user.email
+    ))
+    db.commit()
+    return RedirectResponse(url=f"/admin/abstracts/{abstract_id}?mail_sent=1", status_code=303)
 
 @app.get("/admin/abstracts/export/csv")
 def export_abstracts_csv(
