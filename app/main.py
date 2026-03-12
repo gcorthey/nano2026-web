@@ -9,7 +9,7 @@ from fastapi.responses import HTMLResponse, RedirectResponse, StreamingResponse
 from fastapi.staticfiles import StaticFiles
 from fastapi.templating import Jinja2Templates
 from sqlalchemy.orm import Session
-from app.database import engine, get_db
+from app.database import engine, get_db, SessionLocal
 from fastapi.responses import HTMLResponse, RedirectResponse, StreamingResponse
 from app import models
 from app.auth import (
@@ -21,8 +21,20 @@ import io
 import csv
 from fastapi_mail import FastMail, MessageSchema, ConnectionConfig
 from types import SimpleNamespace
+from sqlalchemy import text
 
 models.Base.metadata.create_all(bind=engine)
+
+def ensure_schema_updates():
+    with engine.begin() as conn:
+        columns = {
+            row[1]
+            for row in conn.execute(text("PRAGMA table_info(abstracts)")).fetchall()
+        }
+        if "codigo_final" not in columns:
+            conn.execute(text("ALTER TABLE abstracts ADD COLUMN codigo_final VARCHAR"))
+
+ensure_schema_updates()
 
 
 
@@ -32,8 +44,70 @@ templates = Jinja2Templates(directory="app/templates")
 
 import re
 
+AREA_CODE_MAP = {
+    "1": "A",
+    "2": "B",
+    "3": "E",
+    "4": "D",
+    "5": "C",
+    "6": "G",
+    "7": "F",
+}
+
+AREA_NAMES = {
+    "A": "Síntesis de nanomateriales",
+    "B": "Autoensamblado",
+    "C": "Propiedades de nanomateriales",
+    "D": "Fenómenos de Superficies",
+    "E": "Nanobiointerfases y procesos biológicos",
+    "F": "Nanotecnología y salud",
+    "G": "Aplicaciones de nanomateriales en ambiente, energía, agro, alimentos y catálisis",
+}
+
 def strip_tags(text: str) -> str:
     return re.sub(r'<[^>]+>', '', text or '').strip()
+
+def normalize_area_code(area_code: str | None) -> str | None:
+    if area_code is None:
+        return None
+    return AREA_CODE_MAP.get(area_code, area_code)
+
+def calculate_final_code(abstract: models.Abstract) -> str | None:
+    if abstract.estado != models.EstadoEnum.aprobado:
+        return None
+    area_code = normalize_area_code(abstract.area_tematica)
+    if not area_code:
+        return None
+    base_code = f"{area_code}{abstract.id:02d}"
+    if not abstract.presentacion_oral:
+        return base_code
+    if abstract.tipo_asignado_admin == "oral":
+        return f"{base_code}-O"
+    if abstract.tipo_asignado_admin == "poster":
+        return base_code
+    return None
+
+def sync_final_code(abstract: models.Abstract):
+    abstract.codigo_final = calculate_final_code(abstract)
+
+def backfill_final_codes():
+    db = SessionLocal()
+    try:
+        abstracts = db.query(models.Abstract).all()
+        changed = False
+        for abstract in abstracts:
+            normalized_area = normalize_area_code(abstract.area_tematica)
+            if abstract.area_tematica != normalized_area:
+                abstract.area_tematica = normalized_area
+                changed = True
+            new_code = calculate_final_code(abstract)
+            if abstract.codigo_final != new_code:
+                abstract.codigo_final = new_code
+                changed = True
+        if changed:
+            db.commit()
+    finally:
+        db.close()
 
 def get_accepted_with_revision_ids(db: Session) -> set[int]:
     rows = db.query(models.AbstractLog.abstract_id).filter(
@@ -48,6 +122,7 @@ def build_admin_abstracts_query(
     aprobado_tipo: str
 ):
     query = db.query(models.Abstract)
+    area = normalize_area_code(area)
 
     if estado != "todos":
         query = query.filter(models.Abstract.estado == estado)
@@ -72,7 +147,7 @@ def apply_abstract_edit_from_form(abstract: models.Abstract, form_data, db: Sess
     abstract.email_autor = form_data.get("email_autor", "").strip()
     abstract.contenido_html = form_data.get("contenido_html", "").strip()
     abstract.referencias_html = form_data.get("referencias_html", "")
-    abstract.area_tematica = form_data.get("area_tematica", "").strip()
+    abstract.area_tematica = normalize_area_code(form_data.get("area_tematica", "").strip())
     abstract.presentacion_oral = int(form_data.get("presentacion_oral", 0))
 
     autor_count = int(form_data.get("autor_count", 0))
@@ -122,6 +197,7 @@ def create_default_admin():
         db.commit()
 
 create_default_admin()
+backfill_final_codes()
 
 # --- Login ---
 @app.get("/login", response_class=HTMLResponse)
@@ -179,7 +255,7 @@ def submit_abstract(
     referencias_html=referencias_html,
     tiene_referencias=tiene_referencias,
     presentacion_oral=presentacion_oral,
-    area_tematica=area_tematica,
+    area_tematica=normalize_area_code(area_tematica),
 )
     db.add(abstract)
     db.flush()  # para obtener el id
@@ -234,6 +310,7 @@ def admin_abstracts(
     current_user: models.User = Depends(require_admin),
     db: Session = Depends(get_db)
 ):
+    area = normalize_area_code(area)
     query, accepted_with_revision_ids = build_admin_abstracts_query(db, estado, area, aprobado_tipo)
     abstracts = query.order_by(models.Abstract.fecha_envio.desc()).all()
     for abstract in abstracts:
@@ -287,6 +364,7 @@ def admin_abstract_detail(
 def admin_approve(abstract_id: int, current_user: models.User = Depends(require_admin), db: Session = Depends(get_db)):
     abstract = db.query(models.Abstract).filter(models.Abstract.id == abstract_id).first()
     abstract.estado = models.EstadoEnum.aprobado
+    sync_final_code(abstract)
     db.commit()
     return RedirectResponse(url=f"/admin/abstracts/{abstract_id}", status_code=302)
 
@@ -294,6 +372,8 @@ def admin_approve(abstract_id: int, current_user: models.User = Depends(require_
 def admin_reject(abstract_id: int, current_user: models.User = Depends(require_admin), db: Session = Depends(get_db)):
     abstract = db.query(models.Abstract).filter(models.Abstract.id == abstract_id).first()
     abstract.estado = models.EstadoEnum.rechazado
+    abstract.tipo_asignado_admin = None
+    abstract.codigo_final = None
     db.commit()
     return RedirectResponse(url=f"/admin/abstracts/{abstract_id}", status_code=302)
     
@@ -495,8 +575,12 @@ async def eval_submit(
         abstract.estado = models.EstadoEnum.aprobado
     elif decision == "revisar":
         abstract.estado = models.EstadoEnum.revisar
+        abstract.tipo_asignado_admin = None
     elif decision == "rechazado":
         abstract.estado = models.EstadoEnum.rechazado
+        abstract.tipo_asignado_admin = None
+
+    sync_final_code(abstract)
 
     db.commit()
 
@@ -509,7 +593,7 @@ async def eval_submit(
         oral_note = ""
         if abstract.presentacion_oral:
             oral_note = (
-                "Próximamente nos contactaremos"
+                "Próximamente nos contactaremos "
                 "para comunicarte la decisión del comité organizador respecto a la modalidad (oral o poster).\n\n"
             )
         else:
@@ -709,6 +793,8 @@ async def revision_edit_submit(
     form_data = await request.form()
     apply_abstract_edit_from_form(abstract, form_data, db)
     abstract.estado = models.EstadoEnum.pendiente
+    abstract.tipo_asignado_admin = None
+    abstract.codigo_final = None
     # Al reenviar correcciones, reiniciar evaluaciones previas para que vuelva a "Pendiente"
     for review in abstract.reviews:
         review.decision = None
@@ -899,6 +985,7 @@ def admin_asignar_tipo(
     if not abstract:
         raise HTTPException(status_code=404, detail="No encontrado")
     abstract.tipo_asignado_admin = tipo_asignado_admin if tipo_asignado_admin else None
+    sync_final_code(abstract)
     db.commit()
     return RedirectResponse(url=f"/admin/abstracts/{abstract_id}", status_code=303)
 
@@ -978,20 +1065,10 @@ def export_abstracts_csv(
     output = io.StringIO()
     writer = csv.writer(output)
     writer.writerow([
-        "ID", "Título", "Autores", "Email presentador", "Área",
+        "ID", "ID final", "Título", "Autores", "Email presentador", "Área",
         "Tipo solicitado", "Tipo evaluador", "Tipo admin",
         "Evaluador asignado", "Estado", "Fecha envío"
     ])
-    area_nombres = {
-    '1': 'Síntesis de nanomateriales',
-    '2': 'Autoensamblado',
-    '3': 'Nanobiointerfaces y procesos biológicos',
-    '4': 'Superficies',
-    '5': 'Propiedades de nanomateriales',
-    '6': 'Aplicaciones de nanomateriales en ambiente, energía, agro, alimentos y catálisis',
-    '7': 'Nanotecnología y Salud',
-}
-    
     for a in abstracts:
         autores = ", ".join(
             f"{au.nombre}{'*' if au.es_presentador else ''}"
@@ -1011,10 +1088,11 @@ def export_abstracts_csv(
 
         writer.writerow([
             a.id,
+            a.codigo_final or "—",
             strip_tags(a.titulo),
             autores,
             a.email_autor,
-            area_nombres.get(a.area_tematica, "—"),
+            AREA_NAMES.get(a.area_tematica, "—"),
             "Oral" if a.presentacion_oral else "Póster",
             tipo_eval,
             a.tipo_asignado_admin or "Sin asignar",

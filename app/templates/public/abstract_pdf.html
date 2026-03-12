@@ -169,13 +169,13 @@
 
     <!-- Área temática -->
     {% set areas = {
-        '1': 'Síntesis de nanomateriales',
-        '2': 'Autoensamblado',
-        '3': 'Nanobiointerfaces y procesos biológicos',
-        '4': 'Superficies',
-        '5': 'Propiedades de nanomateriales',
-        '6': 'Aplicaciones de nanomateriales en ambiente, energía, agro, alimentos y catálisis',
-        '7': 'Nanotecnología y Salud'
+        'A': 'A. Síntesis de nanomateriales',
+        'B': 'B. Autoensamblado',
+        'C': 'C. Propiedades de nanomateriales',
+        'D': 'D. Fenómenos de Superficies',
+        'E': 'E. Nanobiointerfases y procesos biológicos',
+        'F': 'F. Nanotecnología y salud',
+        'G': 'G. Aplicaciones de nanomateriales en ambiente, energía, agro, alimentos y catálisis'
     } %}
     <p class="area">Área temática: <strong>{{ areas.get(abstract.area_tematica, '—') }}</strong></p>
 

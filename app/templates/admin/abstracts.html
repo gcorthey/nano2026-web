@@ -17,13 +17,13 @@
     <div class="flex flex-wrap gap-2 text-sm">
         <span class="text-gray-400 text-xs self-center uppercase tracking-wider mr-1">Área:</span>
         <a href="?estado={{ estado_filtro }}&area=todas&aprobado_tipo={{ aprobado_tipo_filtro }}" class="px-3 py-1 rounded border {% if area_filtro == 'todas' %}bg-gray-700 text-white{% else %}bg-white{% endif %}">Todas</a>
-        <a href="?estado={{ estado_filtro }}&area=1&aprobado_tipo={{ aprobado_tipo_filtro }}" class="px-3 py-1 rounded border {% if area_filtro == '1' %}bg-blue-500 text-white{% else %}bg-white{% endif %}">Síntesis</a>
-        <a href="?estado={{ estado_filtro }}&area=2&aprobado_tipo={{ aprobado_tipo_filtro }}" class="px-3 py-1 rounded border {% if area_filtro == '2' %}bg-purple-500 text-white{% else %}bg-white{% endif %}">Autoensamblado</a>
-        <a href="?estado={{ estado_filtro }}&area=3&aprobado_tipo={{ aprobado_tipo_filtro }}" class="px-3 py-1 rounded border {% if area_filtro == '3' %}bg-green-500 text-white{% else %}bg-white{% endif %}">Nanobio</a>
-        <a href="?estado={{ estado_filtro }}&area=4&aprobado_tipo={{ aprobado_tipo_filtro }}" class="px-3 py-1 rounded border {% if area_filtro == '4' %}bg-orange-500 text-white{% else %}bg-white{% endif %}">Superficies</a>
-        <a href="?estado={{ estado_filtro }}&area=5&aprobado_tipo={{ aprobado_tipo_filtro }}" class="px-3 py-1 rounded border {% if area_filtro == '5' %}bg-yellow-500 text-white{% else %}bg-white{% endif %}">Propiedades</a>
-        <a href="?estado={{ estado_filtro }}&area=6&aprobado_tipo={{ aprobado_tipo_filtro }}" class="px-3 py-1 rounded border {% if area_filtro == '6' %}bg-teal-500 text-white{% else %}bg-white{% endif %}">Aplicaciones</a>
-        <a href="?estado={{ estado_filtro }}&area=7&aprobado_tipo={{ aprobado_tipo_filtro }}" class="px-3 py-1 rounded border {% if area_filtro == '7' %}bg-red-500 text-white{% else %}bg-white{% endif %}">Nano y Salud</a>
+        <a href="?estado={{ estado_filtro }}&area=A&aprobado_tipo={{ aprobado_tipo_filtro }}" class="px-3 py-1 rounded border {% if area_filtro == 'A' %}bg-blue-500 text-white{% else %}bg-white{% endif %}">A. Síntesis</a>
+        <a href="?estado={{ estado_filtro }}&area=B&aprobado_tipo={{ aprobado_tipo_filtro }}" class="px-3 py-1 rounded border {% if area_filtro == 'B' %}bg-purple-500 text-white{% else %}bg-white{% endif %}">B. Autoensamblado</a>
+        <a href="?estado={{ estado_filtro }}&area=C&aprobado_tipo={{ aprobado_tipo_filtro }}" class="px-3 py-1 rounded border {% if area_filtro == 'C' %}bg-yellow-500 text-white{% else %}bg-white{% endif %}">C. Propiedades</a>
+        <a href="?estado={{ estado_filtro }}&area=D&aprobado_tipo={{ aprobado_tipo_filtro }}" class="px-3 py-1 rounded border {% if area_filtro == 'D' %}bg-orange-500 text-white{% else %}bg-white{% endif %}">D. Fenómenos de Superficies</a>
+        <a href="?estado={{ estado_filtro }}&area=E&aprobado_tipo={{ aprobado_tipo_filtro }}" class="px-3 py-1 rounded border {% if area_filtro == 'E' %}bg-green-500 text-white{% else %}bg-white{% endif %}">E. Nanobio</a>
+        <a href="?estado={{ estado_filtro }}&area=F&aprobado_tipo={{ aprobado_tipo_filtro }}" class="px-3 py-1 rounded border {% if area_filtro == 'F' %}bg-red-500 text-white{% else %}bg-white{% endif %}">F. Nano y Salud</a>
+        <a href="?estado={{ estado_filtro }}&area=G&aprobado_tipo={{ aprobado_tipo_filtro }}" class="px-3 py-1 rounded border {% if area_filtro == 'G' %}bg-teal-500 text-white{% else %}bg-white{% endif %}">G. Aplicaciones</a>
     </div>
 </div>
 <!-- Botón exportar CSV -->
@@ -64,34 +64,36 @@
                 <tr>
                     <th class="px-4 py-3">    <input type="checkbox" id="check-all" onclick="toggleAll(this)" class="cursor-pointer"></th>
                     <th class="px-4 py-3 text-left cursor-pointer hover:bg-gray-100 select-none" onclick="sortTable(0)"># <span class="sort-icon">↕</span></th>
-                    <th class="px-4 py-3 text-left cursor-pointer hover:bg-gray-100 select-none" onclick="sortTable(1)">Título <span class="sort-icon">↕</span></th>
-                    <th class="px-4 py-3 text-left cursor-pointer hover:bg-gray-100 select-none" onclick="sortTable(2)">Autores <span class="sort-icon">↕</span></th>
-                    <th class="px-4 py-3 text-left cursor-pointer hover:bg-gray-100 select-none" onclick="sortTable(3)">Área <span class="sort-icon">↕</span></th>
-                    <th class="px-4 py-3 text-center cursor-pointer hover:bg-gray-100 select-none" onclick="sortTable(4)">Tipo solicitado <span class="sort-icon">↕</span></th>
-                    <th class="px-4 py-3 text-center cursor-pointer hover:bg-gray-100 select-none" onclick="sortTable(5)">Tipo evaluador <span class="sort-icon">↕</span></th>
-                    <th class="px-4 py-3 text-center cursor-pointer hover:bg-gray-100 select-none" onclick="sortTable(6)">Tipo admin <span class="sort-icon">↕</span></th>
-                    <th class="px-4 py-3 text-left cursor-pointer hover:bg-gray-100 select-none" onclick="sortTable(7)">Evaluador <span class="sort-icon">↕</span></th>
-                    <th class="px-4 py-3 text-left cursor-pointer hover:bg-gray-100 select-none" onclick="sortTable(8)">Email presentador <span class="sort-icon">↕</span></th>
-                    <th class="px-4 py-3 text-left cursor-pointer hover:bg-gray-100 select-none" onclick="sortTable(9)">Fecha <span class="sort-icon">↕</span></th>
-                    <th class="px-4 py-3 text-left cursor-pointer hover:bg-gray-100 select-none" onclick="sortTable(10)">Estado <span class="sort-icon">↕</span></th>
+                    <th class="px-4 py-3 text-left cursor-pointer hover:bg-gray-100 select-none" onclick="sortTable(1)">ID_f <span class="sort-icon">↕</span></th>
+                    <th class="px-4 py-3 text-left cursor-pointer hover:bg-gray-100 select-none" onclick="sortTable(2)">Título <span class="sort-icon">↕</span></th>
+                    <th class="px-4 py-3 text-left cursor-pointer hover:bg-gray-100 select-none" onclick="sortTable(3)">Autores <span class="sort-icon">↕</span></th>
+                    <th class="px-4 py-3 text-left cursor-pointer hover:bg-gray-100 select-none" onclick="sortTable(4)">Área <span class="sort-icon">↕</span></th>
+                    <th class="px-4 py-3 text-center cursor-pointer hover:bg-gray-100 select-none" onclick="sortTable(5)">Tipo solicitado <span class="sort-icon">↕</span></th>
+                    <th class="px-4 py-3 text-center cursor-pointer hover:bg-gray-100 select-none" onclick="sortTable(6)">Tipo evaluador <span class="sort-icon">↕</span></th>
+                    <th class="px-4 py-3 text-center cursor-pointer hover:bg-gray-100 select-none" onclick="sortTable(7)">Tipo admin <span class="sort-icon">↕</span></th>
+                    <th class="px-4 py-3 text-left cursor-pointer hover:bg-gray-100 select-none" onclick="sortTable(8)">Evaluador <span class="sort-icon">↕</span></th>
+                    <th class="px-4 py-3 text-left cursor-pointer hover:bg-gray-100 select-none" onclick="sortTable(9)">Email presentador <span class="sort-icon">↕</span></th>
+                    <th class="px-4 py-3 text-left cursor-pointer hover:bg-gray-100 select-none" onclick="sortTable(10)">Fecha <span class="sort-icon">↕</span></th>
+                    <th class="px-4 py-3 text-left cursor-pointer hover:bg-gray-100 select-none" onclick="sortTable(11)">Estado <span class="sort-icon">↕</span></th>
                     <th class="px-4 py-3 text-left">Acciones</th>
                 </tr>
             </thead>
         <tbody class="divide-y divide-gray-100">
             {% for a in abstracts %}
             {% set area_info = {
-                '1': ('Síntesis', 'bg-blue-100 text-blue-800'),
-                '2': ('Autoensamblado', 'bg-purple-100 text-purple-800'),
-                '3': ('Nanobio', 'bg-green-100 text-green-800'),
-                '4': ('Superficies', 'bg-orange-100 text-orange-800'),
-                '5': ('Propiedades', 'bg-yellow-100 text-yellow-800'),
-                '6': ('Aplicaciones', 'bg-teal-100 text-teal-800'),
-                '7': ('Nano y Salud', 'bg-red-100 text-red-800'),
+                'A': ('A. Síntesis', 'bg-blue-100 text-blue-800'),
+                'B': ('B. Autoensamblado', 'bg-purple-100 text-purple-800'),
+                'C': ('C. Propiedades', 'bg-yellow-100 text-yellow-800'),
+                'D': ('D. Fenómenos de Superficies', 'bg-orange-100 text-orange-800'),
+                'E': ('E. Nanobio', 'bg-green-100 text-green-800'),
+                'F': ('F. Nano y Salud', 'bg-red-100 text-red-800'),
+                'G': ('G. Aplicaciones', 'bg-teal-100 text-teal-800'),
             } %}
             {% set info = area_info.get(a.area_tematica, ('—', 'bg-gray-100 text-gray-500')) %}
             <tr class="hover:bg-gray-50">
                 <td class="px-4 py-3">     <input type="checkbox" class="row-check cursor-pointer" value="{{ a.id }}" onchange="updateBarra()"></td>
                 <td class="px-4 py-3 text-gray-400">{{ a.id }}</td>
+                <td class="px-4 py-3 text-gray-600 font-mono whitespace-nowrap">{{ a.codigo_final or '—' }}</td>
                 <td class="px-4 py-3 font-medium" style="max-width: 200px;">
                     <div class="truncate">{{ a.titulo | striptags }}</div>
                 </td>

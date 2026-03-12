@@ -43,6 +43,7 @@ class Abstract(Base):
     referencias_html = Column(Text, nullable=True)
     tiene_referencias = Column(Integer, default=0)  # 1 = sí, 0 = no
     tipo_asignado_admin = Column(String, nullable=True)  # 'oral', 'poster', o None
+    codigo_final = Column(String, nullable=True)
     logs = relationship("AbstractLog", back_populates="abstract", order_by="AbstractLog.created_at")
     
 
