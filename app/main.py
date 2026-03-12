@@ -14,7 +14,8 @@ from fastapi.responses import HTMLResponse, RedirectResponse, StreamingResponse
 from app import models
 from app.auth import (
     hash_password, verify_password, create_access_token, require_admin,
-    require_evaluador, get_current_user, create_revision_token, verify_revision_token
+    require_evaluador, get_current_user, create_revision_token, verify_revision_token,
+    create_password_reset_token, verify_password_reset_token, password_reset_fingerprint
 )
 from xhtml2pdf import pisa
 import io
@@ -217,20 +218,147 @@ def create_default_admin():
 create_default_admin()
 backfill_final_codes()
 
+def get_password_reset_user_or_400(token: str, db: Session) -> models.User:
+    try:
+        payload = verify_password_reset_token(token)
+        user_id = int(payload.get("user_id"))
+        email = payload.get("email", "")
+        expected_fingerprint = payload.get("pwd", "")
+    except (JWTError, TypeError, ValueError):
+        raise HTTPException(status_code=400, detail="Link inválido o vencido")
+
+    user = db.query(models.User).filter(models.User.id == user_id).first()
+    if not user or user.email != email:
+        raise HTTPException(status_code=400, detail="Link inválido o vencido")
+    if password_reset_fingerprint(user.password_hash) != expected_fingerprint:
+        raise HTTPException(status_code=400, detail="Link inválido o vencido")
+    return user
+
 # --- Login ---
 @app.get("/login", response_class=HTMLResponse)
 def login_form(request: Request):
-    return templates.TemplateResponse("login.html", {"request": request, "error": None})
+    return templates.TemplateResponse("login.html", {
+        "request": request,
+        "error": None,
+        "success": None
+    })
 
 @app.post("/login")
 def login(request: Request, response: Response, email: str = Form(...), password: str = Form(...), db: Session = Depends(get_db)):
     user = db.query(models.User).filter(models.User.email == email).first()
     if not user or not verify_password(password, user.password_hash):
-        return templates.TemplateResponse("login.html", {"request": request, "error": "Email o contraseña incorrectos"})
+        return templates.TemplateResponse("login.html", {
+            "request": request,
+            "error": "Email o contraseña incorrectos",
+            "success": None
+        })
     token = create_access_token({"sub": user.email, "role": user.role})
     resp = RedirectResponse(url="/admin" if user.role == models.RoleEnum.admin else "/eval", status_code=302)
     resp.set_cookie("access_token", token, httponly=True)
     return resp
+
+@app.get("/forgot-password", response_class=HTMLResponse)
+def forgot_password_form(request: Request):
+    return templates.TemplateResponse("forgot_password.html", {
+        "request": request,
+        "error": None,
+        "success": None
+    })
+
+@app.post("/forgot-password", response_class=HTMLResponse)
+async def forgot_password_submit(
+    request: Request,
+    email: str = Form(...),
+    db: Session = Depends(get_db)
+):
+    user = db.query(models.User).filter(models.User.email == email.strip()).first()
+    success_message = "Si existe una cuenta con ese email, enviamos un enlace para restablecer la contraseña."
+
+    if not user:
+        return templates.TemplateResponse("forgot_password.html", {
+            "request": request,
+            "error": None,
+            "success": success_message
+        })
+
+    token = create_password_reset_token(user.id, user.email, user.password_hash)
+    base_url = os.getenv("PUBLIC_BASE_URL", str(request.base_url).rstrip("/"))
+    reset_url = f"{base_url}/reset-password/{token}"
+    body = (
+        f"Hola {user.nombre},\n\n"
+        f"Recibimos una solicitud para restablecer la contraseña de tu cuenta en NANO2026.\n\n"
+        f"Podés definir una nueva contraseña desde este enlace:\n{reset_url}\n\n"
+        f"El enlace vence en 2 horas y deja de servir si la contraseña ya fue cambiada.\n\n"
+        f"Si no hiciste esta solicitud, podés ignorar este correo.\n\n"
+        f"Saludos,\n"
+        f"Comité organizador NANO2026\n"
+    )
+    mensaje = MessageSchema(
+        subject="[NANO2026] Restablecer contraseña",
+        recipients=[user.email],
+        body=body,
+        subtype="plain"
+    )
+    fm = FastMail(mail_config)
+    try:
+        await fm.send_message(mensaje)
+    except Exception:
+        return templates.TemplateResponse("forgot_password.html", {
+            "request": request,
+            "error": "No se pudo enviar el correo de recuperación. Revisá la configuración SMTP e intentá de nuevo.",
+            "success": None
+        }, status_code=500)
+
+    return templates.TemplateResponse("forgot_password.html", {
+        "request": request,
+        "error": None,
+        "success": success_message
+    })
+
+@app.get("/reset-password/{token}", response_class=HTMLResponse)
+def reset_password_form(
+    token: str,
+    request: Request,
+    db: Session = Depends(get_db)
+):
+    get_password_reset_user_or_400(token, db)
+    return templates.TemplateResponse("reset_password.html", {
+        "request": request,
+        "token": token,
+        "error": None
+    })
+
+@app.post("/reset-password/{token}", response_class=HTMLResponse)
+def reset_password_submit(
+    token: str,
+    request: Request,
+    password: str = Form(...),
+    password_confirm: str = Form(...),
+    db: Session = Depends(get_db)
+):
+    if password != password_confirm:
+        return templates.TemplateResponse("reset_password.html", {
+            "request": request,
+            "token": token,
+            "error": "Las contraseñas no coinciden."
+        }, status_code=400)
+
+    if len(password) < 8:
+        return templates.TemplateResponse("reset_password.html", {
+            "request": request,
+            "token": token,
+            "error": "La contraseña debe tener al menos 8 caracteres."
+        }, status_code=400)
+
+    user = get_password_reset_user_or_400(token, db)
+    user.password_hash = hash_password(password)
+    db.commit()
+
+    return templates.TemplateResponse("login.html", {
+        "request": request,
+        "error": None,
+        "success": "Contraseña actualizada. Ya podés iniciar sesión."
+    })
 
 @app.get("/logout")
 def logout():

@@ -213,6 +213,8 @@ Al iniciar por primera vez se crea automáticamente un usuario admin:
 | `/admin/evaluadores` | Admin |
 | `/eval` | Evaluador |
 | `/eval/{id}` | Evaluador |
+| `/forgot-password` | Público |
+| `/reset-password/{token}` | Público por link firmado |
 
 ---
 

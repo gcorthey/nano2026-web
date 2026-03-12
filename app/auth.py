@@ -7,11 +7,13 @@ from sqlalchemy.orm import Session
 from app.database import get_db
 from app import models
 import os
+import hashlib
 
 SECRET_KEY = os.environ.get("SECRET_KEY", "50d5842e8962618c774c72ae20cbc6c58e9cea35c2a41aa2096b63f4c6a8d7f3")
 ALGORITHM = "HS256"
 ACCESS_TOKEN_EXPIRE_MINUTES = 60 * 8  # 8 horas
 REVISION_TOKEN_EXPIRE_HOURS = 72
+PASSWORD_RESET_TOKEN_EXPIRE_HOURS = 2
 
 pwd_context = CryptContext(schemes=["bcrypt"], deprecated="auto")
 
@@ -37,9 +39,29 @@ def create_revision_token(abstract_id: int, email_autor: str) -> str:
     }
     return jwt.encode(payload, SECRET_KEY, algorithm=ALGORITHM)
 
+def password_reset_fingerprint(password_hash: str) -> str:
+    return hashlib.sha256(password_hash.encode("utf-8")).hexdigest()
+
+def create_password_reset_token(user_id: int, email: str, password_hash: str) -> str:
+    expire = datetime.utcnow() + timedelta(hours=PASSWORD_RESET_TOKEN_EXPIRE_HOURS)
+    payload = {
+        "purpose": "password_reset",
+        "user_id": user_id,
+        "email": email,
+        "pwd": password_reset_fingerprint(password_hash),
+        "exp": expire,
+    }
+    return jwt.encode(payload, SECRET_KEY, algorithm=ALGORITHM)
+
 def verify_revision_token(token: str) -> dict:
     payload = jwt.decode(token, SECRET_KEY, algorithms=[ALGORITHM])
     if payload.get("purpose") != "abstract_revision":
+        raise JWTError("Token inválido")
+    return payload
+
+def verify_password_reset_token(token: str) -> dict:
+    payload = jwt.decode(token, SECRET_KEY, algorithms=[ALGORITHM])
+    if payload.get("purpose") != "password_reset":
         raise JWTError("Token inválido")
     return payload
 
