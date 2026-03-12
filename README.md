@@ -38,9 +38,14 @@ congreso_nano/
 │       ├── public/
 │       │   ├── base.html
 │       │   ├── home.html
+│       │   ├── about.html
 │       │   ├── abstracts.html
 │       │   ├── abstract_detail.html
 │       │   ├── abstract_pdf.html
+│       │   ├── circulares.html
+│       │   ├── contacto.html
+│       │   ├── inscripcion.html
+│       │   ├── sponsors.html
 │       │   ├── submit.html
 │       │   ├── char_panel_content.html
 │       │   ├── speakers.html
@@ -81,14 +86,41 @@ source venv/bin/activate
 pip install -r requirements.txt
 ```
 
-### 4. Crear carpetas estáticas
-```bash
-mkdir -p app/static/css app/static/js
+### 4. Configurar variables de entorno
+
+Crear un archivo `.env` en la raíz del proyecto.
+
+Variables actualmente utilizadas por la aplicación:
+
+| Variable | Obligatoria | Uso |
+|---|---|---|
+| `SECRET_KEY` | Sí | Firma de JWT de login y links de revisión |
+| `MAIL_USERNAME` | Sí, si se envían mails | Usuario SMTP |
+| `MAIL_PASSWORD` | Sí, si se envían mails | Password / app password SMTP |
+| `MAIL_FROM` | Sí, si se envían mails | Remitente visible |
+| `PUBLIC_BASE_URL` | Recomendado | Base pública para links en correos, ej. `https://nano2026.org` |
+| `RECAPTCHA_SECRET` | Opcional | Validación de reCAPTCHA si el flujo lo usa |
+
+Ejemplo:
+
+```env
+SECRET_KEY=clave-secreta-larga-y-aleatoria
+MAIL_USERNAME=usuario@example.com
+MAIL_PASSWORD=app-password
+MAIL_FROM=usuario@example.com
+PUBLIC_BASE_URL=https://nano2026.org
+RECAPTCHA_SECRET=tu-secret
 ```
 
 ### 5. Inicializar la base de datos
 ```bash
 python -c "from app.database import engine; from app import models; models.Base.metadata.create_all(bind=engine)"
+```
+
+La base actualmente usa SQLite local en:
+
+```text
+sqlite:///./congreso.db
 ```
 
 ### 6. Correr el servidor de desarrollo
@@ -125,6 +157,7 @@ Al iniciar por primera vez se crea automáticamente un usuario admin:
 | `afiliaciones` | Afiliaciones por resumen |
 | `reviews` | Evaluaciones de los revisores |
 | `asignaciones` | Asignación evaluador ↔ abstract |
+| `abstract_logs` | Historial de eventos y envíos de correo |
 | `registrations` | Inscripciones al congreso |
 | `sessions` | Sesiones del programa |
 | `speakers` | Oradores invitados |
@@ -135,6 +168,7 @@ Al iniciar por primera vez se crea automáticamente un usuario admin:
 - `referencias_html` — HTML de referencias bibliográficas (formato APA)
 - `area_tematica` — número del 1 al 7
 - `presentacion_oral` — 0 o 1
+- `tipo_asignado_admin` — decisión final del admin sobre `oral` o `poster`
 
 ---
 
@@ -159,6 +193,12 @@ Al iniciar por primera vez se crea automáticamente un usuario admin:
 | `/abstracts/{id}` | Resumen individual |
 | `/abstracts/{id}/pdf` | Descargar resumen en PDF |
 | `/submit` | Formulario de envío de resúmenes |
+| `/revision/{token}` | Reenvío de correcciones por link firmado |
+| `/inscripcion` | Información de inscripción y datos bancarios |
+| `/sponsors` | Página institucional para auspiciantes |
+| `/about` | Sobre el encuentro |
+| `/circulares` | Información institucional complementaria |
+| `/contacto` | Contacto |
 | `/speakers` | Speakers y mesas temáticas |
 | `/venue` | Lugar, cómo llegar, alojamiento |
 | `/programa` | Programa del congreso |
@@ -169,6 +209,7 @@ Al iniciar por primera vez se crea automáticamente un usuario admin:
 |---|---|
 | `/admin` | Admin |
 | `/admin/abstracts/{id}` | Admin |
+| `/admin/abstracts/export/csv` | Admin |
 | `/admin/evaluadores` | Admin |
 | `/eval` | Evaluador |
 | `/eval/{id}` | Evaluador |
@@ -182,10 +223,22 @@ Ponente envía resumen en /submit (sin login)
     → Admin asigna evaluadores en /admin/abstracts/{id}
     → Evaluador revisa y deja decisión + comentario en /eval/{id}
     → Si el abstract solicita oral, el evaluador recomienda o no oral
-    → Admin aprueba o rechaza (decisión final)
+    → Si requiere cambios, el evaluador puede enviar correo con link firmado a /revision/{token}
+    → El presentador reenvía correcciones y el resumen vuelve a pendiente
+    → Si aprobado, se envía correo de aceptación
+    → Admin define modalidad final (oral / póster)
+    → Admin puede enviar al presentador la decisión de modalidad
     → Si aprobado: aparece en /abstracts público
     → Cualquier visitante puede buscar y descargar PDF
 ```
+
+### Notas del flujo actual
+
+- La aprobación del evaluador cambia el estado del abstract a `aprobado` y dispara correo de aceptación.
+- El listado admin `/admin` permite filtrar aprobados simples vs. aprobados con revisión previa.
+- La categoría `aprobado con revisión` se determina a partir del historial (`abstract_logs`) cuando existió un `revision_email_sent`.
+- El admin puede exportar CSV respetando los filtros activos.
+- La modalidad final `oral` / `poster` la decide el admin, independientemente de la recomendación del evaluador.
 
 ---
 
@@ -222,12 +275,19 @@ nano2026.org {
 }
 ```
 
-### 3. Cambiar SECRET_KEY antes de producción
+### 3. Definir variables de entorno de producción
 
-En `app/auth.py`:
-```python
-SECRET_KEY = "clave-secreta-larga-y-aleatoria"
+Como mínimo:
+
+```bash
+export SECRET_KEY="clave-secreta-larga-y-aleatoria"
+export MAIL_USERNAME="usuario@example.com"
+export MAIL_PASSWORD="app-password"
+export MAIL_FROM="usuario@example.com"
+export PUBLIC_BASE_URL="https://nano2026.org"
 ```
+
+Alternativamente, definirlas en el archivo de entorno que use el servicio systemd.
 
 ### 4. Crear servicio systemd para uvicorn
 ```bash
@@ -244,6 +304,7 @@ After=network.target
 User=gcorthey
 WorkingDirectory=/home/gcorthey/congreso_nano
 ExecStart=/home/gcorthey/congreso_nano/venv/bin/uvicorn app.main:app --host 0.0.0.0 --port 8000 --workers 2
+EnvironmentFile=/home/gcorthey/congreso_nano/.env
 Restart=always
 
 [Install]
@@ -271,6 +332,10 @@ sudo systemctl status nano2026
 - El PDF se genera al vuelo con xhtml2pdf, sin almacenamiento en disco
 - El título del abstract soporta cursiva, sub/superíndice y símbolos especiales
 - Las referencias van en campo separado con formato APA
+- Los eventos relevantes del flujo se registran en `abstract_logs`
+- El proyecto usa envío de mails para aceptación, revisión, rechazo y comunicación de modalidad
+- Los links de revisión usan tokens firmados con vencimiento de 72 horas
+- La autenticación web se resuelve con cookie `access_token`
 - Para producción se recomienda poner Cloudflare delante del servidor
 
 ---
