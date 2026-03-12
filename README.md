@@ -325,6 +325,61 @@ sudo systemctl status nano2026
 
 ---
 
+## Backups de base de datos
+
+El proyecto incluye scripts para backup y restore de `congreso.db` en `scripts/`.
+
+### Backup
+
+Script:
+
+```bash
+./scripts/backup_db.sh
+```
+
+Qué hace:
+
+- crea un snapshot consistente de SQLite usando `sqlite3 .backup`,
+- comprime el archivo con `gzip`,
+- sube una copia diaria y otra horaria al bucket S3 `nano2026-backups`,
+- escribe un log en `backup.log`.
+
+Supuestos actuales del script:
+
+- base local en `/home/gcorthey/congreso_nano/congreso.db`,
+- perfil AWS `nano2026`,
+- bucket S3 `nano2026-backups`.
+
+### Restore
+
+Para ver fechas disponibles:
+
+```bash
+./scripts/restore_db.sh
+```
+
+Para restaurar una fecha puntual:
+
+```bash
+./scripts/restore_db.sh YYYY-MM-DD
+```
+
+Qué hace:
+
+- muestra confirmación antes de sobrescribir la base local,
+- guarda una copia del estado actual en un archivo como `congreso.db.pre-restore.<timestamp>`,
+- descarga el backup diario desde S3,
+- valida integridad con `PRAGMA integrity_check`,
+- reemplaza la base local solo si el backup es válido.
+
+### Recomendaciones operativas
+
+- No restaurar con la app escribiendo sobre la base al mismo tiempo.
+- Verificar credenciales AWS y acceso al bucket antes de correr backup o restore.
+- Conservar los archivos `congreso.db.pre-restore.*` hasta confirmar que la restauración fue correcta.
+
+---
+
 ## Notas
 
 - La base de datos `congreso.db` se crea automáticamente al iniciar
