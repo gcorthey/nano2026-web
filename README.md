@@ -352,11 +352,15 @@ Supuestos actuales del script:
 
 ### Restore
 
-Para ver fechas disponibles:
+#### 1. Ver backups disponibles
+
+El script sin argumentos lista las fechas disponibles en `s3://nano2026-backups/daily/`:
 
 ```bash
 ./scripts/restore_db.sh
 ```
+
+#### 2. Elegir una fecha y ejecutar la restauración
 
 Para restaurar una fecha puntual:
 
@@ -364,13 +368,53 @@ Para restaurar una fecha puntual:
 ./scripts/restore_db.sh YYYY-MM-DD
 ```
 
-Qué hace:
+Ejemplo:
+
+```bash
+./scripts/restore_db.sh 2026-03-10
+```
+
+#### 3. Confirmar la operación
+
+El script muestra:
+
+- la fecha del backup que va a restaurar,
+- la ruta de destino de la base local,
+- una confirmación interactiva `¿Confirmar? [s/N]`.
+
+Solo continúa si se responde `s` o `S`.
+
+#### 4. Qué hace internamente el restore
+
+Una vez confirmada la operación, el script:
 
 - muestra confirmación antes de sobrescribir la base local,
 - guarda una copia del estado actual en un archivo como `congreso.db.pre-restore.<timestamp>`,
 - descarga el backup diario desde S3,
 - valida integridad con `PRAGMA integrity_check`,
 - reemplaza la base local solo si el backup es válido.
+
+Importante:
+
+- si la verificación de integridad falla, el restore se aborta,
+- el archivo `congreso.db.pre-restore.<timestamp>` queda disponible para volver atrás manualmente.
+
+#### 5. Qué validar después del restore
+
+Después de restaurar, conviene verificar:
+
+- que la aplicación levanta correctamente,
+- que podés iniciar sesión en `/login`,
+- que el panel `/admin` muestra datos esperados,
+- que la fecha/contenido restaurado coincide con el backup elegido.
+
+Si algo sale mal, el archivo de resguardo previo queda en la raíz del proyecto con nombre:
+
+```text
+congreso.db.pre-restore.<timestamp>
+```
+
+y puede usarse para recuperar el estado anterior.
 
 ### Recomendaciones operativas
 
