@@ -160,7 +160,7 @@
                     {% if a.estado.value == 'pendiente' %}
                         <span class="bg-yellow-100 text-yellow-800 px-2 py-0.5 rounded text-xs">Pendiente</span>
                     {% elif a.estado.value == 'aprobado' %}
-                        {% if a.acceptance_flag and a.acceptance_flag.minor_revision == 1 %}
+                        {% if a.id in accepted_with_revision_ids %}
                             <span class="bg-emerald-100 text-emerald-800 px-2 py-0.5 rounded text-xs">Aceptado con rev.</span>
                         {% else %}
                             <span class="bg-green-100 text-green-800 px-2 py-0.5 rounded text-xs">Aceptado</span>

@@ -20,7 +20,6 @@ from xhtml2pdf import pisa
 import io
 import csv
 from fastapi_mail import FastMail, MessageSchema, ConnectionConfig
-from types import SimpleNamespace
 from sqlalchemy import text
 
 models.Base.metadata.create_all(bind=engine)
@@ -332,14 +331,11 @@ def admin_abstracts(
     area = normalize_area_code(area)
     query, accepted_with_revision_ids = build_admin_abstracts_query(db, estado, area, aprobado_tipo)
     abstracts = query.order_by(models.Abstract.fecha_envio.desc()).all()
-    for abstract in abstracts:
-        abstract.acceptance_flag = SimpleNamespace(
-            minor_revision=1 if abstract.id in accepted_with_revision_ids else 0
-        )
     evaluadores = db.query(models.User).filter(models.User.role == "evaluador").all()
     return templates.TemplateResponse("admin/abstracts.html", {
         "request": request,
         "abstracts": abstracts,
+        "accepted_with_revision_ids": accepted_with_revision_ids,
         "estado_filtro": estado,
         "area_filtro": area,
         "aprobado_tipo_filtro": aprobado_tipo,
@@ -1106,10 +1102,6 @@ def export_abstracts_csv(
 ):
     query, accepted_with_revision_ids = build_admin_abstracts_query(db, estado, area, aprobado_tipo)
     abstracts = query.order_by(models.Abstract.fecha_envio.desc()).all()
-    for abstract in abstracts:
-        abstract.acceptance_flag = SimpleNamespace(
-            minor_revision=1 if abstract.id in accepted_with_revision_ids else 0
-        )
 
     output = io.StringIO()
     writer = csv.writer(output)
