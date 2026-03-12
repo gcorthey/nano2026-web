@@ -3,7 +3,24 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>NANO2026 — XXIV Encuentro de Superficies y Materiales Nanoestructurados</title>
+    <title>{{ page_title or "NANO2026 - XXIV Encuentro de Superficies y Materiales Nanoestructurados" }}</title>
+    <meta name="description" content="{{ meta_description or 'Congreso de nanotecnología en Argentina con conferencias, programa, inscripción y envío de resúmenes.' }}">
+    <link rel="canonical" href="{{ canonical_url or request.url }}">
+    <meta name="robots" content="index,follow">
+    <meta property="og:locale" content="es_AR">
+    <meta property="og:type" content="website">
+    <meta property="og:site_name" content="NANO2026">
+    <meta property="og:title" content="{{ page_title or 'NANO2026 - XXIV Encuentro de Superficies y Materiales Nanoestructurados' }}">
+    <meta property="og:description" content="{{ meta_description or 'Congreso de nanotecnología en Argentina con conferencias, programa, inscripción y envío de resúmenes.' }}">
+    <meta property="og:url" content="{{ canonical_url or request.url }}">
+    <meta property="og:image" content="{{ og_image_url or (request.base_url|string).rstrip('/') ~ '/static/logos/organizadores.png' }}">
+    <meta name="twitter:card" content="summary_large_image">
+    <meta name="twitter:title" content="{{ page_title or 'NANO2026 - XXIV Encuentro de Superficies y Materiales Nanoestructurados' }}">
+    <meta name="twitter:description" content="{{ meta_description or 'Congreso de nanotecnología en Argentina con conferencias, programa, inscripción y envío de resúmenes.' }}">
+    <meta name="twitter:image" content="{{ og_image_url or (request.base_url|string).rstrip('/') ~ '/static/logos/organizadores.png' }}">
+    {% if structured_data %}
+    <script type="application/ld+json">{{ structured_data | safe }}</script>
+    {% endif %}
     <script src="https://cdn.tailwindcss.com"></script>
 </head>
 <body class="bg-gray-100 min-h-screen">

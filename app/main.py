@@ -1,3 +1,4 @@
+import json
 import os
 import string
 import secrets
@@ -24,6 +25,7 @@ import io
 import csv
 from fastapi_mail import FastMail, MessageSchema, ConnectionConfig
 from sqlalchemy import text
+from xml.sax.saxutils import escape
 
 models.Base.metadata.create_all(bind=engine)
 
@@ -117,6 +119,152 @@ def backfill_final_codes():
             db.commit()
     finally:
         db.close()
+
+
+SITE_NAME = "NANO2026"
+DEFAULT_OG_IMAGE_PATH = "/static/logos/organizadores.png"
+
+
+def get_public_base_url(request: Request) -> str:
+    return os.getenv("PUBLIC_BASE_URL", str(request.base_url).rstrip("/"))
+
+
+def absolute_url(request: Request, path: str) -> str:
+    if path.startswith("http://") or path.startswith("https://"):
+        return path
+    return f"{get_public_base_url(request)}{path}"
+
+
+def trim_text(text: str | None, max_length: int = 160) -> str:
+    normalized = " ".join((text or "").split())
+    if len(normalized) <= max_length:
+        return normalized
+    return normalized[: max_length - 1].rstrip() + "…"
+
+
+def build_structured_data(
+    request: Request,
+    *,
+    page_title: str,
+    page_description: str,
+    canonical_url: str,
+    include_event: bool = False
+) -> str:
+    base_url = get_public_base_url(request)
+    data = {
+        "@context": "https://schema.org",
+        "@graph": [
+            {
+                "@type": "Organization",
+                "@id": f"{base_url}#organization",
+                "name": SITE_NAME,
+                "url": base_url,
+                "email": "nano2026@unsam.edu.ar",
+                "sameAs": [
+                    "https://www.instagram.com/encuentronano2026/"
+                ]
+            },
+            {
+                "@type": "WebSite",
+                "@id": f"{base_url}#website",
+                "url": base_url,
+                "name": SITE_NAME,
+                "inLanguage": "es-AR"
+            },
+            {
+                "@type": "WebPage",
+                "@id": f"{canonical_url}#webpage",
+                "url": canonical_url,
+                "name": page_title,
+                "description": page_description,
+                "isPartOf": {
+                    "@id": f"{base_url}#website"
+                },
+                "about": {
+                    "@id": f"{base_url}#organization"
+                },
+                "inLanguage": "es-AR"
+            }
+        ]
+    }
+
+    if include_event:
+        data["@graph"].append({
+            "@type": "Event",
+            "@id": f"{base_url}#event",
+            "name": "NANO2026 - XXIV Encuentro de Superficies y Materiales Nanoestructurados",
+            "description": page_description,
+            "eventAttendanceMode": "https://schema.org/OfflineEventAttendanceMode",
+            "eventStatus": "https://schema.org/EventScheduled",
+            "startDate": "2026-06-03",
+            "endDate": "2026-06-05",
+            "url": canonical_url,
+            "image": [
+                absolute_url(request, DEFAULT_OG_IMAGE_PATH)
+            ],
+            "location": {
+                "@type": "Place",
+                "name": "Campus UNSAM",
+                "address": {
+                    "@type": "PostalAddress",
+                    "addressLocality": "San Martin",
+                    "addressRegion": "Buenos Aires",
+                    "addressCountry": "AR"
+                }
+            },
+            "organizer": {
+                "@id": f"{base_url}#organization"
+            }
+        })
+
+    return json.dumps(data, ensure_ascii=False, separators=(",", ":"))
+
+
+def public_page_context(
+    request: Request,
+    *,
+    title: str,
+    description: str,
+    canonical_path: str,
+    og_image_path: str = DEFAULT_OG_IMAGE_PATH,
+    include_event_schema: bool = False,
+    extra: dict | None = None
+) -> dict:
+    canonical_url = absolute_url(request, canonical_path)
+    context = {
+        "request": request,
+        "page_title": title,
+        "meta_description": trim_text(description, 160),
+        "canonical_url": canonical_url,
+        "og_image_url": absolute_url(request, og_image_path),
+        "structured_data": build_structured_data(
+            request,
+            page_title=title,
+            page_description=trim_text(description, 220),
+            canonical_url=canonical_url,
+            include_event=include_event_schema
+        )
+    }
+    if extra:
+        context.update(extra)
+    return context
+
+
+def public_urls(request: Request) -> list[str]:
+    base_url = get_public_base_url(request)
+    return [
+        f"{base_url}/",
+        f"{base_url}/about",
+        f"{base_url}/inscripcion",
+        f"{base_url}/programa",
+        f"{base_url}/speakers",
+        f"{base_url}/venue",
+        f"{base_url}/sponsors",
+        f"{base_url}/submit",
+        f"{base_url}/circulares",
+        f"{base_url}/contacto",
+        f"{base_url}/abstracts",
+    ]
 
 def get_accepted_with_revision_ids(db: Session) -> set[int]:
     log_rows = db.query(models.AbstractLog.abstract_id).filter(
@@ -430,7 +578,18 @@ def logout():
 # --- Envío público de abstracts ---
 @app.get("/submit", response_class=HTMLResponse)
 def submit_form(request: Request):
-    return templates.TemplateResponse("public/submit.html", {"request": request})
+    return templates.TemplateResponse(
+        "public/submit.html",
+        public_page_context(
+            request,
+            title="Envío de resúmenes | NANO2026",
+            description=(
+                "Presentá tu resumen para el NANO2026 y participá del encuentro "
+                "de superficies y materiales nanoestructurados."
+            ),
+            canonical_path="/submit"
+        )
+    )
 @app.post("/submit", response_class=HTMLResponse)
 def submit_abstract(
     request: Request,
@@ -447,7 +606,15 @@ def submit_abstract(
 ):
     if not contenido_html or contenido_html.strip() == "<p></p>":
         return templates.TemplateResponse("public/submit.html", {
-            "request": request,
+            **public_page_context(
+                request,
+                title="Envío de resúmenes | NANO2026",
+                description=(
+                    "Presentá tu resumen para el NANO2026 y participá del encuentro "
+                    "de superficies y materiales nanoestructurados."
+                ),
+                canonical_path="/submit"
+            ),
             "error": "El resumen no puede estar vacío."
         })
 
@@ -502,7 +669,15 @@ def submit_abstract(
     db.commit()
 
     return templates.TemplateResponse("public/submit.html", {
-        "request": request,
+        **public_page_context(
+            request,
+            title="Envío de resúmenes | NANO2026",
+            description=(
+                "Presentá tu resumen para el NANO2026 y participá del encuentro "
+                "de superficies y materiales nanoestructurados."
+            ),
+            canonical_path="/submit"
+        ),
         "success": True
     })
 # --- Admin: lista de abstracts ---
@@ -1115,12 +1290,25 @@ def home(request: Request, db: Session = Depends(get_db)):
         models.Abstract.estado == models.EstadoEnum.aprobado
     ).count()
     total_speakers = db.query(models.Speaker).count()
-    return templates.TemplateResponse("public/home.html", {
-        "request": request,
-        "total_abstracts": total_abstracts,
-        "total_aprobados": total_aprobados,
-        "total_speakers": total_speakers
-    })
+    return templates.TemplateResponse(
+        "public/home.html",
+        public_page_context(
+            request,
+            title="Congreso de Nanotecnología en Argentina 2026 | NANO2026",
+            description=(
+                "NANO2026 es el XXIV Encuentro de Superficies y Materiales "
+                "Nanoestructurados. Se realiza del 3 al 5 de junio de 2026 en "
+                "Campus UNSAM, San Martin, Buenos Aires."
+            ),
+            canonical_path="/",
+            include_event_schema=True,
+            extra={
+                "total_abstracts": total_abstracts,
+                "total_aprobados": total_aprobados,
+                "total_speakers": total_speakers,
+            }
+        )
+    )
 
 @app.get("/abstracts", response_class=HTMLResponse)
 def abstracts_publicos(
@@ -1140,13 +1328,24 @@ def abstracts_publicos(
     if afiliacion:
         query = query.filter(models.Abstract.afiliacion.ilike(f"%{afiliacion}%"))
     abstracts = query.order_by(models.Abstract.fecha_envio.desc()).all()
-    return templates.TemplateResponse("public/abstracts.html", {
-        "request": request,
-        "abstracts": abstracts,
-        "q": q,
-        "autor": autor,
-        "afiliacion": afiliacion
-    })
+    return templates.TemplateResponse(
+        "public/abstracts.html",
+        public_page_context(
+            request,
+            title="Resúmenes aprobados | NANO2026",
+            description=(
+                "Consultá los resúmenes aprobados del NANO2026 por título, autor "
+                "o afiliación."
+            ),
+            canonical_path="/abstracts",
+            extra={
+                "abstracts": abstracts,
+                "q": q,
+                "autor": autor,
+                "afiliacion": afiliacion,
+            }
+        )
+    )
 @app.get("/abstracts/{abstract_id}", response_class=HTMLResponse)
 def abstract_publico_detalle(
     abstract_id: int,
@@ -1159,10 +1358,17 @@ def abstract_publico_detalle(
     ).first()
     if not abstract:
         raise HTTPException(status_code=404, detail="Resumen no encontrado")
-    return templates.TemplateResponse("public/abstract_detail.html", {
-        "request": request,
-        "abstract": abstract
-    })
+    abstract_description = trim_text(strip_tags(abstract.contenido_html), 160)
+    return templates.TemplateResponse(
+        "public/abstract_detail.html",
+        public_page_context(
+            request,
+            title=f"{abstract.titulo} | Resumen NANO2026",
+            description=abstract_description or "Resumen aprobado del NANO2026.",
+            canonical_path=f"/abstracts/{abstract_id}",
+            extra={"abstract": abstract}
+        )
+    )
 
 
 @app.get("/abstracts/{abstract_id}/pdf")
@@ -1194,24 +1400,79 @@ def abstract_pdf(abstract_id: int, db: Session = Depends(get_db)):
 
 @app.get("/speakers", response_class=HTMLResponse)
 def speakers(request: Request):
-    return templates.TemplateResponse("public/speakers.html", {"request": request})
+    return templates.TemplateResponse(
+        "public/speakers.html",
+        public_page_context(
+            request,
+            title="Conferencias y speakers | NANO2026",
+            description=(
+                "Conocé las conferencias plenarias y los speakers invitados del "
+                "NANO2026."
+            ),
+            canonical_path="/speakers"
+        )
+    )
 
 @app.get("/venue", response_class=HTMLResponse)
 def venue(request: Request):
-    return templates.TemplateResponse("public/venue.html", {"request": request})
+    return templates.TemplateResponse(
+        "public/venue.html",
+        public_page_context(
+            request,
+            title="Sede del congreso | NANO2026",
+            description=(
+                "Información sobre la sede del NANO2026 en Campus UNSAM, San Martin, "
+                "Buenos Aires."
+            ),
+            canonical_path="/venue"
+        )
+    )
 
 @app.get("/programa", response_class=HTMLResponse)
 def programa(request: Request):
-    return templates.TemplateResponse("public/programa.html", {"request": request})
+    return templates.TemplateResponse(
+        "public/programa.html",
+        public_page_context(
+            request,
+            title="Programa del congreso | NANO2026",
+            description=(
+                "Revisá el programa del NANO2026 con sesiones, conferencias y "
+                "actividades del encuentro."
+            ),
+            canonical_path="/programa"
+        )
+    )
 
 
 @app.get("/about", response_class=HTMLResponse)
 def about(request: Request):
-    return templates.TemplateResponse("public/about.html", {"request": request})
+    return templates.TemplateResponse(
+        "public/about.html",
+        public_page_context(
+            request,
+            title="Sobre el encuentro | NANO2026",
+            description=(
+                "Conocé el enfoque, la historia y los objetivos del XXIV Encuentro "
+                "de Superficies y Materiales Nanoestructurados."
+            ),
+            canonical_path="/about"
+        )
+    )
 
 @app.get("/sponsors", response_class=HTMLResponse)
 def sponsors(request: Request):
-    return templates.TemplateResponse("public/sponsors.html", {"request": request})
+    return templates.TemplateResponse(
+        "public/sponsors.html",
+        public_page_context(
+            request,
+            title="Sponsors y empresas | NANO2026",
+            description=(
+                "Espacio para sponsors, empresas e instituciones vinculadas al "
+                "NANO2026."
+            ),
+            canonical_path="/sponsors"
+        )
+    )
 
 
 @app.post("/admin/abstracts/{abstract_id}/delete")
@@ -1261,13 +1522,44 @@ def admin_edit_abstract(
     return RedirectResponse(url=f"/admin/abstracts/{abstract_id}", status_code=303)
 @app.get("/circulares", response_class=HTMLResponse)
 def circulares(request: Request):
-    return templates.TemplateResponse("public/circulares.html", {"request": request})
+    return templates.TemplateResponse(
+        "public/circulares.html",
+        public_page_context(
+            request,
+            title="Circulares del congreso | NANO2026",
+            description="Accedé a las circulares y novedades oficiales del NANO2026.",
+            canonical_path="/circulares"
+        )
+    )
 @app.get("/contacto", response_class=HTMLResponse)
 def contacto(request: Request):
-    return templates.TemplateResponse("public/contacto.html", {"request": request})
+    return templates.TemplateResponse(
+        "public/contacto.html",
+        public_page_context(
+            request,
+            title="Contacto | NANO2026",
+            description=(
+                "Canales de contacto del NANO2026 para consultas sobre inscripción, "
+                "programa, resúmenes y organización."
+            ),
+            canonical_path="/contacto"
+        )
+    )
 @app.get("/inscripcion")
 def inscripcion(request: Request):
-    return templates.TemplateResponse("public/inscripcion.html", {"request": request})
+    return templates.TemplateResponse(
+        "public/inscripcion.html",
+        public_page_context(
+            request,
+            title="Inscripción al congreso | NANO2026",
+            description=(
+                "Información de inscripción, categorías y costos para participar "
+                "del NANO2026."
+            ),
+            canonical_path="/inscripcion",
+            include_event_schema=True
+        )
+    )
 
 @app.post("/admin/abstracts/{abstract_id}/tipo")
 def admin_asignar_tipo(
@@ -1439,7 +1731,15 @@ async def contacto_post(
     if not result.get("success"):
         print("reCAPTCHA result:", result)
         return templates.TemplateResponse("public/contacto.html", {
-            "request": request,
+            **public_page_context(
+                request,
+                title="Contacto | NANO2026",
+                description=(
+                    "Canales de contacto del NANO2026 para consultas sobre inscripción, "
+                    "programa, resúmenes y organización."
+                ),
+                canonical_path="/contacto"
+            ),
             "error": "Verificación fallida. Por favor intentá de nuevo."
         })
 
@@ -1455,11 +1755,69 @@ async def contacto_post(
     try:
         await fm.send_message(mensaje)
         return templates.TemplateResponse("public/contacto.html", {
-            "request": request,
+            **public_page_context(
+                request,
+                title="Contacto | NANO2026",
+                description=(
+                    "Canales de contacto del NANO2026 para consultas sobre inscripción, "
+                    "programa, resúmenes y organización."
+                ),
+                canonical_path="/contacto"
+            ),
             "success": True
         })
     except Exception as e:
         return templates.TemplateResponse("public/contacto.html", {
-            "request": request,
+            **public_page_context(
+                request,
+                title="Contacto | NANO2026",
+                description=(
+                    "Canales de contacto del NANO2026 para consultas sobre inscripción, "
+                    "programa, resúmenes y organización."
+                ),
+                canonical_path="/contacto"
+            ),
             "error": f"Error: {str(e)}"
         })
+
+
+@app.get("/robots.txt")
+def robots_txt(request: Request):
+    content = (
+        "User-agent: *\n"
+        "Allow: /\n"
+        "Disallow: /admin\n"
+        "Disallow: /eval\n"
+        "Disallow: /login\n"
+        "Disallow: /logout\n"
+        "Disallow: /forgot-password\n"
+        "Disallow: /force-password-change\n"
+        "Disallow: /reset-password/\n"
+        f"Sitemap: {get_public_base_url(request)}/sitemap.xml\n"
+    )
+    return Response(content=content, media_type="text/plain")
+
+
+@app.get("/sitemap.xml")
+def sitemap_xml(request: Request, db: Session = Depends(get_db)):
+    base_url = get_public_base_url(request)
+    urls = public_urls(request)
+    approved_abstracts = db.query(models.Abstract.id).filter(
+        models.Abstract.estado == models.EstadoEnum.aprobado
+    ).all()
+    urls.extend(
+        f"{base_url}/abstracts/{abstract_id}"
+        for (abstract_id,) in approved_abstracts
+    )
+
+    xml_items = "\n".join(
+        f"  <url><loc>{escape(url)}</loc></url>"
+        for url in urls
+    )
+    xml = (
+        "<?xml version=\"1.0\" encoding=\"UTF-8\"?>\n"
+        "<urlset xmlns=\"http://www.sitemaps.org/schemas/sitemap/0.9\">\n"
+        f"{xml_items}\n"
+        "</urlset>\n"
+    )
+    return Response(content=xml, media_type="application/xml")

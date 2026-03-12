@@ -1,9 +1,21 @@
 {% extends "public/base.html" %}
 {% block content %}
 
-<h1 class="text-2xl font-bold mb-6">Resúmenes</h1>
+<div class="relative rounded-2xl overflow-hidden mb-10" style="min-height: 180px; background: linear-gradient(135deg, #0a1628 0%, #0d3b6e 60%, #1a6b4a 100%);">
+    <div class="relative z-10 flex flex-col items-center justify-center text-center px-8 py-12">
+        <h1 class="text-3xl font-black text-white mb-2">Resúmenes aprobados de NANO2026</h1>
+        <p class="text-teal-300">Buscá trabajos por título, autor o afiliación</p>
+    </div>
+</div>
 
-<form method="get" action="/abstracts" class="bg-white rounded shadow p-4 mb-6 flex flex-wrap gap-3">
+<div class="bg-white rounded-2xl shadow p-8 mb-6">
+    <h2 class="text-xl font-bold text-gray-800 mb-3">Consulta de trabajos aceptados</h2>
+    <p class="text-gray-600 leading-relaxed">
+        Esta sección reúne los resúmenes aprobados del XXIV Encuentro de Superficies y Materiales Nanoestructurados. Podés buscar por título, autor o afiliación para identificar trabajos del área de nanotecnología, superficies, nanobiointerfases y materiales nanoestructurados.
+    </p>
+</div>
+
+<form method="get" action="/abstracts" class="bg-white rounded-2xl shadow p-4 mb-6 flex flex-wrap gap-3">
     <input type="text" name="q" value="{{ q }}" placeholder="Buscar por título..."
         class="flex-1 border rounded px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-blue-400"/>
     <input type="text" name="autor" value="{{ autor }}" placeholder="Autor..."
@@ -19,16 +31,23 @@
 {% if abstracts %}
 <div class="space-y-4">
     {% for a in abstracts %}
-    <div class="bg-white rounded shadow p-5 hover:shadow-md transition">
+    <div class="bg-white rounded-2xl shadow p-5 hover:shadow-md transition">
         <a href="/abstracts/{{ a.id }}" class="text-lg font-semibold text-blue-800 hover:underline">{{ a.titulo }}</a>
         <p class="text-gray-600 text-sm mt-1">{{ a.autor }} — <span class="text-gray-400">{{ a.afiliacion }}</span></p>
     </div>
     {% endfor %}
 </div>
 {% else %}
-<div class="bg-white rounded shadow p-8 text-center text-gray-400">
+<div class="bg-white rounded-2xl shadow p-8 text-center text-gray-400">
     No se encontraron resúmenes con esos criterios.
 </div>
 {% endif %}
+
+<div class="bg-white rounded-2xl shadow p-8 mt-6">
+    <h2 class="text-xl font-bold text-gray-800 mb-3">Participar en NANO2026</h2>
+    <p class="text-gray-600 leading-relaxed">
+        Si querés presentar un trabajo en próximas convocatorias, consultá la página de <a href="/submit" class="text-teal-600 hover:text-teal-500 font-medium">envío de resúmenes</a>. También podés revisar la <a href="/inscripcion" class="text-teal-600 hover:text-teal-500 font-medium">inscripción</a>, el <a href="/programa" class="text-teal-600 hover:text-teal-500 font-medium">programa</a> y las <a href="/speakers" class="text-teal-600 hover:text-teal-500 font-medium">conferencias</a>.
+    </p>
+</div>
 
 {% endblock %}
