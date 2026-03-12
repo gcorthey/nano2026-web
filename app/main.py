@@ -110,10 +110,16 @@ def backfill_final_codes():
         db.close()
 
 def get_accepted_with_revision_ids(db: Session) -> set[int]:
-    rows = db.query(models.AbstractLog.abstract_id).filter(
+    log_rows = db.query(models.AbstractLog.abstract_id).filter(
         models.AbstractLog.event_type == "revision_email_sent"
     ).distinct().all()
-    return {abstract_id for (abstract_id,) in rows}
+    flag_rows = db.query(models.AbstractAcceptanceFlag.abstract_id).filter(
+        models.AbstractAcceptanceFlag.minor_revision == 1
+    ).distinct().all()
+    return {
+        abstract_id
+        for (abstract_id,) in log_rows + flag_rows
+    }
 
 def build_admin_abstracts_query(
     db: Session,
@@ -141,6 +147,19 @@ def build_admin_abstracts_query(
                 query = query.filter(models.Abstract.id == -1)
 
     return query, accepted_with_revision_ids
+
+def set_minor_revision_flag(db: Session, abstract: models.Abstract, enabled: bool):
+    flag = db.query(models.AbstractAcceptanceFlag).filter(
+        models.AbstractAcceptanceFlag.abstract_id == abstract.id
+    ).first()
+    if not flag:
+        flag = models.AbstractAcceptanceFlag(
+            abstract_id=abstract.id,
+            minor_revision=1 if enabled else 0,
+        )
+        db.add(flag)
+    else:
+        flag.minor_revision = 1 if enabled else 0
 
 def apply_abstract_edit_from_form(abstract: models.Abstract, form_data, db: Session):
     abstract.titulo = form_data.get("titulo", "").strip()
@@ -365,6 +384,7 @@ def admin_approve(abstract_id: int, current_user: models.User = Depends(require_
     abstract = db.query(models.Abstract).filter(models.Abstract.id == abstract_id).first()
     abstract.estado = models.EstadoEnum.aprobado
     sync_final_code(abstract)
+    set_minor_revision_flag(db, abstract, False)
     db.commit()
     return RedirectResponse(url=f"/admin/abstracts/{abstract_id}", status_code=302)
 
@@ -374,8 +394,25 @@ def admin_reject(abstract_id: int, current_user: models.User = Depends(require_a
     abstract.estado = models.EstadoEnum.rechazado
     abstract.tipo_asignado_admin = None
     abstract.codigo_final = None
+    set_minor_revision_flag(db, abstract, False)
     db.commit()
     return RedirectResponse(url=f"/admin/abstracts/{abstract_id}", status_code=302)
+
+@app.post("/admin/abstracts/{abstract_id}/finalize-approval")
+def admin_finalize_approval(
+    abstract_id: int,
+    request: Request,
+    current_user: models.User = Depends(require_admin),
+    db: Session = Depends(get_db)
+):
+    abstract = db.query(models.Abstract).filter(models.Abstract.id == abstract_id).first()
+    if not abstract:
+        raise HTTPException(status_code=404, detail="No encontrado")
+    abstract.estado = models.EstadoEnum.aprobado
+    set_minor_revision_flag(db, abstract, False)
+    db.commit()
+    redirect_to = request.headers.get("referer") or "/admin"
+    return RedirectResponse(url=redirect_to, status_code=303)
     
 
 # --- Admin: asignar/desasignar evaluador ---
@@ -527,6 +564,7 @@ def eval_detalle(
         "request": request,
         "abstract": abstract,
         "review": review,
+        "minor_revision_checked": bool(abstract.acceptance_flag and abstract.acceptance_flag.minor_revision == 1),
         "current_user": current_user,
         "mail_sent": mail_sent,
         "mail_error": mail_error,
@@ -540,6 +578,7 @@ async def eval_submit(
     comentario: str = Form(""),
     current_user: models.User = Depends(require_evaluador),
     recomienda_oral: int = Form(None),
+    revisiones_menores: int = Form(0),
     db: Session = Depends(get_db)
 ):
     asig = db.query(models.Asignacion).filter(
@@ -573,12 +612,15 @@ async def eval_submit(
     abstract = asig.abstract
     if decision == "aprobado":
         abstract.estado = models.EstadoEnum.aprobado
+        set_minor_revision_flag(db, abstract, revisiones_menores == 1)
     elif decision == "revisar":
         abstract.estado = models.EstadoEnum.revisar
         abstract.tipo_asignado_admin = None
+        set_minor_revision_flag(db, abstract, False)
     elif decision == "rechazado":
         abstract.estado = models.EstadoEnum.rechazado
         abstract.tipo_asignado_admin = None
+        set_minor_revision_flag(db, abstract, False)
 
     sync_final_code(abstract)
 
@@ -648,6 +690,7 @@ async def eval_submit(
         "request": request,
         "abstract": abstract,
         "review": review,
+        "minor_revision_checked": bool(abstract.acceptance_flag and abstract.acceptance_flag.minor_revision == 1),
         "logs": db.query(models.AbstractLog).filter(
             models.AbstractLog.abstract_id == abstract.id
         ).order_by(models.AbstractLog.created_at.desc()).all(),
@@ -795,6 +838,7 @@ async def revision_edit_submit(
     abstract.estado = models.EstadoEnum.pendiente
     abstract.tipo_asignado_admin = None
     abstract.codigo_final = None
+    set_minor_revision_flag(db, abstract, False)
     # Al reenviar correcciones, reiniciar evaluaciones previas para que vuelva a "Pendiente"
     for review in abstract.reviews:
         review.decision = None
@@ -925,6 +969,7 @@ def admin_delete_abstract(abstract_id: int, current_user: models.User = Depends(
     abstract = db.query(models.Abstract).filter(models.Abstract.id == abstract_id).first()
     if not abstract:
         raise HTTPException(status_code=404, detail="No encontrado")
+    db.query(models.AbstractAcceptanceFlag).filter(models.AbstractAcceptanceFlag.abstract_id == abstract_id).delete()
     db.query(models.Review).filter(models.Review.abstract_id == abstract_id).delete()
     db.query(models.Asignacion).filter(models.Asignacion.abstract_id == abstract_id).delete()
     db.query(models.Autor).filter(models.Autor.abstract_id == abstract_id).delete()
@@ -1061,6 +1106,10 @@ def export_abstracts_csv(
 ):
     query, accepted_with_revision_ids = build_admin_abstracts_query(db, estado, area, aprobado_tipo)
     abstracts = query.order_by(models.Abstract.fecha_envio.desc()).all()
+    for abstract in abstracts:
+        abstract.acceptance_flag = SimpleNamespace(
+            minor_revision=1 if abstract.id in accepted_with_revision_ids else 0
+        )
 
     output = io.StringIO()
     writer = csv.writer(output)

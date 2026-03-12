@@ -45,6 +45,7 @@ class Abstract(Base):
     tipo_asignado_admin = Column(String, nullable=True)  # 'oral', 'poster', o None
     codigo_final = Column(String, nullable=True)
     logs = relationship("AbstractLog", back_populates="abstract", order_by="AbstractLog.created_at")
+    acceptance_flag = relationship("AbstractAcceptanceFlag", back_populates="abstract", uselist=False)
     
 
 class Autor(Base):
@@ -119,3 +120,11 @@ class AbstractLog(Base):
     details = Column(Text, nullable=False)
     actor_email = Column(String, nullable=True)
     abstract = relationship("Abstract", back_populates="logs")
+
+class AbstractAcceptanceFlag(Base):
+    __tablename__ = "abstract_acceptance_flags"
+    id = Column(Integer, primary_key=True, index=True)
+    abstract_id = Column(Integer, ForeignKey("abstracts.id"), nullable=False, unique=True, index=True)
+    minor_revision = Column(Integer, default=0, nullable=False)  # 1 = aceptado con revisiones menores
+    updated_at = Column(DateTime, default=datetime.utcnow, onupdate=datetime.utcnow, nullable=False)
+    abstract = relationship("Abstract", back_populates="acceptance_flag")

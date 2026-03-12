@@ -126,21 +126,31 @@
             <label class="block text-sm font-medium mb-2">Decisión *</label>
             <div class="flex gap-4">
                 <label class="flex items-center gap-2 cursor-pointer">
-                    <input type="radio" name="decision" value="aprobado" required
+                    <input type="radio" name="decision" value="aprobado" required class="decision-radio"
                         {% if review and review.decision and review.decision.value == 'aprobado' %}checked{% endif %}>
-                    <span class="text-green-700 font-medium">Aprobar</span>
+                    <span class="text-green-700 font-medium">Aceptar</span>
                 </label>
                 <label class="flex items-center gap-2 cursor-pointer">
-                    <input type="radio" name="decision" value="revisar"
+                    <input type="radio" name="decision" value="revisar" class="decision-radio"
                         {% if review and review.decision and review.decision.value == 'revisar' %}checked{% endif %}>
                     <span class="text-yellow-600 font-medium">Requiere revisión</span>
                 </label>
                 <label class="flex items-center gap-2 cursor-pointer">
-                    <input type="radio" name="decision" value="rechazado"
+                    <input type="radio" name="decision" value="rechazado" class="decision-radio"
                         {% if review and review.decision and review.decision.value == 'rechazado' %}checked{% endif %}>
                     <span class="text-red-700 font-medium">Rechazar</span>
                 </label>
             </div>
+        </div>
+
+        <div class="mb-4">
+            <label class="inline-flex items-center gap-2 text-sm">
+                <input type="checkbox" id="minor-revision-checkbox" name="revisiones_menores" value="1"
+                    {% if minor_revision_checked %}checked{% endif %}
+                    {% if not (review and review.decision and review.decision.value == 'aprobado') %}disabled{% endif %}>
+                <span class="font-medium text-gray-700">Realizar revisiones menores</span>
+            </label>
+            <p class="text-xs text-gray-500 mt-1">Solo disponible cuando la decisión es "Aprobar". Marcar cuando es necesaria la edición del resumen por el CO para cumplir con el formato.</p>
         </div>
 
         {% if abstract.presentacion_oral %}
@@ -210,6 +220,22 @@
     const prepareBtn = document.getElementById('prepare-send-revision');
     const confirmBtn = document.getElementById('confirm-send-revision');
     const confirmHint = document.getElementById('confirm-send-hint');
+    const decisionRadios = document.querySelectorAll('.decision-radio');
+    const minorRevisionCheckbox = document.getElementById('minor-revision-checkbox');
+
+    function updateMinorRevisionCheckbox() {
+        if (!minorRevisionCheckbox) return;
+        const selected = document.querySelector('.decision-radio:checked');
+        const isApproved = selected && selected.value === 'aprobado';
+        minorRevisionCheckbox.disabled = !isApproved;
+        if (!isApproved) minorRevisionCheckbox.checked = false;
+    }
+
+    decisionRadios.forEach((radio) => {
+        radio.addEventListener('change', updateMinorRevisionCheckbox);
+    });
+    updateMinorRevisionCheckbox();
+
     if (prepareBtn && confirmBtn && confirmHint) {
         prepareBtn.addEventListener('click', () => {
             if (prepareBtn.disabled) return;

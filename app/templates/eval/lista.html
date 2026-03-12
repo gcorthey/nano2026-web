@@ -23,7 +23,7 @@
         <div class="flex flex-wrap gap-2">
             <button type="button" class="filter-eval-btn px-3 py-1 rounded-full text-xs bg-teal-600 text-white" data-eval="all">Todas</button>
             <button type="button" class="filter-eval-btn px-3 py-1 rounded-full text-xs bg-gray-100 text-gray-700" data-eval="pendiente">Pendiente</button>
-            <button type="button" class="filter-eval-btn px-3 py-1 rounded-full text-xs bg-gray-100 text-gray-700" data-eval="aprobado">Aprobado</button>
+            <button type="button" class="filter-eval-btn px-3 py-1 rounded-full text-xs bg-gray-100 text-gray-700" data-eval="aprobado">Aceptado</button>
             <button type="button" class="filter-eval-btn px-3 py-1 rounded-full text-xs bg-gray-100 text-gray-700" data-eval="revisar">Requiere revisión</button>
             <button type="button" class="filter-eval-btn px-3 py-1 rounded-full text-xs bg-gray-100 text-gray-700" data-eval="rechazado">Rechazado</button>
         </div>
@@ -80,7 +80,11 @@
                 <td class="px-4 py-3 whitespace-nowrap">
                     {% if review and review.decision %}
                         {% if review.decision.value == 'aprobado' %}
-                            <span class="bg-green-100 text-green-800 px-2 py-0.5 rounded text-xs">Aprobado</span>
+                            {% if asig.abstract.acceptance_flag and asig.abstract.acceptance_flag.minor_revision == 1 %}
+                                <span class="bg-emerald-100 text-emerald-800 px-2 py-0.5 rounded text-xs">Aceptado con rev.</span>
+                            {% else %}
+                                <span class="bg-green-100 text-green-800 px-2 py-0.5 rounded text-xs">Aceptado</span>
+                            {% endif %}
                         {% elif review.decision.value == 'revisar' %}
                             <span class="bg-orange-100 text-orange-800 px-2 py-0.5 rounded text-xs">Requiere revisión</span>
                         {% else %}
