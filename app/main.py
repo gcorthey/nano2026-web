@@ -458,10 +458,10 @@ def admin_evaluadores(
     current_user: models.User = Depends(require_admin),
     db: Session = Depends(get_db)
 ):
-    evaluadores = db.query(models.User).filter(models.User.role == models.RoleEnum.evaluador).all()
+    usuarios = db.query(models.User).order_by(models.User.role, models.User.nombre).all()
     return templates.TemplateResponse("admin/evaluadores.html", {
         "request": request,
-        "evaluadores": evaluadores,
+        "usuarios": usuarios,
         "current_user": current_user
     })
 
@@ -471,15 +471,25 @@ def admin_crear_evaluador(
     nombre: str = Form(...),
     email: str = Form(...),
     password: str = Form(...),
+    role: str = Form("evaluador"),
     current_user: models.User = Depends(require_admin),
     db: Session = Depends(get_db)
 ):
-    evaluadores = db.query(models.User).filter(models.User.role == models.RoleEnum.evaluador).all()
+    usuarios = db.query(models.User).order_by(models.User.role, models.User.nombre).all()
+    try:
+        selected_role = models.RoleEnum(role)
+    except ValueError:
+        return templates.TemplateResponse("admin/evaluadores.html", {
+            "request": request,
+            "usuarios": usuarios,
+            "error": "Rol inválido.",
+            "current_user": current_user
+        })
     existe = db.query(models.User).filter(models.User.email == email).first()
     if existe:
         return templates.TemplateResponse("admin/evaluadores.html", {
             "request": request,
-            "evaluadores": evaluadores,
+            "usuarios": usuarios,
             "error": f"Ya existe un usuario con el email {email}",
             "current_user": current_user
         })
@@ -487,24 +497,49 @@ def admin_crear_evaluador(
         nombre=nombre,
         email=email,
         password_hash=hash_password(password),
-        role=models.RoleEnum.evaluador
+        role=selected_role
     )
     db.add(nuevo)
     db.commit()
-    evaluadores = db.query(models.User).filter(models.User.role == models.RoleEnum.evaluador).all()
+    usuarios = db.query(models.User).order_by(models.User.role, models.User.nombre).all()
+    role_label = "Administrador" if selected_role == models.RoleEnum.admin else "Evaluador"
     return templates.TemplateResponse("admin/evaluadores.html", {
         "request": request,
-        "evaluadores": evaluadores,
-        "success": f"Evaluador {nombre} creado correctamente.",
+        "usuarios": usuarios,
+        "success": f"{role_label} {nombre} creado correctamente.",
         "current_user": current_user
     })
 
-@app.post("/admin/evaluadores/{evaluador_id}/delete")
+@app.post("/admin/evaluadores/{evaluador_id}/delete", response_class=HTMLResponse)
 def admin_eliminar_evaluador(
+    request: Request,
     evaluador_id: int,
     current_user: models.User = Depends(require_admin),
     db: Session = Depends(get_db)
 ):
+    user = db.query(models.User).filter(models.User.id == evaluador_id).first()
+    if not user:
+        return RedirectResponse(url="/admin/evaluadores", status_code=302)
+
+    usuarios = db.query(models.User).order_by(models.User.role, models.User.nombre).all()
+    if user.id == current_user.id:
+        return templates.TemplateResponse("admin/evaluadores.html", {
+            "request": request,
+            "usuarios": usuarios,
+            "error": "No podés eliminar tu propio usuario.",
+            "current_user": current_user
+        }, status_code=400)
+
+    if user.role == models.RoleEnum.admin:
+        admin_count = db.query(models.User).filter(models.User.role == models.RoleEnum.admin).count()
+        if admin_count <= 1:
+            return templates.TemplateResponse("admin/evaluadores.html", {
+                "request": request,
+                "usuarios": usuarios,
+                "error": "Debe existir al menos un administrador.",
+                "current_user": current_user
+            }, status_code=400)
+
     db.query(models.Asignacion).filter(models.Asignacion.evaluador_id == evaluador_id).delete()
     db.query(models.Review).filter(models.Review.evaluador_id == evaluador_id).delete()
     db.query(models.User).filter(models.User.id == evaluador_id).delete()

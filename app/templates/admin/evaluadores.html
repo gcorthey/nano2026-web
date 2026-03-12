@@ -2,7 +2,7 @@
 {% block content %}
 
 <div class="flex items-center justify-between mb-6">
-    <h1 class="text-2xl font-bold">Evaluadores</h1>
+    <h1 class="text-2xl font-bold">Usuarios</h1>
 </div>
 
 {% if success %}
@@ -16,9 +16,9 @@
     </div>
 {% endif %}
 
-<!-- Formulario nuevo evaluador -->
+<!-- Formulario nuevo usuario -->
 <div class="bg-white rounded shadow p-6 mb-6">
-    <h2 class="font-semibold mb-4">Agregar evaluador</h2>
+    <h2 class="font-semibold mb-4">Agregar usuario</h2>
     <form method="post" action="/admin/evaluadores" class="grid grid-cols-1 gap-4 sm:grid-cols-2">
         <div>
             <label class="block text-sm font-medium mb-1">Nombre completo *</label>
@@ -35,31 +35,47 @@
             <input type="password" name="password" required
                 class="w-full border rounded px-3 py-2 focus:outline-none focus:ring-2 focus:ring-blue-400"/>
         </div>
+        <div>
+            <label class="block text-sm font-medium mb-1">Rol *</label>
+            <select name="role" required
+                class="w-full border rounded px-3 py-2 focus:outline-none focus:ring-2 focus:ring-blue-400">
+                <option value="evaluador">Evaluador</option>
+                <option value="admin">Administrador</option>
+            </select>
+        </div>
         <div class="flex items-end">
             <button class="w-full bg-blue-600 text-white px-4 py-2 rounded hover:bg-blue-700 text-sm">
-                Crear evaluador
+                Crear usuario
             </button>
         </div>
     </form>
 </div>
 
-<!-- Lista de evaluadores -->
+<!-- Lista de usuarios -->
 <div class="bg-white rounded shadow overflow-hidden">
     <table class="w-full text-sm">
         <thead class="bg-gray-50 text-gray-600 uppercase text-xs">
             <tr>
                 <th class="px-4 py-3 text-left">Nombre</th>
                 <th class="px-4 py-3 text-left">Email</th>
+                <th class="px-4 py-3 text-left">Rol</th>
                 <th class="px-4 py-3 text-left">Asignaciones</th>
                 <th class="px-4 py-3 text-left">Reviews hechas</th>
                 <th class="px-4 py-3 text-left">Acciones</th>
             </tr>
         </thead>
         <tbody class="divide-y divide-gray-100">
-            {% for e in evaluadores %}
+            {% for e in usuarios %}
             <tr class="hover:bg-gray-50">
                 <td class="px-4 py-3 font-medium">{{ e.nombre }}</td>
                 <td class="px-4 py-3 text-gray-500">{{ e.email }}</td>
+                <td class="px-4 py-3">
+                    {% if e.role.value == "admin" %}
+                        <span class="inline-flex rounded-full bg-blue-100 px-2 py-1 text-xs font-medium text-blue-700">Administrador</span>
+                    {% else %}
+                        <span class="inline-flex rounded-full bg-gray-100 px-2 py-1 text-xs font-medium text-gray-700">Evaluador</span>
+                    {% endif %}
+                </td>
                 <td class="px-4 py-3">{{ e.asignaciones | length }}</td>
                 <td class="px-4 py-3">{{ e.reviews | length }}</td>
                 <td class="px-4 py-3">
@@ -70,10 +86,10 @@
                 </td>
             </tr>
             {% endfor %}
-            {% if not evaluadores %}
+            {% if not usuarios %}
             <tr>
-                <td colspan="5" class="px-4 py-6 text-center text-gray-400">
-                    No hay evaluadores todavía.
+                <td colspan="6" class="px-4 py-6 text-center text-gray-400">
+                    No hay usuarios todavía.
                 </td>
             </tr>
             {% endif %}
