@@ -1,4 +1,6 @@
 import os
+import string
+import secrets
 from dotenv import load_dotenv
 load_dotenv()
 import httpx
@@ -27,12 +29,19 @@ models.Base.metadata.create_all(bind=engine)
 
 def ensure_schema_updates():
     with engine.begin() as conn:
-        columns = {
+        abstract_columns = {
             row[1]
             for row in conn.execute(text("PRAGMA table_info(abstracts)")).fetchall()
         }
-        if "codigo_final" not in columns:
+        if "codigo_final" not in abstract_columns:
             conn.execute(text("ALTER TABLE abstracts ADD COLUMN codigo_final VARCHAR"))
+
+        user_columns = {
+            row[1]
+            for row in conn.execute(text("PRAGMA table_info(users)")).fetchall()
+        }
+        if "require_password_change" not in user_columns:
+            conn.execute(text("ALTER TABLE users ADD COLUMN require_password_change INTEGER NOT NULL DEFAULT 0"))
 
 ensure_schema_updates()
 
@@ -210,7 +219,8 @@ def create_default_admin():
             email="admin@congreso.com",
             nombre="Administrador",
             password_hash=hash_password("admin1234"),
-            role=models.RoleEnum.admin
+            role=models.RoleEnum.admin,
+            require_password_change=1
         )
         db.add(admin)
         db.commit()
@@ -253,9 +263,57 @@ def login(request: Request, response: Response, email: str = Form(...), password
             "success": None
         })
     token = create_access_token({"sub": user.email, "role": user.role})
-    resp = RedirectResponse(url="/admin" if user.role == models.RoleEnum.admin else "/eval", status_code=302)
+    target_url = "/force-password-change" if user.require_password_change else ("/admin" if user.role == models.RoleEnum.admin else "/eval")
+    resp = RedirectResponse(url=target_url, status_code=302)
     resp.set_cookie("access_token", token, httponly=True)
     return resp
+
+@app.get("/force-password-change", response_class=HTMLResponse)
+def force_password_change_form(
+    request: Request,
+    current_user: models.User = Depends(get_current_user)
+):
+    if not current_user.require_password_change:
+        return RedirectResponse(url="/admin" if current_user.role == models.RoleEnum.admin else "/eval", status_code=302)
+    return templates.TemplateResponse("reset_password.html", {
+        "request": request,
+        "token": None,
+        "error": None,
+        "force_change": True
+    })
+
+@app.post("/force-password-change", response_class=HTMLResponse)
+def force_password_change_submit(
+    request: Request,
+    password: str = Form(...),
+    password_confirm: str = Form(...),
+    current_user: models.User = Depends(get_current_user),
+    db: Session = Depends(get_db)
+):
+    if not current_user.require_password_change:
+        return RedirectResponse(url="/admin" if current_user.role == models.RoleEnum.admin else "/eval", status_code=302)
+
+    if password != password_confirm:
+        return templates.TemplateResponse("reset_password.html", {
+            "request": request,
+            "token": None,
+            "error": "Las contraseñas no coinciden.",
+            "force_change": True
+        }, status_code=400)
+
+    if len(password) < 8:
+        return templates.TemplateResponse("reset_password.html", {
+            "request": request,
+            "token": None,
+            "error": "La contraseña debe tener al menos 8 caracteres.",
+            "force_change": True
+        }, status_code=400)
+
+    current_user.password_hash = hash_password(password)
+    current_user.require_password_change = 0
+    db.commit()
+
+    return RedirectResponse(url="/admin" if current_user.role == models.RoleEnum.admin else "/eval", status_code=302)
 
 @app.get("/forgot-password", response_class=HTMLResponse)
 def forgot_password_form(request: Request):
@@ -352,6 +410,7 @@ def reset_password_submit(
 
     user = get_password_reset_user_or_400(token, db)
     user.password_hash = hash_password(password)
+    user.require_password_change = 0
     db.commit()
 
     return templates.TemplateResponse("login.html", {
@@ -594,11 +653,10 @@ def admin_evaluadores(
     })
 
 @app.post("/admin/evaluadores", response_class=HTMLResponse)
-def admin_crear_evaluador(
+async def admin_crear_evaluador(
     request: Request,
     nombre: str = Form(...),
     email: str = Form(...),
-    password: str = Form(...),
     role: str = Form("evaluador"),
     current_user: models.User = Depends(require_admin),
     db: Session = Depends(get_db)
@@ -621,20 +679,53 @@ def admin_crear_evaluador(
             "error": f"Ya existe un usuario con el email {email}",
             "current_user": current_user
         })
+    alphabet = string.ascii_letters + string.digits
+    generated_password = "".join(secrets.choice(alphabet) for _ in range(8))
     nuevo = models.User(
         nombre=nombre,
         email=email,
-        password_hash=hash_password(password),
-        role=selected_role
+        password_hash=hash_password(generated_password),
+        role=selected_role,
+        require_password_change=1
     )
     db.add(nuevo)
     db.commit()
     usuarios = db.query(models.User).order_by(models.User.role, models.User.nombre).all()
     role_label = "Administrador" if selected_role == models.RoleEnum.admin else "Evaluador"
+    base_url = os.getenv("PUBLIC_BASE_URL", str(request.base_url).rstrip("/"))
+    login_url = f"{base_url}/login"
+    panel_url = f"{base_url}/admin" if selected_role == models.RoleEnum.admin else f"{base_url}/eval"
+    mensaje = MessageSchema(
+        subject="[NANO2026] Bienvenida y acceso a la plataforma",
+        recipients=[email],
+        body=(
+            f"Hola {nombre},\n\n"
+            f"Se creó una cuenta para vos en la plataforma NANO2026 del XXIV Encuentro de Superficies y Materiales Nanoestructurados.\n\n"
+            f"Rol asignado: {role_label}\n"
+            f"Email de acceso: {email}\n"
+            f"Contraseña inicial: {generated_password}\n\n"
+            f"Para ingresar:\n"
+            f"1. Abrí {login_url}\n"
+            f"2. Ingresá con tu email y la contraseña inicial\n"
+            f"3. Una vez dentro, vas a acceder a tu panel: {panel_url}\n\n"
+            f"Si no recordás la contraseña más adelante, podés usar la opción \"¿Olvidaste tu contraseña?\" en la pantalla de login.\n\n"
+            f"Saludos,\n"
+            f"Comité organizador NANO2026\n"
+        ),
+        subtype="plain"
+    )
+    fm = FastMail(mail_config)
+    warning = None
+    try:
+        await fm.send_message(mensaje)
+    except Exception:
+        warning = f"{role_label} {nombre} creado correctamente, pero no se pudo enviar el correo de bienvenida."
+
     return templates.TemplateResponse("admin/evaluadores.html", {
         "request": request,
         "usuarios": usuarios,
-        "success": f"{role_label} {nombre} creado correctamente.",
+        "success": f"{role_label} {nombre} creado correctamente." if not warning else None,
+        "warning": warning,
         "current_user": current_user
     })
 

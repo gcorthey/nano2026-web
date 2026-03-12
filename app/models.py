@@ -21,6 +21,7 @@ class User(Base):
     nombre = Column(String, nullable=False)
     password_hash = Column(String, nullable=False)
     role = Column(Enum(RoleEnum), nullable=False)
+    require_password_change = Column(Integer, default=0, nullable=False)
     reviews = relationship("Review", back_populates="evaluador")
     asignaciones = relationship("Asignacion", back_populates="evaluador")
 

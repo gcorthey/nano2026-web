@@ -85,11 +85,15 @@ def get_current_user(request: Request, db: Session = Depends(get_db)) -> models.
     return user
 
 def require_admin(current_user: models.User = Depends(get_current_user)) -> models.User:
+    if current_user.require_password_change:
+        raise HTTPException(status_code=302, headers={"Location": "/force-password-change"})
     if current_user.role != models.RoleEnum.admin:
         raise HTTPException(status_code=403, detail="Acceso solo para administradores")
     return current_user
 
 def require_evaluador(current_user: models.User = Depends(get_current_user)) -> models.User:
+    if current_user.require_password_change:
+        raise HTTPException(status_code=302, headers={"Location": "/force-password-change"})
     if current_user.role not in (models.RoleEnum.evaluador, models.RoleEnum.admin):
         raise HTTPException(status_code=403, detail="Acceso solo para evaluadores")
     return current_user
