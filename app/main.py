@@ -814,6 +814,10 @@ def programa(request: Request):
 def about(request: Request):
     return templates.TemplateResponse("public/about.html", {"request": request})
 
+@app.get("/sponsors", response_class=HTMLResponse)
+def sponsors(request: Request):
+    return templates.TemplateResponse("public/sponsors.html", {"request": request})
+
 
 @app.post("/admin/abstracts/{abstract_id}/delete")
 def admin_delete_abstract(abstract_id: int, current_user: models.User = Depends(require_admin), db: Session = Depends(get_db)):

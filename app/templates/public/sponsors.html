@@ -1,0 +1,256 @@
+{% extends "public/base.html" %}
+{% block content %}
+
+<div class="relative rounded-2xl overflow-hidden mb-10" style="background: linear-gradient(140deg, #0b1f33 0%, #114b5f 48%, #1f7a53 100%);">
+    <div class="absolute inset-0 opacity-15" style="background:
+        radial-gradient(circle at 20% 20%, rgba(255,255,255,0.22), transparent 28%),
+        radial-gradient(circle at 80% 30%, rgba(255,255,255,0.12), transparent 24%),
+        radial-gradient(circle at 50% 80%, rgba(255,255,255,0.10), transparent 22%);"></div>
+    <div class="relative z-10 px-8 py-12 md:px-12 md:py-16">
+        <div class="max-w-3xl">
+            <p class="text-teal-200 text-xs font-bold tracking-[0.25em] uppercase mb-3">Convocatoria Sponsors</p>
+            <h1 class="text-4xl md:text-5xl font-black text-white leading-tight mb-4">Nano2026 busca aliados para conectar ciencia, tecnología e industria</h1>
+            <p class="text-lg text-teal-50 mb-6">3 al 5 de junio de 2026 · UNSAM, Campus Miguelete · Más de 300 participantes del sistema científico-tecnológico y del sector productivo.</p>
+            <div class="flex flex-wrap gap-3">
+                <a href="mailto:nano2026@unsam.edu.ar?subject=Auspicio%20Nano2026"
+                    class="bg-white text-slate-900 font-semibold px-6 py-3 rounded-full hover:bg-slate-100 transition shadow">
+                    Consultar auspicio
+                </a>
+                <a href="#niveles-auspicio"
+                    class="border border-white/40 text-white font-semibold px-6 py-3 rounded-full hover:bg-white/10 transition">
+                    Ver niveles
+                </a>
+            </div>
+        </div>
+    </div>
+</div>
+
+<div class="grid grid-cols-1 md:grid-cols-3 gap-6 mb-10">
+    <div class="bg-white rounded-2xl shadow p-6 border-t-4 border-teal-500">
+        <p class="text-4xl font-black text-teal-600">300+</p>
+        <p class="text-gray-600 text-sm mt-2">Participantes esperados de universidades, centros de investigación y sector tecnológico.</p>
+    </div>
+    <div class="bg-white rounded-2xl shadow p-6 border-t-4 border-blue-500">
+        <p class="text-4xl font-black text-blue-600">7</p>
+        <p class="text-gray-600 text-sm mt-2">Ejes temáticos que conectan materiales avanzados, energía, ambiente, agro, alimentos y salud.</p>
+    </div>
+    <div class="bg-white rounded-2xl shadow p-6 border-t-4 border-emerald-500">
+        <p class="text-4xl font-black text-emerald-600">25</p>
+        <p class="text-gray-600 text-sm mt-2">Años de trayectoria de un encuentro consolidado para la comunidad nano en Argentina.</p>
+    </div>
+</div>
+
+<div class="grid grid-cols-1 lg:grid-cols-[1.3fr_0.9fr] gap-8 mb-10">
+    <section class="bg-white rounded-2xl shadow p-8">
+        <h2 class="text-2xl font-bold text-gray-900 mb-4">Por qué Nano2026 es una oportunidad relevante</h2>
+        <p class="text-gray-600 leading-relaxed mb-4">
+            El XXIV Encuentro de Superficies y Materiales Nanoestructurados es el encuentro anual de la comunidad de nanotecnología en Argentina.
+            Desde su primera edición en 2001, organizada en el Centro Atómico Bariloche de la CNEA, se consolidó como un espacio de referencia
+            para la presentación y discusión de avances en nanociencia y nanotecnología.
+        </p>
+        <p class="text-gray-600 leading-relaxed mb-4">
+            La edición 2026 se realizará de manera presencial en la Universidad Nacional de San Martín y será organizada por el INS-EByN-UNSAM,
+            en colaboración con UBA, CNEA, FAN, UNLP y CONICET. Esta edición tendrá un foco especial en fortalecer la interacción entre la
+            comunidad científica y el sector productivo.
+        </p>
+        <p class="text-gray-600 leading-relaxed">
+            El evento reunirá investigadores, estudiantes, profesionales y referentes tecnológicos en un entorno ideal para generar visibilidad,
+            vínculos estratégicos y conversaciones concretas sobre aplicaciones, desafíos industriales y oportunidades de desarrollo.
+        </p>
+    </section>
+
+    <aside class="bg-slate-900 rounded-2xl shadow p-8 text-white">
+        <p class="text-teal-300 text-xs font-bold uppercase tracking-[0.2em] mb-3">Datos clave</p>
+        <ul class="space-y-4 text-sm">
+            <li class="border-b border-white/10 pb-4">
+                <span class="block text-white font-semibold mb-1">Fecha</span>
+                <span class="text-slate-300">3 al 5 de junio de 2026</span>
+            </li>
+            <li class="border-b border-white/10 pb-4">
+                <span class="block text-white font-semibold mb-1">Lugar</span>
+                <span class="text-slate-300">UNSAM · Campus Miguelete · San Martín, Buenos Aires, Argentina</span>
+            </li>
+            <li class="border-b border-white/10 pb-4">
+                <span class="block text-white font-semibold mb-1">Perfil de audiencia</span>
+                <span class="text-slate-300">Investigadores, estudiantes de grado y posgrado, profesionales y referentes del ecosistema de innovación</span>
+            </li>
+            <li>
+                <span class="block text-white font-semibold mb-1">Contacto</span>
+                <a href="mailto:nano2026@unsam.edu.ar?subject=Auspicio%20Nano2026" class="text-teal-300 hover:underline">nano2026@unsam.edu.ar</a>
+            </li>
+        </ul>
+    </aside>
+</div>
+
+<section class="bg-white rounded-2xl shadow p-8 mb-10">
+    <div class="flex flex-col md:flex-row md:items-end md:justify-between gap-4 mb-6">
+        <div>
+            <h2 class="text-2xl font-bold text-gray-900">Qué pasa durante el evento</h2>
+            <p class="text-gray-500 mt-2">Instancias pensadas para generar intercambio académico, tecnológico y productivo.</p>
+        </div>
+    </div>
+    <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+        {% for item in [
+            ('Conferencias plenarias y semiplenarias', 'A cargo de científicos y tecnólogos de trayectoria nacional e internacional.'),
+            ('Comunicaciones orales y sesiones de póster', 'Espacios de alta circulación para difundir resultados y conversar con estudiantes e investigadores.'),
+            ('Mesas redondas y debates', 'Discusiones sobre formación, desarrollo tecnológico y articulación con el sector productivo.'),
+            ('Networking con empresas y organizaciones', 'Instancias orientadas a detectar desafíos, aplicaciones y oportunidades de colaboración.')
+        ] %}
+        <div class="rounded-2xl bg-slate-50 border border-slate-200 p-5">
+            <h3 class="font-semibold text-gray-900 mb-2">{{ item[0] }}</h3>
+            <p class="text-sm text-gray-600 leading-relaxed">{{ item[1] }}</p>
+        </div>
+        {% endfor %}
+    </div>
+</section>
+
+<section class="grid grid-cols-1 lg:grid-cols-2 gap-8 mb-10">
+    <div class="bg-white rounded-2xl shadow p-8">
+        <h2 class="text-2xl font-bold text-gray-900 mb-5">Por qué apoyar Nano2026</h2>
+        <ul class="space-y-4 text-sm text-gray-600">
+            {% for item in [
+                'Aumentar la visibilidad institucional frente a una audiencia especializada en nanotecnología, materiales avanzados, biotecnología, energía, ambiente y salud.',
+                'Establecer vínculos con grupos de investigación, universidades, centros de desarrollo y organismos científicos de todo el país.',
+                'Acceder a talento altamente calificado en formación y a investigadores jóvenes con alto potencial de transferencia.',
+                'Explorar oportunidades de colaboración y desarrollo tecnológico aplicables al sector productivo.',
+                'Contribuir al fortalecimiento de la comunidad nacional de nanociencia y nanotecnología.'
+            ] %}
+            <li class="flex items-start gap-3">
+                <span class="mt-1 h-2.5 w-2.5 rounded-full bg-teal-500 flex-shrink-0"></span>
+                <span>{{ item }}</span>
+            </li>
+            {% endfor %}
+        </ul>
+    </div>
+
+    <div class="bg-gradient-to-br from-amber-50 to-orange-100 rounded-2xl shadow p-8 border border-orange-200">
+        <h2 class="text-2xl font-bold text-gray-900 mb-5">Ejes temáticos</h2>
+        <div class="flex flex-wrap gap-3">
+            {% for area in [
+                'Síntesis de nanomateriales',
+                'Autoensamblado',
+                'Nanobiointerfases y procesos biológicos',
+                'Superficies e interfaces',
+                'Propiedades de nanomateriales',
+                'Aplicaciones en ambiente, energía, agro, alimentos y catálisis',
+                'Nanotecnología y salud'
+            ] %}
+            <span class="px-3 py-2 rounded-full bg-white/80 text-sm text-gray-700 border border-white">{{ area }}</span>
+            {% endfor %}
+        </div>
+    </div>
+</section>
+
+<section id="niveles-auspicio" class="bg-white rounded-2xl shadow p-8 mb-10">
+    <div class="mb-6">
+        <h2 class="text-2xl font-bold text-gray-900">Niveles de auspicio</h2>
+        <p class="text-gray-500 mt-2">Opciones pensadas para distintos niveles de participación y visibilidad.</p>
+    </div>
+    <div class="grid grid-cols-1 xl:grid-cols-2 gap-5">
+        <div class="rounded-2xl border-2 border-slate-900 bg-slate-900 text-white p-6">
+            <div class="flex items-baseline justify-between gap-4 mb-4">
+                <div class="flex items-center gap-3">
+                    <span class="inline-flex h-10 w-10 items-center justify-center rounded-full bg-slate-700 text-slate-100">
+                        <svg class="w-5 h-5" fill="currentColor" viewBox="0 0 24 24" aria-hidden="true">
+                            <path d="M17 3H7v4H3l3 6 6 8 6-8 3-6h-4V3zm-8 2h6v2H9V5zm-2.764 4h11.528l-1.6 3.2H7.836L6.236 9zM12 17.667 9.17 13.2h5.66L12 17.667z"/>
+                        </svg>
+                    </span>
+                    <h3 class="text-xl font-bold">Platino</h3>
+                </div>
+                <span class="text-2xl font-black">USD 2,500</span>
+            </div>
+            <ul class="space-y-2 text-sm text-slate-200 list-disc list-inside">
+                <li>Logo destacado en sitio web, folletos, pancartas y campañas por correo.</li>
+                <li>Espacio de exhibición en ubicación privilegiada.</li>
+                <li>Mención exclusiva en apertura y clausura.</li>
+                <li>Presentación de 30 minutos para la empresa o tecnología.</li>
+                <li>Dos inscripciones gratuitas para representantes.</li>
+                <li>Acceso a información posterior al evento.</li>
+                <li>Distribución de merchandising a participantes.</li>
+            </ul>
+        </div>
+
+        <div class="rounded-2xl border-2 border-amber-400 bg-amber-50 p-6">
+            <div class="flex items-baseline justify-between gap-4 mb-4">
+                <div class="flex items-center gap-3">
+                    <span class="inline-flex h-10 w-10 items-center justify-center rounded-full bg-amber-200 text-amber-700">
+                        <svg class="w-5 h-5" fill="currentColor" viewBox="0 0 24 24" aria-hidden="true">
+                            <path d="M17 3H7v4H3l3 6 6 8 6-8 3-6h-4V3zm-8 2h6v2H9V5zm-2.764 4h11.528l-1.6 3.2H7.836L6.236 9zM12 17.667 9.17 13.2h5.66L12 17.667z"/>
+                        </svg>
+                    </span>
+                    <h3 class="text-xl font-bold text-gray-900">Oro</h3>
+                </div>
+                <span class="text-2xl font-black text-amber-700">USD 1,500</span>
+            </div>
+            <ul class="space-y-2 text-sm text-gray-700 list-disc list-inside">
+                <li>Logo en sitio web, folletos y pancartas.</li>
+                <li>Espacio dedicado para mostrar productos o servicios.</li>
+                <li>Mención como patrocinador oro durante el evento.</li>
+                <li>Una inscripción gratuita para representante.</li>
+                <li>Distribución de merchandising a participantes.</li>
+            </ul>
+        </div>
+
+        <div class="rounded-2xl border border-slate-300 bg-slate-50 p-6">
+            <div class="flex items-baseline justify-between gap-4 mb-4">
+                <div class="flex items-center gap-3">
+                    <span class="inline-flex h-10 w-10 items-center justify-center rounded-full bg-slate-200 text-slate-500">
+                        <svg class="w-5 h-5" fill="currentColor" viewBox="0 0 24 24" aria-hidden="true">
+                            <path d="M17 3H7v4H3l3 6 6 8 6-8 3-6h-4V3zm-8 2h6v2H9V5zm-2.764 4h11.528l-1.6 3.2H7.836L6.236 9zM12 17.667 9.17 13.2h5.66L12 17.667z"/>
+                        </svg>
+                    </span>
+                    <h3 class="text-xl font-bold text-gray-900">Plata</h3>
+                </div>
+                <span class="text-2xl font-black text-slate-700">USD 500</span>
+            </div>
+            <ul class="space-y-2 text-sm text-gray-700 list-disc list-inside">
+                <li>Logo en sitio web y folletos.</li>
+                <li>Mención como patrocinador plata en materiales del evento.</li>
+                <li>Distribución de merchandising a participantes.</li>
+            </ul>
+        </div>
+
+        <div class="rounded-2xl border border-emerald-200 bg-emerald-50 p-6">
+            <div class="flex items-baseline justify-between gap-4 mb-4">
+                <div class="flex items-center gap-3">
+                    <span class="inline-flex h-10 w-10 items-center justify-center rounded-full bg-orange-200 text-orange-700">
+                        <svg class="w-5 h-5" fill="currentColor" viewBox="0 0 24 24" aria-hidden="true">
+                            <path d="M17 3H7v4H3l3 6 6 8 6-8 3-6h-4V3zm-8 2h6v2H9V5zm-2.764 4h11.528l-1.6 3.2H7.836L6.236 9zM12 17.667 9.17 13.2h5.66L12 17.667z"/>
+                        </svg>
+                    </span>
+                    <h3 class="text-xl font-bold text-gray-900">Bronce</h3>
+                </div>
+                <span class="text-lg font-black text-emerald-700">Menos de USD 500</span>
+            </div>
+            <ul class="space-y-2 text-sm text-gray-700 list-disc list-inside">
+                <li>Logo en formato reducido en sitio web y folletos.</li>
+                <li>Reconocimiento general como colaborador del evento.</li>
+                <li>Distribución de merchandising a participantes.</li>
+            </ul>
+        </div>
+    </div>
+</section>
+
+<section class="bg-slate-900 rounded-2xl shadow p-8 md:p-10 text-white">
+    <div class="grid grid-cols-1 md:grid-cols-[1.2fr_0.8fr] gap-8 items-center">
+        <div>
+            <p class="text-teal-300 text-xs font-bold uppercase tracking-[0.2em] mb-3">Oportunidad de auspicio</p>
+            <h2 class="text-3xl font-black mb-4">Sumá a tu organización a la edición 2026</h2>
+            <p class="text-slate-300 leading-relaxed">
+                Si tu empresa u organización busca visibilidad en un entorno de alto valor científico y tecnológico,
+                Nano2026 ofrece un marco concreto para construir vínculos, detectar oportunidades y posicionarse frente
+                a una audiencia especializada.
+            </p>
+        </div>
+        <div class="bg-white/5 border border-white/10 rounded-2xl p-6">
+            <p class="text-sm text-slate-300 mb-4">Escribinos para recibir la propuesta de auspicio y coordinar una conversación.</p>
+            <a href="mailto:nano2026@unsam.edu.ar?subject=Auspicio%20Nano2026"
+                class="block w-full text-center bg-teal-500 hover:bg-teal-400 text-white font-semibold px-6 py-3 rounded-xl transition">
+                Contactar al comité
+            </a>
+            <p class="text-center text-teal-200 text-sm mt-4">nano2026@unsam.edu.ar</p>
+        </div>
+    </div>
+</section>
+
+{% endblock %}
