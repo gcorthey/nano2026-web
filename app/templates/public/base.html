@@ -13,11 +13,14 @@
     <meta property="og:title" content="{{ page_title or 'NANO2026 - XXIV Encuentro de Superficies y Materiales Nanoestructurados' }}">
     <meta property="og:description" content="{{ meta_description or 'Congreso de nanotecnología en Argentina con conferencias, programa, inscripción y envío de resúmenes.' }}">
     <meta property="og:url" content="{{ canonical_url or request.url }}">
-    <meta property="og:image" content="{{ og_image_url or (request.base_url|string).rstrip('/') ~ '/static/logos/organizadores.png' }}">
+    <meta property="og:image" content="{{ og_image_url or (request.base_url|string).rstrip('/') ~ '/static/og/LOGO.png' }}">
+    <meta property="og:image:width" content="896">
+    <meta property="og:image:height" content="583">
+    <meta property="og:image:alt" content="NANO2026 - Encuentro de Superficies y Materiales Nanoestructurados">
     <meta name="twitter:card" content="summary_large_image">
     <meta name="twitter:title" content="{{ page_title or 'NANO2026 - XXIV Encuentro de Superficies y Materiales Nanoestructurados' }}">
     <meta name="twitter:description" content="{{ meta_description or 'Congreso de nanotecnología en Argentina con conferencias, programa, inscripción y envío de resúmenes.' }}">
-    <meta name="twitter:image" content="{{ og_image_url or (request.base_url|string).rstrip('/') ~ '/static/logos/organizadores.png' }}">
+    <meta name="twitter:image" content="{{ og_image_url or (request.base_url|string).rstrip('/') ~ '/static/og/LOGO.png' }}">
     {% if structured_data %}
     <script type="application/ld+json">{{ structured_data | safe }}</script>
     {% endif %}

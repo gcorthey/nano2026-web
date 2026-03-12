@@ -122,7 +122,7 @@ def backfill_final_codes():
 
 
 SITE_NAME = "NANO2026"
-DEFAULT_OG_IMAGE_PATH = "/static/logos/organizadores.png"
+DEFAULT_OG_IMAGE_PATH = "/static/og/LOGO.png"
 
 
 def get_public_base_url(request: Request) -> str:
