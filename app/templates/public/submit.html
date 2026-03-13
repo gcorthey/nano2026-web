@@ -14,7 +14,9 @@
     #titulo-editor .ql-editor { min-height: 42px; max-height: 80px; font-size: 1rem; }
 
     #referencias-editor .ql-editor { min-height: 120px; font-size: 1rem; }
- 
+
+    .dynamic-row { width: 100%; }
+    .dynamic-row input { min-width: 0; }
 </style>
 
 <!-- Hero -->
@@ -183,20 +185,20 @@
     function agregarAutor() {
         autorCount++;
         const div = document.createElement('div');
-        div.className = 'flex gap-2 items-center';
+        div.className = 'dynamic-row flex flex-col gap-2 sm:flex-row sm:flex-wrap sm:items-center';
         div.id = `autor-row-${autorCount}`;
         div.innerHTML = `
-            <span class="text-gray-400 text-sm w-5">${autorCount}.</span>
+            <span class="text-gray-400 text-sm w-5 sm:self-center">${autorCount}.</span>
             <input type="text" name="autor_nombre_${autorCount}" placeholder="Apellido, Nombre" required
-                class="flex-1 border rounded-lg px-3 py-1.5 text-sm focus:outline-none focus:ring-2 focus:ring-teal-400"/>
+                class="w-full sm:flex-1 border rounded-lg px-3 py-1.5 text-sm focus:outline-none focus:ring-2 focus:ring-teal-400"/>
             <input type="text" name="autor_afils_${autorCount}" placeholder="Afil. ej: 1,2"
-                class="w-24 border rounded-lg px-3 py-1.5 text-sm focus:outline-none focus:ring-2 focus:ring-teal-400"
+                class="w-full sm:w-28 border rounded-lg px-3 py-1.5 text-sm focus:outline-none focus:ring-2 focus:ring-teal-400"
                 title="Números de afiliación separados por coma"/>
-            <label class="flex items-center gap-1 text-xs text-gray-500 whitespace-nowrap cursor-pointer">
+            <label class="flex items-center gap-1 text-xs text-gray-500 cursor-pointer sm:whitespace-nowrap">
                 <input type="radio" name="presentador" value="${autorCount}"> Presenta
             </label>
             <button type="button" onclick="document.getElementById('autor-row-${autorCount}').remove()"
-                class="text-red-400 hover:text-red-600 text-lg leading-none">×</button>
+                class="self-end sm:self-center text-red-400 hover:text-red-600 text-lg leading-none">×</button>
         `;
         document.getElementById('autores-list').appendChild(div);
         if (autorCount === 1) {
@@ -207,14 +209,14 @@
     function agregarAfiliacion() {
         afiliacionCount++;
         const div = document.createElement('div');
-        div.className = 'flex gap-2 items-center';
+        div.className = 'dynamic-row flex flex-col gap-2 sm:flex-row sm:items-center';
         div.id = `afil-row-${afiliacionCount}`;
         div.innerHTML = `
-            <span class="text-gray-400 text-sm w-5">${afiliacionCount}.</span>
+            <span class="text-gray-400 text-sm w-5 sm:self-center">${afiliacionCount}.</span>
             <input type="text" name="afil_nombre_${afiliacionCount}" placeholder="Institución, ciudad, país" required
-                class="flex-1 border rounded-lg px-3 py-1.5 text-sm focus:outline-none focus:ring-2 focus:ring-teal-400"/>
+                class="w-full sm:flex-1 border rounded-lg px-3 py-1.5 text-sm focus:outline-none focus:ring-2 focus:ring-teal-400"/>
             <button type="button" onclick="document.getElementById('afil-row-${afiliacionCount}').remove()"
-                class="text-red-400 hover:text-red-600 text-lg leading-none">×</button>
+                class="self-end sm:self-center text-red-400 hover:text-red-600 text-lg leading-none">×</button>
         `;
         document.getElementById('afiliaciones-list').appendChild(div);
     }
