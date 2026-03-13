@@ -129,6 +129,10 @@ def get_public_base_url(request: Request) -> str:
     return os.getenv("PUBLIC_BASE_URL", str(request.base_url).rstrip("/"))
 
 
+def get_recaptcha_site_key() -> str:
+    return os.getenv("RECAPTCHA_SITE_KEY", "")
+
+
 def absolute_url(request: Request, path: str) -> str:
     if path.startswith("http://") or path.startswith("https://"):
         return path
@@ -590,6 +594,7 @@ def submit_form(request: Request):
                 ),
                 canonical_path="/submit"
             ),
+            "recaptcha_site_key": get_recaptcha_site_key(),
             "initial_submit_data": {
                 "titulo": "",
                 "email_autor": "",
@@ -605,7 +610,7 @@ def submit_form(request: Request):
         }
     )
 @app.post("/submit", response_class=HTMLResponse)
-def submit_abstract(
+async def submit_abstract(
     request: Request,
     titulo: str = Form(...),
     presentacion_oral: int = Form(...),
@@ -616,6 +621,7 @@ def submit_abstract(
     area_tematica: str = Form(...),
     referencias_html: str = Form(""),
     tiene_referencias: int = Form(0),
+    recaptcha_token: str = Form(""),
     db: Session = Depends(get_db)
 ):
     form_state = {
@@ -653,6 +659,7 @@ def submit_abstract(
                 ),
                 canonical_path="/submit"
             ),
+            "recaptcha_site_key": get_recaptcha_site_key(),
             "initial_submit_data": form_state,
             "error": message
         }, status_code=status_code)
@@ -672,6 +679,20 @@ def submit_abstract(
         return submit_error("El resumen no puede superar los 2500 caracteres.")
     if tiene_referencias and len(referencias_texto) > 750:
         return submit_error("Las referencias bibliográficas no pueden superar los 750 caracteres.")
+
+    async with httpx.AsyncClient() as client:
+        resp = await client.post(
+            "https://www.google.com/recaptcha/api/siteverify",
+            data={
+                "secret": os.getenv("RECAPTCHA_SECRET"),
+                "response": recaptcha_token
+            }
+        )
+        result = resp.json()
+
+    if not result.get("success"):
+        print("reCAPTCHA result:", result)
+        return submit_error("Verificación fallida. Por favor intentá de nuevo.")
 
     afiliaciones_data: list[tuple[int, str]] = []
     for i in range(1, afil_count + 1):
@@ -743,6 +764,7 @@ def submit_abstract(
             ),
             canonical_path="/submit"
         ),
+        "recaptcha_site_key": get_recaptcha_site_key(),
         "initial_submit_data": {
             "titulo": "",
             "email_autor": "",
@@ -1620,15 +1642,18 @@ def circulares(request: Request):
 def contacto(request: Request):
     return templates.TemplateResponse(
         "public/contacto.html",
-        public_page_context(
-            request,
-            title="Contacto | NANO2026",
-            description=(
-                "Canales de contacto del NANO2026 para consultas sobre inscripción, "
-                "programa, resúmenes y organización."
+        {
+            **public_page_context(
+                request,
+                title="Contacto | NANO2026",
+                description=(
+                    "Canales de contacto del NANO2026 para consultas sobre inscripción, "
+                    "programa, resúmenes y organización."
+                ),
+                canonical_path="/contacto"
             ),
-            canonical_path="/contacto"
-        )
+            "recaptcha_site_key": get_recaptcha_site_key(),
+        }
     )
 @app.get("/inscripcion")
 def inscripcion(request: Request):
@@ -1825,6 +1850,7 @@ async def contacto_post(
                 ),
                 canonical_path="/contacto"
             ),
+            "recaptcha_site_key": get_recaptcha_site_key(),
             "error": "Verificación fallida. Por favor intentá de nuevo."
         })
 
@@ -1849,6 +1875,7 @@ async def contacto_post(
                 ),
                 canonical_path="/contacto"
             ),
+            "recaptcha_site_key": get_recaptcha_site_key(),
             "success": True
         })
     except Exception as e:
@@ -1862,6 +1889,7 @@ async def contacto_post(
                 ),
                 canonical_path="/contacto"
             ),
+            "recaptcha_site_key": get_recaptcha_site_key(),
             "error": f"Error: {str(e)}"
         })
 
