@@ -157,6 +157,9 @@
             {% include "public/char_panel_content.html" %}
         </div>
         <div id="referencias-editor" class="border rounded-xl bg-white"></div>
+        <div class="flex justify-end mt-1">
+            <span id="referencias-counter" class="text-xs text-gray-400">0 / 750 caracteres</span>
+        </div>
     </div>
 
     <input type="hidden" name="referencias_html" id="referencias-hidden"/>
@@ -182,13 +185,35 @@
     let autorCount = 0;
     let afiliacionCount = 0;
 
+    function removeAutor(id) {
+        const rows = document.querySelectorAll('[id^="autor-row-"]');
+        if (rows.length <= 1) {
+            alert('Debe haber al menos un autor.');
+            return;
+        }
+        document.getElementById(`autor-row-${id}`)?.remove();
+    }
+
+    function removeAfiliacion(id) {
+        const rows = document.querySelectorAll('[id^="afil-row-"]');
+        if (rows.length <= 1) {
+            alert('Debe haber al menos una afiliación.');
+            return;
+        }
+        document.getElementById(`afil-row-${id}`)?.remove();
+    }
+
     function agregarAutor() {
         autorCount++;
         const div = document.createElement('div');
-        div.className = 'dynamic-row flex flex-col gap-2 sm:flex-row sm:flex-wrap sm:items-center';
+        div.className = 'dynamic-row grid grid-cols-1 gap-2 sm:flex sm:flex-row sm:flex-wrap sm:items-center';
         div.id = `autor-row-${autorCount}`;
         div.innerHTML = `
-            <span class="text-gray-400 text-sm w-5 sm:self-center">${autorCount}.</span>
+            <div class="flex items-start justify-between gap-3 sm:contents">
+                <span class="text-gray-400 text-sm w-5 pt-2 sm:pt-0 sm:self-center">${autorCount}.</span>
+                <button type="button" onclick="removeAutor(${autorCount})"
+                    class="text-red-400 hover:text-red-600 text-lg leading-none sm:order-none">×</button>
+            </div>
             <input type="text" name="autor_nombre_${autorCount}" placeholder="Apellido, Nombre" required
                 class="w-full sm:flex-1 border rounded-lg px-3 py-1.5 text-sm focus:outline-none focus:ring-2 focus:ring-teal-400"/>
             <input type="text" name="autor_afils_${autorCount}" placeholder="Afil. ej: 1,2"
@@ -197,8 +222,6 @@
             <label class="flex items-center gap-1 text-xs text-gray-500 cursor-pointer sm:whitespace-nowrap">
                 <input type="radio" name="presentador" value="${autorCount}"> Presenta
             </label>
-            <button type="button" onclick="document.getElementById('autor-row-${autorCount}').remove()"
-                class="self-end sm:self-center text-red-400 hover:text-red-600 text-lg leading-none">×</button>
         `;
         document.getElementById('autores-list').appendChild(div);
         if (autorCount === 1) {
@@ -209,17 +232,28 @@
     function agregarAfiliacion() {
         afiliacionCount++;
         const div = document.createElement('div');
-        div.className = 'dynamic-row flex flex-col gap-2 sm:flex-row sm:items-center';
+        div.className = 'dynamic-row grid grid-cols-1 gap-2 sm:flex sm:flex-row sm:items-center';
         div.id = `afil-row-${afiliacionCount}`;
         div.innerHTML = `
-            <span class="text-gray-400 text-sm w-5 sm:self-center">${afiliacionCount}.</span>
+            <div class="flex items-start justify-between gap-3 sm:contents">
+                <span class="text-gray-400 text-sm w-5 pt-2 sm:pt-0 sm:self-center">${afiliacionCount}.</span>
+                <button type="button" onclick="removeAfiliacion(${afiliacionCount})"
+                    class="text-red-400 hover:text-red-600 text-lg leading-none sm:order-none">×</button>
+            </div>
             <input type="text" name="afil_nombre_${afiliacionCount}" placeholder="Institución, ciudad, país" required
                 class="w-full sm:flex-1 border rounded-lg px-3 py-1.5 text-sm focus:outline-none focus:ring-2 focus:ring-teal-400"/>
-            <button type="button" onclick="document.getElementById('afil-row-${afiliacionCount}').remove()"
-                class="self-end sm:self-center text-red-400 hover:text-red-600 text-lg leading-none">×</button>
         `;
         document.getElementById('afiliaciones-list').appendChild(div);
     }
+
+    document.addEventListener('DOMContentLoaded', function() {
+        if (document.querySelectorAll('[id^="autor-row-"]').length === 0) {
+            agregarAutor();
+        }
+        if (document.querySelectorAll('[id^="afil-row-"]').length === 0) {
+            agregarAfiliacion();
+        }
+    });
 </script>
 
 <script>window.katex = katex;</script>
@@ -304,15 +338,15 @@
     const quillTitulo = crearEditorTitulo('titulo-editor', 'Escribí el título del trabajo aquí...');
     const quill = crearEditorResumen('quill-editor', 'Escribí el resumen aquí...');
     const MAX_CHARS = 2500;
+    const MAX_REF_CHARS = 750;
     const charCounter = document.getElementById('char-counter');
+    const referenciasCounter = document.getElementById('referencias-counter');
     quill.on('text-change', function() {
         const len = quill.getText().trim().length;
         charCounter.textContent = len + ' / ' + MAX_CHARS + ' caracteres';
         if (len > MAX_CHARS) {
             charCounter.classList.add('text-red-500', 'font-semibold');
             charCounter.classList.remove('text-gray-400');
-            const delta = quill.getContents();
-            let count = 0;
             quill.deleteText(MAX_CHARS, quill.getLength());
         } else {
             charCounter.classList.remove('text-red-500', 'font-semibold');
@@ -374,6 +408,18 @@ quillReferencias.setContents([
     { insert: '2. \n' },
     { insert: '3. \n' }
 ]);
+    quillReferencias.on('text-change', function() {
+        const len = quillReferencias.getText().trim().length;
+        referenciasCounter.textContent = len + ' / ' + MAX_REF_CHARS + ' caracteres';
+        if (len > MAX_REF_CHARS) {
+            referenciasCounter.classList.add('text-red-500', 'font-semibold');
+            referenciasCounter.classList.remove('text-gray-400');
+            quillReferencias.deleteText(MAX_REF_CHARS, quillReferencias.getLength());
+        } else {
+            referenciasCounter.classList.remove('text-red-500', 'font-semibold');
+            referenciasCounter.classList.add('text-gray-400');
+        }
+    });
     function toggleChars(panelId) {
         document.getElementById(panelId).classList.toggle('hidden');
     }
@@ -416,13 +462,15 @@ quillReferencias.setContents([
     });
 
     document.addEventListener('DOMContentLoaded', function() {
-        agregarAutor();
-        agregarAfiliacion();
-
         document.querySelector('form').addEventListener('submit', function() {
             document.getElementById('titulo-hidden').value = quillTitulo.root.innerHTML;
             document.getElementById('contenido_html').value = quill.root.innerHTML;
             document.getElementById('referencias-hidden').value = quillReferencias.root.innerHTML;
+
+            if (quillReferencias.getText().trim().length > MAX_REF_CHARS) {
+                alert('Las referencias bibliográficas no pueden superar los 750 caracteres.');
+                return false;
+            }
 
             const hAutores = document.createElement('input');
             hAutores.type = 'hidden';
