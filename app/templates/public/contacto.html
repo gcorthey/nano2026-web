@@ -78,22 +78,22 @@ San Martín, Buenos Aires</p>
         <form method="post" action="/contacto">
             <div class="mb-4">
                 <label class="block text-sm font-medium text-gray-700 mb-1">Tu nombre</label>
-                <input type="text" name="nombre" placeholder="Nombre completo"
+                <input type="text" name="nombre" placeholder="Nombre completo" required
                     class="w-full border rounded-xl px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-teal-400"/>
             </div>
             <div class="mb-4">
                 <label class="block text-sm font-medium text-gray-700 mb-1">Tu email</label>
-                <input type="email" name="email" placeholder="tu@email.com"
+                <input type="email" name="email" placeholder="tu@email.com" required
                     class="w-full border rounded-xl px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-teal-400"/>
             </div>
             <div class="mb-4">
                 <label class="block text-sm font-medium text-gray-700 mb-1">Asunto</label>
-                <input type="text" name="subject" placeholder="¿Sobre qué querés consultar?"
+                <input type="text" name="subject" placeholder="¿Sobre qué querés consultar?" required
                     class="w-full border rounded-xl px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-teal-400"/>
             </div>
             <div class="mb-6">
                 <label class="block text-sm font-medium text-gray-700 mb-1">Mensaje</label>
-                <textarea name="body" rows="4" placeholder="Escribí tu consulta acá..."
+                <textarea name="body" rows="4" placeholder="Escribí tu consulta acá..." required
                     class="w-full border rounded-xl px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-teal-400"></textarea>
             </div>
 <button type="submit" id="submit-btn"
@@ -104,12 +104,24 @@ San Martín, Buenos Aires</p>
 
 <script src="https://www.google.com/recaptcha/api.js?render={{ recaptcha_site_key }}"></script>
 <script>
+let contactoRecaptchaReady = false;
+
 document.querySelector('form').addEventListener('submit', function(e) {
+    if (contactoRecaptchaReady) {
+        contactoRecaptchaReady = false;
+        return;
+    }
+
+    if (!e.target.reportValidity()) {
+        return;
+    }
+
     e.preventDefault();
     grecaptcha.ready(function() {
         grecaptcha.execute('{{ recaptcha_site_key }}', {action: 'contacto'}).then(function(token) {
             document.getElementById('recaptcha_token').value = token;
-            e.target.submit();
+            contactoRecaptchaReady = true;
+            e.target.requestSubmit();
         });
     });
 });
