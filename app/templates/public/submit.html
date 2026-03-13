@@ -93,16 +93,16 @@
         <!-- Email -->
         <div class="mb-6">
             <label class="block text-sm font-bold mb-1">Email del autor presentador *</label>
-            <input type="email" name="email_autor" required
+            <input type="email" name="email_autor" id="email-autor" required value="{{ initial_submit_data.email_autor if initial_submit_data else '' }}"
                 class="w-full border rounded-xl px-3 py-2 focus:outline-none focus:ring-2 focus:ring-teal-400"/>
         </div>
 
         <!-- Área temática -->
         <div class="mb-6">
             <label class="block text-sm font-bold mb-2">Área temática *</label>
-            <select name="area_tematica" required
+            <select name="area_tematica" id="area-tematica" required
                 class="w-full border rounded-xl px-3 py-2 focus:outline-none focus:ring-2 focus:ring-teal-400 bg-white">
-                <option value="" disabled selected>Seleccioná un área...</option>
+                <option value="" disabled {% if not initial_submit_data or not initial_submit_data.area_tematica %}selected{% endif %}>Seleccioná un área...</option>
                 <option value="A">A. Síntesis de nanomateriales</option>
                 <option value="B">B. Autoensamblado</option>
                 <option value="C">C. Propiedades de nanomateriales</option>
@@ -203,54 +203,60 @@
         document.getElementById(`afil-row-${id}`)?.remove();
     }
 
-    function agregarAutor() {
-        autorCount++;
+    function agregarAutor(data = {}) {
+        const rowIndex = data.index ?? (autorCount + 1);
+        autorCount = Math.max(autorCount, rowIndex);
         const div = document.createElement('div');
         div.className = 'dynamic-row grid grid-cols-1 gap-2 sm:flex sm:flex-row sm:flex-wrap sm:items-center';
-        div.id = `autor-row-${autorCount}`;
+        div.id = `autor-row-${rowIndex}`;
         div.innerHTML = `
             <div class="flex items-start justify-between gap-3 sm:contents">
-                <span class="text-gray-400 text-sm w-5 pt-2 sm:pt-0 sm:self-center">${autorCount}.</span>
-                <button type="button" onclick="removeAutor(${autorCount})"
+                <span class="text-gray-400 text-sm w-5 pt-2 sm:pt-0 sm:self-center">${rowIndex}.</span>
+                <button type="button" onclick="removeAutor(${rowIndex})"
                     class="text-red-400 hover:text-red-600 text-lg leading-none sm:order-none">×</button>
             </div>
-            <input type="text" name="autor_nombre_${autorCount}" placeholder="Apellido, Nombre" required
+            <input type="text" name="autor_nombre_${rowIndex}" placeholder="Apellido, Nombre" required value="${(data.nombre || '').replace(/"/g, '&quot;')}"
                 class="w-full sm:flex-1 border rounded-lg px-3 py-1.5 text-sm focus:outline-none focus:ring-2 focus:ring-teal-400"/>
-            <input type="text" name="autor_afils_${autorCount}" placeholder="Afil. ej: 1,2"
+            <input type="text" name="autor_afils_${rowIndex}" placeholder="Afil. ej: 1,2" value="${(data.afils || '').replace(/"/g, '&quot;')}"
                 class="w-full sm:w-28 border rounded-lg px-3 py-1.5 text-sm focus:outline-none focus:ring-2 focus:ring-teal-400"
                 title="Números de afiliación separados por coma"/>
             <label class="flex items-center gap-1 text-xs text-gray-500 cursor-pointer sm:whitespace-nowrap">
-                <input type="radio" name="presentador" value="${autorCount}"> Presenta
+                <input type="radio" name="presentador" value="${rowIndex}" ${String(initialSubmitData.presentador) === String(rowIndex) ? 'checked' : ''}> Presenta
             </label>
         `;
         document.getElementById('autores-list').appendChild(div);
-        if (autorCount === 1) {
+        if (!initialSubmitData.presentador && document.querySelectorAll('input[name="presentador"]').length === 1) {
             div.querySelector('input[type=radio]').checked = true;
         }
     }
 
-    function agregarAfiliacion() {
-        afiliacionCount++;
+    function agregarAfiliacion(data = {}) {
+        const rowIndex = data.index ?? (afiliacionCount + 1);
+        afiliacionCount = Math.max(afiliacionCount, rowIndex);
         const div = document.createElement('div');
         div.className = 'dynamic-row grid grid-cols-1 gap-2 sm:flex sm:flex-row sm:items-center';
-        div.id = `afil-row-${afiliacionCount}`;
+        div.id = `afil-row-${rowIndex}`;
         div.innerHTML = `
             <div class="flex items-start justify-between gap-3 sm:contents">
-                <span class="text-gray-400 text-sm w-5 pt-2 sm:pt-0 sm:self-center">${afiliacionCount}.</span>
-                <button type="button" onclick="removeAfiliacion(${afiliacionCount})"
+                <span class="text-gray-400 text-sm w-5 pt-2 sm:pt-0 sm:self-center">${rowIndex}.</span>
+                <button type="button" onclick="removeAfiliacion(${rowIndex})"
                     class="text-red-400 hover:text-red-600 text-lg leading-none sm:order-none">×</button>
             </div>
-            <input type="text" name="afil_nombre_${afiliacionCount}" placeholder="Institución, ciudad, país" required
+            <input type="text" name="afil_nombre_${rowIndex}" placeholder="Institución, ciudad, país" required value="${(data.nombre || '').replace(/"/g, '&quot;')}"
                 class="w-full sm:flex-1 border rounded-lg px-3 py-1.5 text-sm focus:outline-none focus:ring-2 focus:ring-teal-400"/>
         `;
         document.getElementById('afiliaciones-list').appendChild(div);
     }
 
     document.addEventListener('DOMContentLoaded', function() {
-        if (document.querySelectorAll('[id^="autor-row-"]').length === 0) {
+        if (initialSubmitData.autores && initialSubmitData.autores.length > 0) {
+            initialSubmitData.autores.forEach((autor) => agregarAutor(autor));
+        } else if (document.querySelectorAll('[id^="autor-row-"]').length === 0) {
             agregarAutor();
         }
-        if (document.querySelectorAll('[id^="afil-row-"]').length === 0) {
+        if (initialSubmitData.afiliaciones && initialSubmitData.afiliaciones.length > 0) {
+            initialSubmitData.afiliaciones.forEach((afiliacion) => agregarAfiliacion(afiliacion));
+        } else if (document.querySelectorAll('[id^="afil-row-"]').length === 0) {
             agregarAfiliacion();
         }
     });
@@ -259,6 +265,7 @@
 <script>window.katex = katex;</script>
 <script src="https://cdn.quilljs.com/1.3.6/quill.js"></script>
 <script>
+    const initialSubmitData = {{ initial_submit_data|tojson }};
     let activeQuill = null;
 
     function crearEditorTitulo(elementId, placeholder) {
@@ -341,6 +348,12 @@
     const MAX_REF_CHARS = 750;
     const charCounter = document.getElementById('char-counter');
     const referenciasCounter = document.getElementById('referencias-counter');
+    if (initialSubmitData.titulo) {
+        quillTitulo.root.innerHTML = initialSubmitData.titulo;
+    }
+    if (initialSubmitData.contenido_html) {
+        quill.root.innerHTML = initialSubmitData.contenido_html;
+    }
     quill.on('text-change', function() {
         const len = quill.getText().trim().length;
         charCounter.textContent = len + ' / ' + MAX_CHARS + ' caracteres';
@@ -408,6 +421,9 @@ quillReferencias.setContents([
     { insert: '2. \n' },
     { insert: '3. \n' }
 ]);
+    if (initialSubmitData.referencias_html) {
+        quillReferencias.root.innerHTML = initialSubmitData.referencias_html;
+    }
     quillReferencias.on('text-change', function() {
         const len = quillReferencias.getText().trim().length;
         referenciasCounter.textContent = len + ' / ' + MAX_REF_CHARS + ' caracteres';
@@ -462,10 +478,36 @@ quillReferencias.setContents([
     });
 
     document.addEventListener('DOMContentLoaded', function() {
+        if (initialSubmitData.area_tematica) {
+            document.getElementById('area-tematica').value = initialSubmitData.area_tematica;
+        }
+        if (initialSubmitData.presentacion_oral !== "") {
+            const presentacion = document.querySelector(`input[name="presentacion_oral"][value="${initialSubmitData.presentacion_oral}"]`);
+            if (presentacion) {
+                presentacion.checked = true;
+            }
+        }
+        if (initialSubmitData.tiene_referencias) {
+            const checkbox = document.getElementById('toggle-referencias');
+            checkbox.checked = true;
+            toggleReferencias(checkbox);
+        }
         document.querySelector('form').addEventListener('submit', function() {
             document.getElementById('titulo-hidden').value = quillTitulo.root.innerHTML;
             document.getElementById('contenido_html').value = quill.root.innerHTML;
             document.getElementById('referencias-hidden').value = quillReferencias.root.innerHTML;
+
+            if (!quillTitulo.getText().trim()) {
+                alert('El título no puede estar vacío.');
+                quillTitulo.focus();
+                return false;
+            }
+
+            if (!quill.getText().trim()) {
+                alert('El resumen no puede estar vacío.');
+                quill.focus();
+                return false;
+            }
 
             if (quillReferencias.getText().trim().length > MAX_REF_CHARS) {
                 alert('Las referencias bibliográficas no pueden superar los 750 caracteres.');

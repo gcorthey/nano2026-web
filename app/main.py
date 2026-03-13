@@ -580,15 +580,29 @@ def logout():
 def submit_form(request: Request):
     return templates.TemplateResponse(
         "public/submit.html",
-        public_page_context(
-            request,
-            title="Envío de resúmenes | NANO2026",
-            description=(
-                "Presentá tu resumen para el NANO2026 y participá del encuentro "
-                "de superficies y materiales nanoestructurados."
+        {
+            **public_page_context(
+                request,
+                title="Envío de resúmenes | NANO2026",
+                description=(
+                    "Presentá tu resumen para el NANO2026 y participá del encuentro "
+                    "de superficies y materiales nanoestructurados."
+                ),
+                canonical_path="/submit"
             ),
-            canonical_path="/submit"
-        )
+            "initial_submit_data": {
+                "titulo": "",
+                "email_autor": "",
+                "area_tematica": "",
+                "presentacion_oral": "",
+                "contenido_html": "",
+                "referencias_html": "",
+                "tiene_referencias": 0,
+                "presentador": "",
+                "autores": [],
+                "afiliaciones": [],
+            }
+        }
     )
 @app.post("/submit", response_class=HTMLResponse)
 def submit_abstract(
@@ -604,6 +618,30 @@ def submit_abstract(
     tiene_referencias: int = Form(0),
     db: Session = Depends(get_db)
 ):
+    form_state = {
+        "titulo": titulo,
+        "email_autor": email_autor,
+        "area_tematica": normalize_area_code(area_tematica) or area_tematica,
+        "presentacion_oral": str(presentacion_oral),
+        "contenido_html": contenido_html,
+        "referencias_html": referencias_html,
+        "tiene_referencias": 1 if tiene_referencias else 0,
+        "presentador": request._form.get("presentador", "").strip(),
+        "autores": [],
+        "afiliaciones": [],
+    }
+    for i in range(1, autor_count + 1):
+        form_state["autores"].append({
+            "index": i,
+            "nombre": request._form.get(f"autor_nombre_{i}", ""),
+            "afils": request._form.get(f"autor_afils_{i}", ""),
+        })
+    for i in range(1, afil_count + 1):
+        form_state["afiliaciones"].append({
+            "index": i,
+            "nombre": request._form.get(f"afil_nombre_{i}", ""),
+        })
+
     def submit_error(message: str, status_code: int = 400):
         return templates.TemplateResponse("public/submit.html", {
             **public_page_context(
@@ -615,6 +653,7 @@ def submit_abstract(
                 ),
                 canonical_path="/submit"
             ),
+            "initial_submit_data": form_state,
             "error": message
         }, status_code=status_code)
 
