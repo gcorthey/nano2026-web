@@ -743,6 +743,18 @@ def submit_abstract(
             ),
             canonical_path="/submit"
         ),
+        "initial_submit_data": {
+            "titulo": "",
+            "email_autor": "",
+            "area_tematica": "",
+            "presentacion_oral": "",
+            "contenido_html": "",
+            "referencias_html": "",
+            "tiene_referencias": 0,
+            "presentador": "",
+            "autores": [],
+            "afiliaciones": [],
+        },
         "success": True
     })
 # --- Admin: lista de abstracts ---
