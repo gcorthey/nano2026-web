@@ -303,10 +303,10 @@ Description=NANO2026 Web
 After=network.target
 
 [Service]
-User=gcorthey
-WorkingDirectory=/home/gcorthey/congreso_nano
-ExecStart=/home/gcorthey/congreso_nano/venv/bin/uvicorn app.main:app --host 0.0.0.0 --port 8000 --workers 2
-EnvironmentFile=/home/gcorthey/congreso_nano/.env
+User=appuser
+WorkingDirectory=/ruta/al/proyecto/congreso_nano
+ExecStart=/ruta/al/proyecto/congreso_nano/venv/bin/uvicorn app.main:app --host 0.0.0.0 --port 8000 --workers 2
+EnvironmentFile=/ruta/al/proyecto/congreso_nano/.env
 Restart=always
 
 [Install]
@@ -324,6 +324,79 @@ sudo systemctl start nano2026
 ```bash
 sudo systemctl status nano2026
 ```
+
+### 6. Despliegue automático con webhook de GitLab
+
+El despliegue en producción puede automatizarse usando un **webhook configurado en GitLab** que se dispara ante **Push events**. Ese webhook no lo recibe la app FastAPI: lo recibe un servicio separado corriendo en la Raspberry Pi, y ese servicio ejecuta el redeploy.
+
+Flujo esperado:
+
+1. Se hace `git push` a la rama desplegada.
+2. GitLab envía un `POST` al endpoint del servicio `webhook` en la Raspberry Pi.
+3. El servicio `webhook` valida el request.
+4. Si el evento es válido, ejecuta un script de deploy.
+5. El script actualiza el repo y reinicia `nano2026.service`.
+
+En GitLab, en `Settings > Webhooks`, configurar:
+
+- URL del webhook apuntando a la Raspberry Pi
+- trigger `Push events`
+- secret token compartido con el servicio receptor
+
+En la Raspberry Pi, el servicio de webhook debe:
+
+- escuchar un endpoint HTTP propio, por ejemplo en un puerto interno
+- validar el token enviado por GitLab
+- ejecutar un script de despliegue
+
+Ejemplo de script de deploy:
+
+```bash
+/ruta/al/deploy.sh
+```
+
+Contenido:
+
+```bash
+#!/bin/bash
+cd /ruta/al/proyecto/congreso_nano
+git fetch origin main
+git reset --hard origin/main
+sudo systemctl restart nano2026
+```
+
+Ejemplo de servicio receptor del webhook:
+
+```python
+from http.server import HTTPServer, BaseHTTPRequestHandler
+import subprocess
+import hmac
+import hashlib
+
+SECRET = b"nano2026webhook"
+
+class Handler(BaseHTTPRequestHandler):
+    def do_POST(self):
+        length = int(self.headers.get('Content-Length', 0))
+        body = self.rfile.read(length)
+        token = self.headers.get('X-Gitlab-Token', '')
+        if token != SECRET.decode():
+            self.send_response(403)
+            self.end_headers()
+            return
+        subprocess.Popen(['/ruta/al/deploy.sh'])
+        self.send_response(200)
+        self.end_headers()
+        self.wfile.write(b'OK')
+    def log_message(self, *args):
+        pass
+
+HTTPServer(('127.0.0.1', 9000), Handler).serve_forever()
+```
+
+En este repo se incluyen versiones de referencia en `scripts/deploy.sh` y `scripts/webhook.py`. En producción pueden copiarse o adaptarse a las rutas finales que uses en tu servidor.
+
+Si además cambia la configuración del proxy o certificados, puede reiniciarse también Caddy, pero para pushes comunes de aplicación alcanza con reiniciar `nano2026`.
 
 ---
 
@@ -348,7 +421,7 @@ Qué hace:
 
 Supuestos actuales del script:
 
-- base local en `/home/gcorthey/congreso_nano/congreso.db`,
+- base local en `/ruta/al/proyecto/congreso_nano/congreso.db`,
 - perfil AWS `nano2026`,
 - bucket S3 `nano2026-backups`.
 
