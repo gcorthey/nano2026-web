@@ -604,7 +604,7 @@ def submit_abstract(
     tiene_referencias: int = Form(0),
     db: Session = Depends(get_db)
 ):
-    if not contenido_html or contenido_html.strip() == "<p></p>":
+    def submit_error(message: str, status_code: int = 400):
         return templates.TemplateResponse("public/submit.html", {
             **public_page_context(
                 request,
@@ -615,56 +615,82 @@ def submit_abstract(
                 ),
                 canonical_path="/submit"
             ),
-            "error": "El resumen no puede estar vacío."
-        })
+            "error": message
+        }, status_code=status_code)
 
-    abstract = models.Abstract(
-    titulo=titulo,
-    autor="",
-    afiliacion="",
-    email_autor=email_autor,
-    contenido_html=contenido_html,
-    referencias_html=referencias_html,
-    tiene_referencias=tiene_referencias,
-    presentacion_oral=presentacion_oral,
-    area_tematica=normalize_area_code(area_tematica),
-)
-    db.add(abstract)
-    db.flush()  # para obtener el id
+    titulo = titulo.strip()
+    email_autor = email_autor.strip()
+    resumen_texto = strip_tags(contenido_html)
+    referencias_texto = strip_tags(referencias_html)
 
-    # Guardar afiliaciones
+    if not titulo:
+        return submit_error("El título no puede estar vacío.")
+    if not email_autor:
+        return submit_error("El email del autor presentador es obligatorio.")
+    if not resumen_texto:
+        return submit_error("El resumen no puede estar vacío.")
+    if len(resumen_texto) > 2500:
+        return submit_error("El resumen no puede superar los 2500 caracteres.")
+    if tiene_referencias and len(referencias_texto) > 750:
+        return submit_error("Las referencias bibliográficas no pueden superar los 750 caracteres.")
+
+    afiliaciones_data: list[tuple[int, str]] = []
     for i in range(1, afil_count + 1):
-        from fastapi import Request as FastRequest
         nombre_afil = request._form.get(f"afil_nombre_{i}", "").strip()
         if nombre_afil:
-            afil = models.Afiliacion(
-                abstract_id=abstract.id,
-                nombre=nombre_afil,
-                orden=i
-            )
-            db.add(afil)
+            afiliaciones_data.append((i, nombre_afil))
 
-    # Guardar autores
-    presentador_idx = request._form.get("presentador", "1")
-    autor_presentador = ""
+    if not afiliaciones_data:
+        return submit_error("Debe haber al menos una afiliación.")
+
+    autores_data: list[tuple[int, str, str]] = []
     for i in range(1, autor_count + 1):
         nombre_autor = request._form.get(f"autor_nombre_{i}", "").strip()
         afils_str = request._form.get(f"autor_afils_{i}", "").strip()
         if nombre_autor:
-            es_presentador = 1 if str(i) == str(presentador_idx) else 0
-            autor = models.Autor(
-                abstract_id=abstract.id,
-                nombre=nombre_autor,
-                orden=i,
-                es_presentador=es_presentador,
-                afiliaciones_ids=afils_str
-            )
-            db.add(autor)
-            if es_presentador:
-                autor_presentador = nombre_autor
+            autores_data.append((i, nombre_autor, afils_str))
 
-    # Actualizar campo autor con el presentador
-    abstract.autor = autor_presentador
+    if not autores_data:
+        return submit_error("Debe haber al menos un autor.")
+
+    presentador_idx = request._form.get("presentador", "").strip()
+    presentadores = [autor for autor in autores_data if str(autor[0]) == presentador_idx]
+    if len(presentadores) != 1:
+        return submit_error("Debe seleccionarse exactamente un autor presentador.")
+
+    abstract = models.Abstract(
+        titulo=titulo,
+        autor=presentadores[0][1],
+        afiliacion=afiliaciones_data[0][1],
+        email_autor=email_autor,
+        contenido_html=contenido_html,
+        referencias_html=referencias_html if tiene_referencias else "",
+        tiene_referencias=1 if tiene_referencias else 0,
+        presentacion_oral=presentacion_oral,
+        area_tematica=normalize_area_code(area_tematica),
+    )
+    db.add(abstract)
+    db.flush()  # para obtener el id
+
+    # Guardar afiliaciones
+    for orden, nombre_afil in afiliaciones_data:
+        afil = models.Afiliacion(
+            abstract_id=abstract.id,
+            nombre=nombre_afil,
+            orden=orden
+        )
+        db.add(afil)
+
+    # Guardar autores
+    for orden, nombre_autor, afils_str in autores_data:
+        autor = models.Autor(
+            abstract_id=abstract.id,
+            nombre=nombre_autor,
+            orden=orden,
+            es_presentador=1 if str(orden) == presentador_idx else 0,
+            afiliaciones_ids=afils_str
+        )
+        db.add(autor)
 
     db.commit()
 
@@ -934,8 +960,16 @@ def admin_eliminar_evaluador(
                 "current_user": current_user
             }, status_code=400)
 
+    review_count = db.query(models.Review).filter(models.Review.evaluador_id == evaluador_id).count()
+    if review_count > 0:
+        return templates.TemplateResponse("admin/evaluadores.html", {
+            "request": request,
+            "usuarios": usuarios,
+            "error": "No podés eliminar un evaluador que ya revisó resúmenes.",
+            "current_user": current_user
+        }, status_code=400)
+
     db.query(models.Asignacion).filter(models.Asignacion.evaluador_id == evaluador_id).delete()
-    db.query(models.Review).filter(models.Review.evaluador_id == evaluador_id).delete()
     db.query(models.User).filter(models.User.id == evaluador_id).delete()
     db.commit()
     return RedirectResponse(url="/admin/evaluadores", status_code=302)
