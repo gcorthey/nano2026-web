@@ -492,26 +492,29 @@ quillReferencias.setContents([
             checkbox.checked = true;
             toggleReferencias(checkbox);
         }
-        document.querySelector('form').addEventListener('submit', function() {
+        document.querySelector('form').addEventListener('submit', function(event) {
             document.getElementById('titulo-hidden').value = quillTitulo.root.innerHTML;
             document.getElementById('contenido_html').value = quill.root.innerHTML;
             document.getElementById('referencias-hidden').value = quillReferencias.root.innerHTML;
 
             if (!quillTitulo.getText().trim()) {
+                event.preventDefault();
                 alert('El título no puede estar vacío.');
                 quillTitulo.focus();
-                return false;
+                return;
             }
 
             if (!quill.getText().trim()) {
+                event.preventDefault();
                 alert('El resumen no puede estar vacío.');
                 quill.focus();
-                return false;
+                return;
             }
 
             if (quillReferencias.getText().trim().length > MAX_REF_CHARS) {
+                event.preventDefault();
                 alert('Las referencias bibliográficas no pueden superar los 750 caracteres.');
-                return false;
+                return;
             }
 
             const hAutores = document.createElement('input');
