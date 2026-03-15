@@ -634,7 +634,13 @@ Nota:
 
 ## Herramientas de desarrollo
 
-Durante el desarrollo de este sitio se utilizaron herramientas de asistencia para programación, incluyendo Claude Sonnet 4.6 y Codex sobre GPT-5.4.
+Durante el desarrollo de este sitio se utilizaron las siguientes herramientas de asistencia para programación: Claude Sonnet 4.6 (Anthropic) y Codex sobre GPT-5.4 (OpenAI).
+
+---
+
+## Licencia
+
+Este repositorio se distribuye bajo la licencia `GNU AGPL-3.0`. Ver [LICENSE](/home/gcorthey/dev/congreso_nano/LICENSE).
 
 ---
 
