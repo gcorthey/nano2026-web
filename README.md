@@ -325,7 +325,7 @@ sudo systemctl start nano2026
 sudo systemctl status nano2026
 ```
 
-### 6. Despliegue automático con webhook de GitLab
+### 6. Automatización operativa y mantenimiento
 
 El despliegue en producción puede automatizarse usando un **webhook configurado en GitLab** que se dispara ante **Push events**. Ese webhook no lo recibe la app FastAPI: lo recibe un servicio separado corriendo en la Raspberry Pi, y ese servicio ejecuta el redeploy.
 
@@ -343,70 +343,136 @@ En GitLab, en `Settings > Webhooks`, configurar:
 - trigger `Push events`
 - secret token compartido con el servicio receptor
 
-En la Raspberry Pi, el servicio de webhook debe:
-
-- escuchar un endpoint HTTP propio, por ejemplo en un puerto interno
-- validar el token enviado por GitLab
-- ejecutar un script de despliegue
-
-Ejemplo de script de deploy:
-
-```bash
-/ruta/al/deploy.sh
-```
-
-Contenido:
-
-```bash
-#!/bin/bash
-cd /ruta/al/proyecto/congreso_nano
-git fetch origin main
-git reset --hard origin/main
-sudo systemctl restart nano2026
-```
-
-Ejemplo de servicio receptor del webhook:
-
-```python
-from http.server import HTTPServer, BaseHTTPRequestHandler
-import subprocess
-import hmac
-import hashlib
-
-SECRET = b"nano2026webhook"
-
-class Handler(BaseHTTPRequestHandler):
-    def do_POST(self):
-        length = int(self.headers.get('Content-Length', 0))
-        body = self.rfile.read(length)
-        token = self.headers.get('X-Gitlab-Token', '')
-        if token != SECRET.decode():
-            self.send_response(403)
-            self.end_headers()
-            return
-        subprocess.Popen(['/ruta/al/deploy.sh'])
-        self.send_response(200)
-        self.end_headers()
-        self.wfile.write(b'OK')
-    def log_message(self, *args):
-        pass
-
-HTTPServer(('127.0.0.1', 9000), Handler).serve_forever()
-```
-
-En este repo se incluyen versiones de referencia en `scripts/deploy.sh` y `scripts/webhook.py`. En producción pueden copiarse o adaptarse a las rutas finales que uses en tu servidor.
-
-Si además cambia la configuración del proxy o certificados, puede reiniciarse también Caddy, pero para pushes comunes de aplicación alcanza con reiniciar `nano2026`.
-
 ---
 
-## Backups de base de datos
+## Scripts
 
-El proyecto incluye scripts para backup y restore de `congreso.db` en `scripts/`.
+El directorio `scripts/` contiene utilidades operativas para despliegue, webhook y backups.
 
-### Backup
+La mayoría de los scripts están pensados para ser portables:
 
-Script:
+- si no configurás nada, derivan la ruta del repo automáticamente a partir de la ubicación del propio script,
+- si necesitás adaptarlos a producción, podés sobreescribir comportamiento con variables de entorno,
+- lo más prolijo en Raspberry Pi es setear esas variables en `systemd` con `Environment=` o `EnvironmentFile=`.
+
+### Resumen rápido
+
+| Script | Propósito |
+|---|---|
+| `scripts/deploy.sh` | Actualiza el repo desde Git y reinicia el servicio |
+| `scripts/webhook.py` | Recibe el webhook de GitLab y dispara el deploy |
+| `scripts/backup_db.sh` | Genera y sube backups de `congreso.db` a S3 |
+| `scripts/restore_db.sh` | Restaura un backup diario de SQLite desde S3 |
+| `scripts/rpi-backup.sh` | Genera un snapshot completo de la Raspberry Pi |
+
+### Cómo se configuran las rutas
+
+Los scripts usan dos estrategias:
+
+1. Detectar automáticamente el root del repo.
+2. Permitir override por variables de entorno.
+
+Patrón usado en los scripts shell:
+
+```bash
+SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
+REPO_DIR="${REPO_DIR:-$(cd "${SCRIPT_DIR}/.." && pwd)}"
+```
+
+Eso significa que, si corrés por ejemplo `./scripts/deploy.sh` desde el repo, `REPO_DIR` apunta solo al directorio raíz del proyecto sin hardcodear un home específico.
+
+Si querés fijar rutas explícitas en producción, podés hacerlo así:
+
+```bash
+REPO_DIR=/srv/congreso_nano SERVICE_NAME=nano2026 ./scripts/deploy.sh
+```
+
+o dentro de `systemd`:
+
+```ini
+[Service]
+Environment="REPO_DIR=/srv/congreso_nano"
+Environment="SERVICE_NAME=nano2026"
+Environment="WEBHOOK_SECRET=un-token-largo"
+Environment="DEPLOY_SCRIPT=/srv/congreso_nano/scripts/deploy.sh"
+```
+
+### `scripts/deploy.sh`
+
+Uso:
+
+```bash
+./scripts/deploy.sh
+```
+
+Qué hace:
+
+- entra al repo desplegado,
+- hace `git fetch` de la rama configurada,
+- resetea el working tree a `origin/<rama>`,
+- reinicia el servicio systemd de la app.
+
+Variables soportadas:
+
+| Variable | Default | Uso |
+|---|---|---|
+| `REPO_DIR` | raíz del repo detectada automáticamente | Ruta del checkout desplegado |
+| `BRANCH` | `main` | Rama a desplegar |
+| `SERVICE_NAME` | `nano2026` | Servicio systemd a reiniciar |
+
+Ejemplo:
+
+```bash
+REPO_DIR=/srv/congreso_nano BRANCH=main SERVICE_NAME=nano2026 ./scripts/deploy.sh
+```
+
+Importante:
+
+- el script usa `git reset --hard`, así que descarta cambios locales no comiteados en el checkout de producción.
+
+### `scripts/webhook.py`
+
+Uso:
+
+```bash
+python3 scripts/webhook.py
+```
+
+Qué hace:
+
+- levanta un servidor HTTP mínimo,
+- escucha `POST` en la interfaz y puerto configurados,
+- valida el header `X-Gitlab-Token`,
+- ejecuta el script de deploy cuando el token coincide.
+
+Variables soportadas:
+
+| Variable | Default | Uso |
+|---|---|---|
+| `WEBHOOK_SECRET` | `nano2026webhook` | Token esperado desde GitLab |
+| `DEPLOY_SCRIPT` | `scripts/deploy.sh` dentro del repo | Script a ejecutar ante el webhook |
+| `WEBHOOK_HOST` | `127.0.0.1` | Host de escucha |
+| `WEBHOOK_PORT` | `9000` | Puerto de escucha |
+
+Ejemplo:
+
+```bash
+WEBHOOK_SECRET=un-token-largo \
+DEPLOY_SCRIPT=/srv/congreso_nano/scripts/deploy.sh \
+WEBHOOK_HOST=127.0.0.1 \
+WEBHOOK_PORT=9000 \
+python3 /srv/congreso_nano/scripts/webhook.py
+```
+
+En GitLab, en `Settings > Webhooks`, conviene configurar:
+
+- URL apuntando al endpoint expuesto por el servicio webhook,
+- `Push events`,
+- el mismo valor de token que uses en `WEBHOOK_SECRET`.
+
+### `scripts/backup_db.sh`
+
+Uso:
 
 ```bash
 ./scripts/backup_db.sh
@@ -414,30 +480,41 @@ Script:
 
 Qué hace:
 
-- crea un snapshot consistente de SQLite usando `sqlite3 .backup`,
-- comprime el archivo con `gzip`,
-- sube una copia diaria y otra horaria al bucket S3 `nano2026-backups`,
-- escribe un log en `backup.log`.
+- genera un snapshot consistente de SQLite con `sqlite3 .backup`,
+- comprime la copia con `gzip`,
+- sube una copia diaria y otra horaria a S3,
+- escribe un log local.
 
-Supuestos actuales del script:
+Variables soportadas:
 
-- base local en `/ruta/al/proyecto/congreso_nano/congreso.db`,
-- perfil AWS `nano2026`,
-- bucket S3 `nano2026-backups`.
+| Variable | Default | Uso |
+|---|---|---|
+| `REPO_DIR` | raíz del repo detectada automáticamente | Base para derivar paths locales |
+| `DB_PATH` | `${REPO_DIR}/congreso.db` | Base SQLite a respaldar |
+| `LOG_FILE` | `${REPO_DIR}/backup.log` | Archivo de log |
+| `S3_BUCKET` | `nano2026-backups` | Bucket de destino |
+| `AWS_PROFILE` | `nano2026` | Perfil AWS CLI |
+| `RETENTION_DAYS` | `30` | Reservado para futura retención local |
 
-### Restore
+Ejemplo:
 
-#### 1. Ver backups disponibles
+```bash
+DB_PATH=/srv/congreso_nano/congreso.db \
+LOG_FILE=/var/log/nano2026-db-backup.log \
+AWS_PROFILE=prod \
+S3_BUCKET=nano2026-backups \
+./scripts/backup_db.sh
+```
 
-El script sin argumentos lista las fechas disponibles en `s3://nano2026-backups/daily/`:
+### `scripts/restore_db.sh`
+
+Uso para listar backups disponibles:
 
 ```bash
 ./scripts/restore_db.sh
 ```
 
-#### 2. Elegir una fecha y ejecutar la restauración
-
-Para restaurar una fecha puntual:
+Uso para restaurar una fecha puntual:
 
 ```bash
 ./scripts/restore_db.sh YYYY-MM-DD
@@ -449,47 +526,65 @@ Ejemplo:
 ./scripts/restore_db.sh 2026-03-10
 ```
 
-#### 3. Confirmar la operación
+Qué hace:
 
-El script muestra:
-
-- la fecha del backup que va a restaurar,
-- la ruta de destino de la base local,
-- una confirmación interactiva `¿Confirmar? [s/N]`.
-
-Solo continúa si se responde `s` o `S`.
-
-#### 4. Qué hace internamente el restore
-
-Una vez confirmada la operación, el script:
-
-- muestra confirmación antes de sobrescribir la base local,
-- guarda una copia del estado actual en un archivo como `congreso.db.pre-restore.<timestamp>`,
-- descarga el backup diario desde S3,
+- lista backups diarios disponibles si no recibe argumentos,
+- antes de restaurar pide confirmación interactiva,
+- guarda una copia local previa en `congreso.db.pre-restore.<timestamp>`,
+- descarga el backup desde S3,
 - valida integridad con `PRAGMA integrity_check`,
-- reemplaza la base local solo si el backup es válido.
+- reemplaza la base local solo si la verificación da `ok`.
 
-Importante:
+Variables soportadas:
 
-- si la verificación de integridad falla, el restore se aborta,
-- el archivo `congreso.db.pre-restore.<timestamp>` queda disponible para volver atrás manualmente.
+| Variable | Default | Uso |
+|---|---|---|
+| `REPO_DIR` | raíz del repo detectada automáticamente | Base para derivar paths locales |
+| `DB_PATH` | `${REPO_DIR}/congreso.db` | Base SQLite a reemplazar |
+| `S3_BUCKET` | `nano2026-backups` | Bucket donde se buscan backups |
+| `AWS_PROFILE` | `nano2026` | Perfil AWS CLI |
 
-#### 5. Qué validar después del restore
-
-Después de restaurar, conviene verificar:
+Qué validar después del restore:
 
 - que la aplicación levanta correctamente,
 - que podés iniciar sesión en `/login`,
 - que el panel `/admin` muestra datos esperados,
-- que la fecha/contenido restaurado coincide con el backup elegido.
+- que la fecha y el contenido restaurados coinciden con el backup elegido.
 
-Si algo sale mal, el archivo de resguardo previo queda en la raíz del proyecto con nombre:
+### `scripts/rpi-backup.sh`
 
-```text
-congreso.db.pre-restore.<timestamp>
+Uso:
+
+```bash
+./scripts/rpi-backup.sh
 ```
 
-y puede usarse para recuperar el estado anterior.
+Qué hace:
+
+- genera una imagen completa de la Raspberry Pi usando `image-backup`,
+- guarda la imagen localmente en `/mnt/backups`,
+- registra el proceso en un log diario dentro de `/mnt/backups/logs`,
+- sube la imagen a `s3://nano2026-backups/snapshots/`,
+- borra imágenes locales antiguas y logs viejos.
+
+Variables soportadas:
+
+| Variable | Default | Uso |
+|---|---|---|
+| `AWS_PROFILE` | `nano2026` | Perfil AWS CLI |
+| `S3_DEST` | `s3://nano2026-backups/snapshots/` | Destino de snapshots |
+| `WORK_DIR` | `$HOME` | Directorio desde el que corre `image-backup` |
+
+Supuestos actuales:
+
+- existe un mountpoint local en `/mnt/backups`,
+- `image-backup` está disponible en `/usr/local/bin/image-backup`,
+- el script tiene permisos para ejecutar `sudo /usr/local/bin/image-backup`,
+- AWS CLI está configurado y autorizado para subir al destino configurado.
+
+Nota:
+
+- este snapshot del sistema complementa al backup de SQLite: uno protege la Raspberry completa y el otro facilita restauraciones rápidas de la base de datos.
 
 ### Recomendaciones operativas
 

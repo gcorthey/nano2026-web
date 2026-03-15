@@ -1,12 +1,14 @@
 #!/bin/bash
 set -euo pipefail
 
-DB_PATH="/home/gcorthey/congreso_nano/congreso.db"
-S3_BUCKET="nano2026-backups"
-LOG_FILE="/home/gcorthey/congreso_nano/backup.log"
-RETENTION_DAYS=30
+SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
+REPO_DIR="${REPO_DIR:-$(cd "${SCRIPT_DIR}/.." && pwd)}"
+DB_PATH="${DB_PATH:-${REPO_DIR}/congreso.db}"
+S3_BUCKET="${S3_BUCKET:-nano2026-backups}"
+LOG_FILE="${LOG_FILE:-${REPO_DIR}/backup.log}"
+RETENTION_DAYS="${RETENTION_DAYS:-30}"
 
-export AWS_PROFILE=nano2026
+export AWS_PROFILE="${AWS_PROFILE:-nano2026}"
 
 log() { echo "[$(date '+%Y-%m-%d %H:%M:%S')] $*" | tee -a "$LOG_FILE"; }
 

@@ -1,5 +1,12 @@
 #!/bin/bash
-cd /home/gcorthey/congreso_nano
-git fetch origin main
-git reset --hard origin/main
-sudo systemctl restart nano2026
+set -euo pipefail
+
+SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
+REPO_DIR="${REPO_DIR:-$(cd "${SCRIPT_DIR}/.." && pwd)}"
+BRANCH="${BRANCH:-main}"
+SERVICE_NAME="${SERVICE_NAME:-nano2026}"
+
+cd "${REPO_DIR}"
+git fetch origin "${BRANCH}"
+git reset --hard "origin/${BRANCH}"
+sudo systemctl restart "${SERVICE_NAME}"
