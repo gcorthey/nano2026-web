@@ -206,6 +206,41 @@ def build_structured_data(
             "image": [
                 absolute_url(request, DEFAULT_OG_IMAGE_PATH)
             ],
+            "offers": {
+                "@type": "AggregateOffer",
+                "url": f"{base_url}/inscripcion",
+                "priceCurrency": "USD",
+                "lowPrice": 35,
+                "highPrice": 160,
+                "offerCount": 15,
+                "availability": "https://schema.org/InStock"
+            },
+            "performer": [
+                {
+                    "@type": "Person",
+                    "name": "Roman Krahne"
+                },
+                {
+                    "@type": "Person",
+                    "name": "Fabrizio Messina"
+                },
+                {
+                    "@type": "Person",
+                    "name": "Daniel Lanzillotti Kimura"
+                },
+                {
+                    "@type": "Person",
+                    "name": "Ana Flávia Nogueira"
+                },
+                {
+                    "@type": "Person",
+                    "name": "María Lidia Herrera"
+                },
+                {
+                    "@type": "Person",
+                    "name": "Lilo Pozzo"
+                }
+            ],
             "location": {
                 "@type": "Place",
                 "name": "Campus UNSAM",
