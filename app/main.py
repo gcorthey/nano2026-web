@@ -213,7 +213,8 @@ def build_structured_data(
                 "lowPrice": 35,
                 "highPrice": 160,
                 "offerCount": 15,
-                "availability": "https://schema.org/InStock"
+                "availability": "https://schema.org/InStock",
+                "validFrom": "2025-12-01T00:00:00-03:00"
             },
             "performer": [
                 {
