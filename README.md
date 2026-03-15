@@ -609,5 +609,11 @@ Nota:
 
 ---
 
+## Herramientas de desarrollo
+
+Durante el desarrollo de este sitio se utilizaron herramientas de asistencia para programación, incluyendo Claude Sonnet 4.6 y Codex sobre GPT-5.4.
+
+---
+
 G. Corthey  
 gcorthey@unsam.edu.ar
