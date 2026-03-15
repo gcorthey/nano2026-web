@@ -11,7 +11,8 @@ Campus UNSAM · San Martín, Buenos Aires · 3, 4 y 5 de junio de 2026
 |---|---|
 | Backend | FastAPI + Python 3.11 |
 | Templates | Jinja2 |
-| Base de datos | SQLite + SQLAlchemy |
+| Base de datos | SQLite |
+| ORM / acceso a datos | SQLAlchemy |
 | Autenticación | JWT (python-jose) + bcrypt 4.0.1 |
 | Editor de texto | Quill.js 1.3.6 (CDN) + KaTeX 0.16.9 |
 | Generación PDF | xhtml2pdf |
@@ -167,7 +168,7 @@ El primer ingreso fuerza cambio de contraseña antes de habilitar el panel.
 
 ---
 
-## Base de datos — modelos principales
+## Tablas principales de la base de datos
 
 | Tabla | Descripción |
 |---|---|
