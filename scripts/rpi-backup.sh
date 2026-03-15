@@ -23,6 +23,9 @@ printf "%s\n\n1000\ny\n" "${IMAGE_PATH}" | sudo /usr/local/bin/image-backup
 echo "Uploading to S3..."
 aws --profile "${AWS_PROFILE}" s3 cp "${IMAGE_PATH}" "${S3_DEST}"
 
+echo "Removing uploaded local image..."
+rm -f "${IMAGE_PATH}"
+
 echo "Removing old local backups..."
 find "${BACKUP_DIR}" -maxdepth 1 -type f -name "rpi-*.img" -mtime +2 -delete
 find "${LOG_DIR}" -maxdepth 1 -type f -name "backup-*.log" -mtime +30 -delete
