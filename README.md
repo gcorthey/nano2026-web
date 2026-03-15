@@ -9,7 +9,7 @@ Campus UNSAM · San Martín, Buenos Aires · 3, 4 y 5 de junio de 2026
 
 | Capa | Tecnología |
 |---|---|
-| Backend | FastAPI + Python 3.13 |
+| Backend | FastAPI + Python 3.11 |
 | Templates | Jinja2 |
 | Base de datos | SQLite + SQLAlchemy |
 | Autenticación | JWT (python-jose) + bcrypt 4.0.1 |
@@ -32,9 +32,13 @@ congreso_nano/
 │   ├── auth.py          # Autenticación JWT y roles
 │   ├── static/
 │   │   ├── css/
-│   │   └── js/
+│   │   ├── js/
+│   │   ├── logos/
+│   │   └── og/
 │   └── templates/
 │       ├── login.html
+│       ├── forgot_password.html
+│       ├── reset_password.html
 │       ├── public/
 │       │   ├── base.html
 │       │   ├── home.html
@@ -49,18 +53,31 @@ congreso_nano/
 │       │   ├── submit.html
 │       │   ├── char_panel_content.html
 │       │   ├── speakers.html
+│       │   ├── speakers_full.html
 │       │   ├── venue.html
-│       │   └── programa.html
+│       │   ├── programa.html
+│       │   └── programa_full.html
 │       ├── admin/
 │       │   ├── base.html
 │       │   ├── abstracts.html
 │       │   ├── abstract_detail.html
+│       │   ├── abstract_edit.html
 │       │   └── evaluadores.html
 │       └── eval/
 │           ├── base.html
 │           ├── lista.html
 │           └── detalle.html
+├── scripts/
+│   ├── deploy.sh
+│   ├── webhook.py
+│   ├── backup_db.sh
+│   ├── restore_db.sh
+│   └── rpi-backup.sh
+├── Dockerfile
+├── Procfile
+├── nixpacks.toml
 ├── requirements.txt
+├── runtime.txt
 └── README.md
 ```
 
@@ -99,6 +116,7 @@ Variables actualmente utilizadas por la aplicación:
 | `MAIL_PASSWORD` | Sí, si se envían mails | Password / app password SMTP |
 | `MAIL_FROM` | Sí, si se envían mails | Remitente visible |
 | `PUBLIC_BASE_URL` | Recomendado | Base pública para links en correos, ej. `https://nano2026.org` |
+| `RECAPTCHA_SITE_KEY` | Opcional | Site key pública de reCAPTCHA para renderizar formularios |
 | `RECAPTCHA_SECRET` | Opcional | Validación de reCAPTCHA si el flujo lo usa |
 
 Ejemplo:
@@ -109,6 +127,7 @@ MAIL_USERNAME=usuario@example.com
 MAIL_PASSWORD=app-password
 MAIL_FROM=usuario@example.com
 PUBLIC_BASE_URL=https://nano2026.org
+RECAPTCHA_SITE_KEY=tu-site-key
 RECAPTCHA_SECRET=tu-secret
 ```
 
@@ -144,6 +163,7 @@ Al iniciar por primera vez se crea automáticamente un usuario admin:
 | Contraseña | `admin1234` |
 
 ⚠️ **Cambiar la contraseña antes de poner en producción.**
+El primer ingreso fuerza cambio de contraseña antes de habilitar el panel.
 
 ---
 
@@ -202,6 +222,8 @@ Al iniciar por primera vez se crea automáticamente un usuario admin:
 | `/speakers` | Speakers y mesas temáticas |
 | `/venue` | Lugar, cómo llegar, alojamiento |
 | `/programa` | Programa del congreso |
+| `/robots.txt` | Reglas de indexación para buscadores |
+| `/sitemap.xml` | Sitemap público del sitio |
 
 ### Protegidas
 
