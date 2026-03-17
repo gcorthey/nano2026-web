@@ -1,6 +1,47 @@
 {% extends "public/base.html" %}
 {% block content %}
 
+<style>
+    .sponsors-carousel {
+        overflow: hidden;
+        position: relative;
+        cursor: grab;
+        touch-action: pan-y;
+        user-select: none;
+    }
+
+    .sponsors-carousel::before,
+    .sponsors-carousel::after {
+        content: "";
+        position: absolute;
+        top: 0;
+        bottom: 0;
+        width: 3rem;
+        z-index: 1;
+        pointer-events: none;
+    }
+
+    .sponsors-carousel::before {
+        left: 0;
+        background: linear-gradient(to right, rgba(255, 255, 255, 0.98), rgba(255, 255, 255, 0));
+    }
+
+    .sponsors-carousel::after {
+        right: 0;
+        background: linear-gradient(to left, rgba(255, 255, 255, 0.98), rgba(255, 255, 255, 0));
+    }
+
+    .sponsors-track {
+        display: flex;
+        width: max-content;
+        will-change: transform;
+    }
+
+    .sponsors-carousel.is-dragging {
+        cursor: grabbing;
+    }
+</style>
+
 <!-- Hero -->
 <div class="relative rounded-2xl overflow-hidden mb-10" style="min-height: 180px; background: linear-gradient(135deg, #0a1628 0%, #0d3b6e 60%, #1a6b4a 100%);">
     <div class="relative z-10 flex flex-col items-center justify-center text-center px-8 py-12">
@@ -127,11 +168,133 @@
 </div>
 <!-- Organizado por -->
 <div class="bg-white rounded-2xl shadow p-8 mb-4">
-    <h2 class="text-xl font-bold text-gray-800 mb-6">Organizado por</h2>
-    <div class="flex items-center justify-center">
-       <img src="/static/logos/organizadores.svg" alt="Instituciones organizadoras"
-    class="w-full max-w-4xl object-contain"/>
+    <h2 class="text-xl font-bold text-gray-800 mb-2">Organizado por</h2>
+    {% set logos = [
+        ('conicet.png', 'CONICET'),
+        ('unahur.png', 'UNAHUR'),
+        ('fiuba.png', 'FIUBA'),
+        ('uba.png', 'UBA'),
+        ('inn.png', 'INN'),
+        ('adimra.png', 'ADIMRA'),
+        ('ins.png', 'INS'),
+        ('unlp.png', 'UNLP')
+    ] %}
+    <div class="sponsors-carousel py-2" id="sponsors-carousel">
+        <div class="sponsors-track" id="sponsors-track">
+            {% for _ in range(2) %}
+                {% for filename, alt in logos %}
+                <div class="mx-4 md:mx-6 shrink-0 flex items-center justify-center h-28 w-40 md:h-32 md:w-52">
+                    <img src="/static/logos/{{ filename }}" alt="{{ alt }}" draggable="false" class="max-h-full max-w-full object-contain" />
+                </div>
+                {% endfor %}
+            {% endfor %}
+        </div>
     </div>
 </div>
+
+<script>
+    (function () {
+        const carousel = document.getElementById('sponsors-carousel');
+        const track = document.getElementById('sponsors-track');
+
+        if (!carousel || !track) {
+            return;
+        }
+
+        let offset = 0;
+        let isHovered = false;
+        let isDragging = false;
+        let startX = 0;
+        let startOffset = 0;
+        let logoSetWidth = 0;
+        let speed = window.innerWidth <= 768 ? 0.45 : 0.6;
+
+        function normalizeOffset(value) {
+            if (!logoSetWidth) {
+                return value;
+            }
+
+            while (value <= -logoSetWidth) {
+                value += logoSetWidth;
+            }
+
+            while (value > 0) {
+                value -= logoSetWidth;
+            }
+
+            return value;
+        }
+
+        function applyTransform() {
+            track.style.transform = `translate3d(${offset}px, 0, 0)`;
+        }
+
+        function recalculateWidth() {
+            logoSetWidth = track.scrollWidth / 2;
+            offset = normalizeOffset(offset);
+            applyTransform();
+        }
+
+        function animate() {
+            if (!isHovered && !isDragging && logoSetWidth) {
+                offset = normalizeOffset(offset - speed);
+                applyTransform();
+            }
+
+            requestAnimationFrame(animate);
+        }
+
+        function pointerX(event) {
+            return event.touches ? event.touches[0].clientX : event.clientX;
+        }
+
+        function startDrag(event) {
+            isDragging = true;
+            startX = pointerX(event);
+            startOffset = offset;
+            carousel.classList.add('is-dragging');
+        }
+
+        function moveDrag(event) {
+            if (!isDragging) {
+                return;
+            }
+
+            offset = normalizeOffset(startOffset + (pointerX(event) - startX));
+            applyTransform();
+        }
+
+        function endDrag() {
+            isDragging = false;
+            carousel.classList.remove('is-dragging');
+        }
+
+        carousel.addEventListener('mouseenter', function () {
+            isHovered = true;
+        });
+
+        carousel.addEventListener('mouseleave', function () {
+            isHovered = false;
+            endDrag();
+        });
+
+        carousel.addEventListener('mousedown', startDrag);
+        window.addEventListener('mousemove', moveDrag);
+        window.addEventListener('mouseup', endDrag);
+
+        carousel.addEventListener('touchstart', startDrag, { passive: true });
+        window.addEventListener('touchmove', moveDrag, { passive: true });
+        window.addEventListener('touchend', endDrag);
+
+        window.addEventListener('resize', function () {
+            speed = window.innerWidth <= 768 ? 0.45 : 0.6;
+            recalculateWidth();
+        });
+
+        recalculateWidth();
+        applyTransform();
+        requestAnimationFrame(animate);
+    })();
+</script>
 
 {% endblock %}
