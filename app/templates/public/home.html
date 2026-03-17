@@ -2,6 +2,15 @@
 {% block content %}
 
 <style>
+    @keyframes soft-pulse {
+        0%, 100% { opacity: 1; transform: scale(1); }
+        50% { opacity: 0.7; transform: scale(1.03); }
+    }
+
+    .deadline-badge {
+        animation: soft-pulse 1.8s ease-in-out infinite;
+    }
+
     .sponsors-carousel {
         overflow: hidden;
         position: relative;
@@ -101,7 +110,8 @@
     </a>
     <a href="/submit" class="bg-white rounded-2xl shadow p-6 hover:shadow-lg transition">
         <h2 class="text-lg font-bold text-gray-800 mb-2">Envío de resúmenes</h2>
-        <p class="text-sm text-gray-600">Presentá tu trabajo científico para las sesiones orales o de pósters del encuentro.<br><strong>Hasta el 15 de abril</strong></p>
+        <p class="text-sm text-gray-600">Presentá tu trabajo científico para las sesiones orales o de pósters del encuentro.</p>
+        <span class="deadline-badge mt-3 inline-flex items-center px-3 py-1 rounded-full bg-amber-100 text-amber-800 font-semibold text-sm">Hasta el 15 de abril</span>
     </a>
     <a href="/venue" class="bg-white rounded-2xl shadow p-6 hover:shadow-lg transition">
         <h2 class="text-lg font-bold text-gray-800 mb-2">Sede y cómo llegar</h2>
