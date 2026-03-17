@@ -75,30 +75,22 @@
     </div>
 </div>
 
-<div class="bg-white rounded-2xl shadow p-8 mb-12">
-    <h2 class="text-2xl font-bold text-gray-800 mb-4">Encuentro de nanotecnología, superficies y materiales nanoestructurados</h2>
-    <div class="grid grid-cols-1 md:grid-cols-2 gap-6 text-gray-600 leading-relaxed">
-        <p>
-            NANO2026 reúne a investigadores, estudiantes, becarios y actores del sector tecnológico interesados en nanotecnología, nanobiointerfases, superficies y aplicaciones en salud, energía, ambiente, agro y catálisis.
-        </p>
-        <p>
-            En el sitio vas a encontrar la información clave sobre <a href="/inscripcion" class="text-teal-600 hover:text-teal-500 font-medium">inscripción</a>, <a href="/submit" class="text-teal-600 hover:text-teal-500 font-medium">envío de resúmenes</a>, <a href="/programa" class="text-teal-600 hover:text-teal-500 font-medium">programa</a>, <a href="/speakers" class="text-teal-600 hover:text-teal-500 font-medium">conferencias</a> y <a href="/venue" class="text-teal-600 hover:text-teal-500 font-medium">sede</a>.
-        </p>
-    </div>
-</div>
+
 <!-- Contadores -->
-<div class="grid grid-cols-1 sm:grid-cols-3 gap-6 mb-12">
+<div class="grid grid-cols-1 sm:grid-cols-2 gap-6 mb-12">
+    <!-- Esto es un comentario
     <div class="bg-white rounded-2xl shadow p-6 text-center border-t-4 border-teal-500">
         <p class="text-4xl font-black text-teal-600">{{ total_abstracts }}</p>
         <p class="text-gray-500 text-sm mt-1">Resúmenes recibidos</p>
     </div>
-    <div class="bg-white rounded-2xl shadow p-6 text-center border-t-4 border-blue-500">
-        <p class="text-4xl font-black text-blue-600">300-500</p>
-        <p class="text-gray-500 text-sm mt-1">Asistentes esperados</p>
-    </div>
+    -->
+    <a href="/submit" class="block bg-white rounded-2xl shadow p-6 text-center border-t-4 border-blue-500 hover:shadow-lg transition">
+        <p class="text-4xl font-black text-blue-600" data-countdown-target="2026-04-15" data-countdown-expired="Cerrado">--</p>
+        <p class="text-gray-500 text-sm mt-1">días para enviar tu trabajo</p>
+    </a>
     <div class="bg-white rounded-2xl shadow p-6 text-center border-t-4 border-indigo-500">
-        <p class="text-4xl font-black text-indigo-600">5</p>
-        <p class="text-gray-500 text-sm mt-1">Conferencias plenarias</p>
+        <p class="text-4xl font-black text-indigo-600" data-countdown-target="2026-06-03" data-countdown-expired="En curso">--</p>
+        <p class="text-gray-500 text-sm mt-1">para el comienzo del encuentro</p>
     </div>
 </div>
 
@@ -109,7 +101,7 @@
     </a>
     <a href="/submit" class="bg-white rounded-2xl shadow p-6 hover:shadow-lg transition">
         <h2 class="text-lg font-bold text-gray-800 mb-2">Envío de resúmenes</h2>
-        <p class="text-sm text-gray-600">Presentá tu trabajo científico para las sesiones orales o de pósters del encuentro.</p>
+        <p class="text-sm text-gray-600">Presentá tu trabajo científico para las sesiones orales o de pósters del encuentro.<br><strong>Hasta el 15 de abril</strong></p>
     </a>
     <a href="/venue" class="bg-white rounded-2xl shadow p-6 hover:shadow-lg transition">
         <h2 class="text-lg font-bold text-gray-800 mb-2">Sede y cómo llegar</h2>
@@ -274,6 +266,32 @@
 </div>
 
 <script>
+    (function () {
+        const countdownElements = document.querySelectorAll('[data-countdown-target]');
+
+        function updateCountdowns() {
+            const now = new Date();
+
+            countdownElements.forEach((element) => {
+                const targetDate = new Date(`${element.dataset.countdownTarget}T00:00:00`);
+                const diffMs = targetDate - now;
+
+                if (diffMs <= 0) {
+                    element.textContent = element.dataset.countdownExpired || '0';
+                    return;
+                }
+
+                const daysRemaining = Math.ceil(diffMs / (1000 * 60 * 60 * 24));
+                element.textContent = `${daysRemaining} días`;
+            });
+        }
+
+        if (countdownElements.length) {
+            updateCountdowns();
+            setInterval(updateCountdowns, 60 * 1000);
+        }
+    })();
+
     (function () {
         const carousel = document.getElementById('sponsors-carousel');
         const track = document.getElementById('sponsors-track');
