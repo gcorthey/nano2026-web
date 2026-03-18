@@ -1,5 +1,5 @@
 <!DOCTYPE html>
-<html lang="es">
+<html lang="{{ html_lang or 'es' }}">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
@@ -7,7 +7,7 @@
     <meta name="description" content="{{ meta_description or 'Congreso de nanotecnología en Argentina con conferencias, programa, inscripción y envío de resúmenes.' }}">
     <link rel="canonical" href="{{ canonical_url or request.url }}">
     <meta name="robots" content="index,follow">
-    <meta property="og:locale" content="es_AR">
+    <meta property="og:locale" content="{{ og_locale or 'es_AR' }}">
     <meta property="og:type" content="website">
     <meta property="og:site_name" content="NANO2026">
     <meta property="og:title" content="{{ page_title or 'NANO2026 - XXIV Encuentro de Superficies y Materiales Nanoestructurados' }}">

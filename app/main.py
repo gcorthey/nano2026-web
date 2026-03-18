@@ -152,7 +152,8 @@ def build_structured_data(
     page_title: str,
     page_description: str,
     canonical_url: str,
-    include_event: bool = False
+    include_event: bool = False,
+    language: str = "es-AR"
 ) -> str:
     base_url = get_public_base_url(request)
     data = {
@@ -173,7 +174,7 @@ def build_structured_data(
                 "@id": f"{base_url}#website",
                 "url": base_url,
                 "name": SITE_NAME,
-                "inLanguage": "es-AR"
+                "inLanguage": language
             },
             {
                 "@type": "WebPage",
@@ -187,7 +188,7 @@ def build_structured_data(
                 "about": {
                     "@id": f"{base_url}#organization"
                 },
-                "inLanguage": "es-AR"
+                "inLanguage": language
             }
         ]
     }
@@ -268,21 +269,29 @@ def public_page_context(
     canonical_path: str,
     og_image_path: str = DEFAULT_OG_IMAGE_PATH,
     include_event_schema: bool = False,
+    language: str = "es-AR",
+    html_lang: str | None = None,
+    og_locale: str | None = None,
     extra: dict | None = None
 ) -> dict:
     canonical_url = absolute_url(request, canonical_path)
+    resolved_html_lang = html_lang or language.split("-")[0]
+    resolved_og_locale = og_locale or language.replace("-", "_")
     context = {
         "request": request,
         "page_title": title,
         "meta_description": trim_text(description, 160),
         "canonical_url": canonical_url,
         "og_image_url": absolute_url(request, og_image_path),
+        "html_lang": resolved_html_lang,
+        "og_locale": resolved_og_locale,
         "structured_data": build_structured_data(
             request,
             page_title=title,
             page_description=trim_text(description, 220),
             canonical_url=canonical_url,
-            include_event=include_event_schema
+            include_event=include_event_schema,
+            language=language
         )
     }
     if extra:
@@ -300,6 +309,7 @@ def public_urls(request: Request) -> list[str]:
         f"{base_url}/speakers",
         f"{base_url}/venue",
         f"{base_url}/sponsors",
+        f"{base_url}/en/sponsors",
         f"{base_url}/submit",
         f"{base_url}/circulares",
         f"{base_url}/contacto",
@@ -1614,6 +1624,24 @@ def sponsors(request: Request):
                 "NANO2026."
             ),
             canonical_path="/sponsors"
+        )
+    )
+
+
+@app.get("/en/sponsors", response_class=HTMLResponse)
+def sponsors_en(request: Request):
+    return templates.TemplateResponse(
+        "public/sponsors_en.html",
+        public_page_context(
+            request,
+            title="Sponsors and industry partners | NANO2026",
+            description=(
+                "Sponsorship opportunities for companies, organizations and "
+                "institutions connected to NANO2026."
+            ),
+            canonical_path="/en/sponsors",
+            language="en",
+            og_locale="en_US"
         )
     )
 
