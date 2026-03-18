@@ -261,7 +261,35 @@
 <!-- Fila inferior: tabla de precios (ancho completo) -->
 <div class="bg-gradient-to-r from-[#005C53] to-[#042940] rounded-2xl shadow p-8 text-white mb-6">
     <h2 class="text-lg font-bold mb-6">Costos de inscripción</h2>
-    <div class="overflow-x-auto">
+    {% set registration_prices = [
+        ('Estudiantes de grado', '35', '50', '80'),
+        ('Estudiantes de posgrado', '45', '90', '100'),
+        ('Postdoctorando', '50', '100', '110'),
+        ('Investigadores del sector público', '60', '120', '150'),
+        ('Industria | Empresa | Sector profesional | Emprendimiento', '70', '140', '160')
+    ] %}
+    <div class="grid gap-4 sm:hidden">
+        {% for category, first_price, second_price, third_price in registration_prices %}
+        <div class="rounded-2xl border border-white/15 bg-white/10 p-4 backdrop-blur-sm">
+            <h3 class="text-base font-semibold text-white">{{ category }}</h3>
+            <div class="mt-4 space-y-3 text-sm">
+                <div class="flex items-center justify-between gap-4 border-b border-white/10 pb-2">
+                    <span class="text-teal-200">Primera<br><span class="text-xs text-teal-100">hasta 15/4/26</span></span>
+                    <span class="text-lg font-bold text-white">{{ first_price }}</span>
+                </div>
+                <div class="flex items-center justify-between gap-4 border-b border-white/10 pb-2">
+                    <span class="text-teal-200">Segunda<br><span class="text-xs text-teal-100">hasta 28/5/26</span></span>
+                    <span class="text-lg font-bold text-white">{{ second_price }}</span>
+                </div>
+                <div class="flex items-center justify-between gap-4">
+                    <span class="text-teal-200">Tercera<br><span class="text-xs text-teal-100">hasta el 5/6/26</span></span>
+                    <span class="text-lg font-bold text-white">{{ third_price }}</span>
+                </div>
+            </div>
+        </div>
+        {% endfor %}
+    </div>
+    <div class="hidden overflow-x-auto sm:block">
         <table class="w-full text-sm">
             <thead>
                 <tr class="text-teal-200 text-xs uppercase">
@@ -275,36 +303,14 @@
                 </tr>
             </thead>
             <tbody class="divide-y divide-white divide-opacity-20">
+                {% for category, first_price, second_price, third_price in registration_prices %}
                 <tr>
-                    <td class="py-3 pr-6">Estudiantes de grado</td>
-                    <td class="text-center py-3 px-4 font-bold">35</td>
-                    <td class="text-center py-3 px-4 font-bold">50</td>
-                    <td class="text-center py-3 px-4 font-bold">80</td>
+                    <td class="py-3 pr-6">{{ category }}</td>
+                    <td class="text-center py-3 px-4 font-bold">{{ first_price }}</td>
+                    <td class="text-center py-3 px-4 font-bold">{{ second_price }}</td>
+                    <td class="text-center py-3 px-4 font-bold">{{ third_price }}</td>
                 </tr>
-                <tr>
-                    <td class="py-3 pr-6">Estudiantes de posgrado</td>
-                    <td class="text-center py-3 px-4 font-bold">45</td>
-                    <td class="text-center py-3 px-4 font-bold">90</td>
-                    <td class="text-center py-3 px-4 font-bold">100</td>
-                </tr>
-                <tr>
-                    <td class="py-3 pr-6">Postdoctorando</td>
-                    <td class="text-center py-3 px-4 font-bold">50</td>
-                    <td class="text-center py-3 px-4 font-bold">100</td>
-                    <td class="text-center py-3 px-4 font-bold">110</td>
-                </tr>
-                <tr>
-                    <td class="py-3 pr-6">Investigadores del sector público</td>
-                    <td class="text-center py-3 px-4 font-bold">60</td>
-                    <td class="text-center py-3 px-4 font-bold">120</td>
-                    <td class="text-center py-3 px-4 font-bold">150</td>
-                </tr>
-                <tr>
-                    <td class="py-3 pr-6">Industria | Empresa | Sector profesional | Emprendimiento</td>
-                    <td class="text-center py-3 px-4 font-bold">70</td>
-                    <td class="text-center py-3 px-4 font-bold">140</td>
-                    <td class="text-center py-3 px-4 font-bold">160</td>
-                </tr>
+                {% endfor %}
             </tbody>
         </table>
     </div>
