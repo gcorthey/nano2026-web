@@ -1,16 +1,18 @@
 {% extends "public/base.html" %}
 {% block content %}
 
-<div class="relative rounded-2xl overflow-hidden mb-10" style="background: linear-gradient(140deg, #0b1f33 0%, #114b5f 48%, #1f7a53 100%);">
-    <div class="absolute inset-0 opacity-15" style="background:
-        radial-gradient(circle at 20% 20%, rgba(255,255,255,0.22), transparent 28%),
-        radial-gradient(circle at 80% 30%, rgba(255,255,255,0.12), transparent 24%),
-        radial-gradient(circle at 50% 80%, rgba(255,255,255,0.10), transparent 22%);"></div>
+<div class="relative rounded-2xl overflow-hidden mb-10"
+    style="background: linear-gradient(135deg, #0a1628 0%, #0d3b6e 50%, #1a6b4a 100%);">
+    <div class="absolute inset-0 opacity-20"
+        style="background-image: url('/static/images/tio2.png'); background-size: cover; background-position: center;">
+    </div>
     <div class="relative z-10 px-8 py-12 md:px-12 md:py-16">
         <div class="max-w-3xl">
             <p class="text-teal-200 text-xs font-bold tracking-[0.25em] uppercase mb-3">Sponsorship Invitation</p>
             <a href="/sponsors" class="inline-flex items-center rounded-full border border-white/20 bg-white/10 px-3 py-1 text-xs font-semibold uppercase tracking-[0.2em] text-white hover:bg-white/20 transition mb-4">Versión en español</a>
-            <img src="/static/logos/logo_nano.png" alt="NANO2026" class="mb-4 h-24 md:h-[7.5rem] w-auto object-contain" />
+            <div class="bg-white bg-opacity-10 backdrop-blur rounded-2xl px-6 py-3 mb-6 block w-fit">
+                <img src="/static/logos/logo_nano_v2.png" alt="NANO2026" class="h-32 md:h-[10rem] w-auto object-contain" />
+            </div>
             <h1 class="text-4xl md:text-5xl font-black text-white leading-tight mb-4">Nano2026 is looking for partners to connect science, technology and industry</h1>
             <p class="text-lg text-teal-50 mb-6">June 3 to 5, 2026 · UNSAM, Miguelete Campus · More than 300 participants from the scientific-technological system and the productive sector.</p>
             <div class="flex flex-wrap gap-3">
@@ -28,16 +30,16 @@
 </div>
 
 <div class="grid grid-cols-1 md:grid-cols-3 gap-6 mb-10">
-    <div class="bg-white rounded-2xl shadow p-6 border-t-4 border-teal-500">
-        <p class="text-4xl font-black text-teal-600">300+</p>
+    <div class="bg-white rounded-2xl shadow p-6 border-t-4 border-[#042940]">
+        <p class="text-4xl font-black text-[#042940]">300+</p>
         <p class="text-gray-600 text-sm mt-2">Expected participants from universities, research centers and the technology sector.</p>
     </div>
-    <div class="bg-white rounded-2xl shadow p-6 border-t-4 border-blue-500">
-        <p class="text-4xl font-black text-blue-600">7</p>
+    <div class="bg-white rounded-2xl shadow p-6 border-t-4 border-[#005C53]">
+        <p class="text-4xl font-black text-[#005C53]">7</p>
         <p class="text-gray-600 text-sm mt-2">Thematic areas linking advanced materials, energy, environment, agro, food and health.</p>
     </div>
-    <div class="bg-white rounded-2xl shadow p-6 border-t-4 border-emerald-500">
-        <p class="text-4xl font-black text-emerald-600">25</p>
+    <div class="bg-white rounded-2xl shadow p-6 border-t-4 border-[#9FC131]">
+        <p class="text-4xl font-black text-[#9FC131]">25</p>
         <p class="text-gray-600 text-sm mt-2">Years of track record for a well-established meeting of Argentina's nano community.</p>
     </div>
 </div>
@@ -61,8 +63,8 @@
         </p>
     </section>
 
-    <aside class="bg-slate-900 rounded-2xl shadow p-8 text-white">
-        <p class="text-teal-300 text-xs font-bold uppercase tracking-[0.2em] mb-3">Key facts</p>
+    <aside class="bg-[#042940] rounded-2xl shadow p-8 text-white">
+        <p class="text-[#DBF227] text-xs font-bold uppercase tracking-[0.2em] mb-3">Key facts</p>
         <ul class="space-y-4 text-sm">
             <li class="border-b border-white/10 pb-4">
                 <span class="block text-white font-semibold mb-1">Date</span>
@@ -78,7 +80,7 @@
             </li>
             <li>
                 <span class="block text-white font-semibold mb-1">Contact</span>
-                <a href="mailto:nano2026@unsam.edu.ar?subject=Nano2026%20Sponsorship" class="text-teal-300 hover:underline">nano2026@unsam.edu.ar</a>
+                <a href="mailto:nano2026@unsam.edu.ar?subject=Nano2026%20Sponsorship" class="text-[#DBF227] hover:underline">nano2026@unsam.edu.ar</a>
             </li>
         </ul>
     </aside>
@@ -125,20 +127,22 @@
         </ul>
     </div>
 
-    <div class="bg-gradient-to-br from-amber-50 to-orange-100 rounded-2xl shadow p-8 border border-orange-200">
+    <div class="bg-[#D6D58E] rounded-2xl shadow p-8 border border-[#005C53]">
         <h2 class="text-2xl font-bold text-gray-900 mb-5">Thematic areas</h2>
         <div class="grid grid-cols-1 sm:grid-cols-2 gap-3">
             {% for area in [
-                ('🔬', 'A. Nanomaterial synthesis'),
-                ('⚛️', 'B. Self-assembly'),
-                ('💡', 'C. Properties of nanomaterials'),
-                ('🌐', 'D. Surface phenomena'),
-                ('🧬', 'E. Nanobiointerfaces and biological processes'),
-                ('🏥', 'F. Nanotechnology and health'),
-                ('🌱', 'G. Applications of nanomaterials in environment, energy, agro and catalysis')
+                ('A.svg', 'A. Nanomaterial synthesis'),
+                ('B.svg', 'B. Self-assembly'),
+                ('C.svg', 'C. Properties of nanomaterials'),
+                ('D.svg', 'D. Surface phenomena'),
+                ('E.svg', 'E. Nanobiointerfaces and biological processes'),
+                ('F.svg', 'F. Nanotechnology and health'),
+                ('G.svg', 'G. Applications of nanomaterials in environment, energy, agro and catalysis')
             ] %}
-            <div class="bg-white/80 rounded-xl px-4 py-3 flex items-center gap-2 text-sm text-gray-700 border border-white {% if area[0] == '🌱' %}sm:col-span-2{% endif %}">
-                <span class="text-lg">{{ area[0] }}</span>
+            <div class="bg-white/80 rounded-xl px-4 py-3 flex items-center gap-2 text-sm text-gray-700 border border-white {% if area[0] == 'G.svg' %}sm:col-span-2{% endif %}">
+                <span class="inline-flex h-8 w-8 items-center justify-center flex-shrink-0" aria-hidden="true">
+                    <img src="/static/icons/{{ area[0] }}" alt="" class="h-7 w-7 object-contain" />
+                </span>
                 <span>{{ area[1] }}</span>
             </div>
             {% endfor %}
