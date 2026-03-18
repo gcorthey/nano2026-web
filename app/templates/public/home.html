@@ -70,32 +70,69 @@
 </style>
 
 <!-- Hero -->
+<!-- Contenedor principal del hero.
+     `relative` permite posicionar capas absolutas adentro.
+     `rounded-2xl` y `overflow-hidden` recortan el fondo y la imagen.
+     El fondo base es un degradado oscuro para que el texto blanco tenga buen contraste. -->
 <div class="relative rounded-2xl overflow-hidden mb-12"
     style="min-height: 200px; background: linear-gradient(135deg, #0a1628 0%, #0d3b6e 50%, #1a6b4a 100%);">
+
+    <!-- Capa decorativa de fondo.
+         Está en `absolute inset-0` para cubrir todo el hero.
+         La opacidad baja evita que compita con el contenido principal. -->
     <div class="absolute inset-0 opacity-20"
-        style="background-image: url('https://upload.wikimedia.org/wikipedia/commons/thumb/a/a0/Citrobacter_freundii_bacteria.jpg/1200px-Citrobacter_freundii_bacteria.jpg'); background-size: cover; background-position: center;">
+        style="background-image: url('/static/images/tio2.png'); background-size: cover; background-position: center;">
     </div>
+
+    <!-- Contenido principal del hero.
+         `relative z-10` lo deja por encima del fondo.
+         Está centrado tanto horizontal como verticalmente. -->
     <div class="relative z-10 flex flex-col items-center justify-center text-center px-6 py-10">
+
+        <!-- Caja superior translúcida con el nombre extendido del evento y el logo.
+             `backdrop-blur` desenfoca apenas el fondo que queda detrás. -->
         <div class="bg-white bg-opacity-10 backdrop-blur rounded-2xl px-6 py-2 mb-4 inline-block">
+
+            <!-- Bajada institucional / nombre formal del encuentro. -->
             <p class="text-teal-300 text-sm font-semibold tracking-widest uppercase mb-1">XXIV Encuentro de Superficies
                 y Materiales Nanoestructurados</p>
+
+            <!-- Logo principal del evento. -->
             <img src="/static/logos/logo_nano.png" alt="NANO 2026" class="mx-auto w-full max-w-[220px] md:max-w-sm object-contain" />
         </div>
+
+        <!-- Texto descriptivo corto:
+             explica rápidamente qué es el evento y qué acciones están abiertas. -->
         <p class="max-w-3xl text-white/90 text-sm md:text-base leading-relaxed mb-3">
             Congreso de nanotecnología en Argentina con inscripción abierta, envío de resúmenes, conferencias plenarias y actividades académicas en Campus UNSAM.
         </p>
+
+        <!-- Fecha principal del encuentro. -->
         <p class="text-white text-lg md:text-xl font-light mb-1">3, 4 y 5 de junio de 2026</p>
+
+        <!-- Ubicación del evento.
+             Está destacada en teal para separarla visualmente de la fecha. -->
         <p class="text-teal-300 text-base md:text-lg mb-6">Campus UNSAM · San Martín, Buenos Aires</p>
+
+        <!-- Grupo de llamados a la acción principales.
+             Acá viven los botones más importantes del hero. -->
         <div class="flex flex-wrap gap-4 justify-center">
+
+            <!-- CTA 1: inscripción general al congreso. -->
             <a href="https://forms.gle/qRTWnuQAiVNvWmX16"
                 class="bg-teal-500 hover:bg-teal-400 text-white font-semibold px-7 py-2.5 rounded-full transition shadow-lg">
                 Inscribirse al congreso →
             </a>
+
+            <!-- CTA 2: envío de resúmenes. -->
             <a href="/submit"
                 class="bg-teal-500 hover:bg-teal-400 text-white font-semibold px-7 py-2.5 rounded-full transition shadow-lg">
                 Enviar resumen →
             </a>
         </div>
+
+        <!-- Link secundario de bajo peso visual para el acceso interno.
+             Se deja más tenue para no competir con los CTAs principales. -->
         <a href="/login" class="mt-4 text-white text-opacity-40 hover:text-opacity-70 text-xs transition">
             Acceso evaluadores y administradores →
         </a>
