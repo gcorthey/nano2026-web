@@ -159,6 +159,9 @@ Los detalles serán anunciados próximamente.
 <!-- Fila inferior: tabla de precios (ancho completo) -->
 <div class="bg-gradient-to-r from-[#005C53] to-[#042940] rounded-2xl shadow p-8 text-white mb-6">
     <h2 class="text-lg font-bold mb-6">Costos de inscripción</h2>
+    <p class="text-teal-200 text-xs mt-4 mb-6">* Valores en dólares (USD). Dólar oficial BNA tipo vendedor cotización al día de la
+        transferencia. <a href="https://bna.com.ar/Personas" target="_blank" class="text-teal-200 hover:underline">Ver
+            Cotización BNA</a></p>
     {% set registration_prices = [
         ('Estudiantes de grado', '35', '50', '80'),
         ('Estudiantes de posgrado', '45', '90', '100'),
@@ -172,15 +175,15 @@ Los detalles serán anunciados próximamente.
             <h3 class="text-base font-semibold text-white">{{ category }}</h3>
             <div class="mt-4 space-y-3 text-sm">
                 <div class="flex items-center justify-between gap-4 border-b border-white/10 pb-2">
-                    <span class="text-teal-200">Primera<br><span class="text-xs text-teal-100">hasta 15/4/26</span></span>
+                    <span class="text-teal-200">Hasta 15/4/26</span>
                     <span class="text-lg font-bold text-white">{{ first_price }}</span>
                 </div>
                 <div class="flex items-center justify-between gap-4 border-b border-white/10 pb-2">
-                    <span class="text-teal-200">Segunda<br><span class="text-xs text-teal-100">hasta 28/5/26</span></span>
+                    <span class="text-teal-200">Hasta 28/5/26</span>
                     <span class="text-lg font-bold text-white">{{ second_price }}</span>
                 </div>
                 <div class="flex items-center justify-between gap-4">
-                    <span class="text-teal-200">Tercera<br><span class="text-xs text-teal-100">hasta el 5/6/26</span></span>
+                    <span class="text-teal-200">Hasta 5/6/26</span>
                     <span class="text-lg font-bold text-white">{{ third_price }}</span>
                 </div>
             </div>
@@ -192,9 +195,9 @@ Los detalles serán anunciados próximamente.
             <thead>
                 <tr class="text-teal-200 text-xs uppercase">
                     <th class="text-left py-2 pr-6">Categoría</th>
-                    <th class="text-center py-2 px-4">Primera<br><span class="font-normal normal-case">hasta 15/4/26</span></th>
-                    <th class="text-center py-2 px-4">Segunda<br><span class="font-normal normal-case">hasta 28/5/26</span></th>
-                    <th class="text-center py-2 px-4">Tercera<br><span class="font-normal normal-case">hasta el 5/6/26</span></th>
+                    <th class="text-center py-2 px-4">Hasta 15/4/26</th>
+                    <th class="text-center py-2 px-4">Hasta 28/5/26</th>
+                    <th class="text-center py-2 px-4">Hasta 5/6/26</th>
                 </tr>
             </thead>
             <tbody class="divide-y divide-white divide-opacity-20">
@@ -209,7 +212,7 @@ Los detalles serán anunciados próximamente.
             </tbody>
         </table>
     </div>
-    <p class="text-teal-200 text-xs mt-4">* Valores en dólares. Dólar oficial BNA tipo vendedor cotización al día de la transferencia. <a href="https://bna.com.ar/Personas" target="_blank" class="text-teal-200 hover:underline">Ver Cotización BNA</a></p>
+  
     <div class="mt-6 text-center">
         <a href="https://forms.gle/qRTWnuQAiVNvWmX16" target="_blank"
             class="bg-[#9fc131] hover:bg-[#8aae2b] text-white font-semibold px-8 py-3 rounded-full transition shadow inline-block">
