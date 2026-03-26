@@ -31,7 +31,8 @@
                 'institucion': 'INFIQC, Universidad Nacional de Córdoba, Argentina',
                 'area': 'Nanobiotecnología y materia blanda',
                 'img': '/static/images/speakers/giacomelli.webp?v=20260326-1231',
-                'scholar': 'https://scholar.google.com/citations?user=hESiDPwAAAAJ&hl=es'
+                'scholar': 'https://scholar.google.com/citations?user=hESiDPwAAAAJ&hl=es',
+                'abstract_url': '/abstracts/1'
             },
             {
                 'nombre': 'Daniel Lanzillotti Kimura',
@@ -62,6 +63,9 @@
                 <p class="text-[#005C53] text-sm font-medium mt-0.5">{{ speaker.institucion }}</p>
                 <p class="text-gray-500 text-sm mt-1">{{ speaker.area }}</p>
                 <a href="{{ speaker.scholar }}" target="_blank" class="text-blue-500 text-xs hover:underline mt-2 inline-block">Google Scholar →</a>
+                {% if speaker.abstract_url %}
+                <a href="{{ speaker.abstract_url }}" class="text-[#005C53] text-xs hover:underline mt-2 ml-3 inline-block">Resumen →</a>
+                {% endif %}
             </div>
         </div>
         {% endfor %}
