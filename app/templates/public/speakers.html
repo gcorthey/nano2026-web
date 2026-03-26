@@ -2,30 +2,176 @@
 {% block content %}
 
 <!-- Hero -->
-<div class="relative rounded-2xl overflow-hidden mb-10" style="min-height: 180px; background: linear-gradient(135deg, #0a1628 0%, #0d3b6e 60%, #1a6b4a 100%);">
-    <div class="relative z-10 flex flex-col items-center justify-center text-center px-8 py-12">
-        <h1 class="text-3xl font-black text-white mb-2">Conferencias y speakers de NANO2026</h1>
-        <p class="text-teal-300">3, 4 y 5 de junio de 2026 · Campus UNSAM</p>
+<div class="relative rounded-2xl overflow-hidden mb-12" style="min-height: 220px; background: linear-gradient(135deg, #0a1628 0%, #0d3b6e 60%, #1a6b4a 100%);">
+    <div class="absolute inset-0 opacity-20" style="background-image: url('https://images.unsplash.com/photo-1540575467063-178a50c2df87?w=1400&q=80'); background-size: cover; background-position: center;"></div>
+    <div class="relative z-10 flex flex-col items-center justify-center text-center px-8 py-16">
+        <h1 class="text-4xl font-black text-white mb-2">Conferencias</h1>
+        <p class="text-teal-300 text-lg">Conferencias plenarias y semiplenarias · NANO2026</p>
     </div>
 </div>
 
-<div class="bg-white rounded-2xl shadow p-8 mb-8">
-    <h2 class="text-xl font-bold text-gray-800 mb-3">Speakers invitados y conferencias plenarias</h2>
-    <p class="text-gray-600 leading-relaxed">
-        En esta página se publicarán los speakers invitados, conferencias plenarias y actividades destacadas del NANO2026. La selección abarcará distintas áreas de la nanotecnología y los materiales nanoestructurados.
-    </p>
+<!-- Conferencias plenarias-->
+<div class="mb-12">
+    <div class="flex items-center gap-3 mb-6">
+        <span class="bg-teal-500 text-white text-xs font-bold px-3 py-1 rounded-full uppercase tracking-wider">Conferencias Plenarias</span>
+        <div class="flex-1 h-px bg-gray-200"></div>
+    </div>
+    <div class="grid grid-cols-1 gap-6 sm:grid-cols-2">
+
+        {% for speaker in [
+            {
+                'nombre': 'Roman Krahne',
+                'institucion': 'Istituto Italiano di Tecnologia (IIT), Italia',
+                'area': 'Optoelectrónica y plasmónica',
+                'img': '/static/images/speakers/krahne.webp',
+                'scholar': 'https://scholar.google.com/citations?user=Oq5AD3QAAAAJ&hl=en'
+            },
+            {
+                'nombre': 'Carla Giacomelli',
+                'institucion': 'INFIQC, Universidad Nacional de Córdoba, Argentina',
+                'area': 'Nanobiotecnología y materia blanda',
+                'img': '/static/images/speakers/giacomelli.webp',
+                'scholar': 'https://scholar.google.com/citations?user=hESiDPwAAAAJ&hl=es'
+            },
+            {
+                'nombre': 'Daniel Lanzillotti Kimura',
+                'institucion': 'C2N · Université Paris-Saclay, Francia',
+                'area': 'Películas delgadas, fonónica',
+                 'img': '/static/images/speakers/kimura.webp',
+                'scholar': 'https://scholar.google.com/citations?user=Dn2EeFwAAAAJ&hl=es'
+            },
+            {
+                'nombre': 'Leonardo Fraceto',
+                'institucion': 'Universidade Estadual Paulista Júlio de Mesquita Filho, Brasil',
+                'area': 'Nanotecnología para el agro',
+               'img': '/static/images/speakers/fraceto.webp',
+                'scholar': 'https://scholar.google.com/citations?user=UnA2eToAAAAJ&hl=pt-BR'
+            },
+            {
+                'nombre': 'Laura Cornaglia',
+                'institucion': 'INCAPE, Universidad Nacional del Litoral, Argentina',
+                'area': 'Nanomateriales en catálisis',
+                'img': '/static/images/speakers/cornaglia.webp',
+                'scholar': 'https://scholar.google.com/citations?user=cj1TEVwAAAAJ&hl=es'
+            },
+        ] %}
+        <div class="bg-white rounded-2xl shadow p-6 flex gap-5 hover:shadow-md transition">
+            <img src="{{ speaker.img }}" class="w-24 h-24 rounded-full object-cover {{ speaker.img_position or 'object-[center_20%]' }} flex-shrink-0 border-4 border-teal-100" alt="{{ speaker.nombre }}"/>
+            <div>
+                <h3 class="font-bold text-gray-900 text-lg">{{ speaker.nombre }}</h3>
+                <p class="text-[#005C53] text-sm font-medium mt-0.5">{{ speaker.institucion }}</p>
+                <p class="text-gray-500 text-sm mt-1">{{ speaker.area }}</p>
+                <a href="{{ speaker.scholar }}" target="_blank" class="text-blue-500 text-xs hover:underline mt-2 inline-block">Google Scholar →</a>
+            </div>
+        </div>
+        {% endfor %}
+
+    </div>
 </div>
 
-<div class="bg-yellow-50 border border-yellow-200 rounded-2xl px-6 py-4 mb-8 text-center">
-    <p class="text-yellow-700 font-medium">📅 La lista de conferencias estará disponible próximamente.</p>
-    <p class="text-yellow-600 text-sm mt-1">¡Seguí de cerca el sitio para no perderte las novedades!</p>
+<!-- Conferencias semiplenarias -->
+<div class="mb-12">
+    <div class="flex items-center gap-3 mb-6">
+        <span class="bg-blue-600 text-white text-xs font-bold px-3 py-1 rounded-full uppercase tracking-wider">Conferencias semiplenarias</span>
+        <div class="flex-1 h-px bg-gray-200"></div>
+    </div>
+    <div class="grid grid-cols-1 gap-6 sm:grid-cols-2">
+
+        {% for speaker in [
+            {
+                'nombre': 'Federico Williams',
+                'institucion': 'INQUIMAE, Universidad de Buenos Aires, Argentina',
+                'area': 'Fenómenos de superficies',
+                'img': '/static/images/speakers/williams.webp',
+                'scholar': 'https://scholar.google.co.cr/citations?user=x1_cXy8AAAAJ&hl=th'
+            },
+            {
+                'nombre': 'Maria Lidia Herrera',
+                'institucion': 'ITECA, Universidad Nacional de San Martín, Argentina',
+                'area': 'Nanotecnología en alimentos',
+                'img': '/static/images/speakers/herrera.webp',
+                'scholar': 'https://www.cheme.washington.edu/facultyfinder/lilo-pozzo'
+            },
+            {
+                'nombre': 'Liliana Mogni',
+                'institucion': 'UE-INN, Centro Atómico Bariloche, CNEA, Argentina',
+                'area': 'Sintesis y aplicaciones de nanomateriales para energía',
+                'img': '/static/images/speakers/mogni.webp',
+                'scholar': 'https://scholar.google.com/citations?user=UMJ3XHgAAAAJ&hl=es'
+            },
+                        {
+                'nombre': 'María Molina',
+                'institucion': 'Universidad Nacional de Río Cuarto, Argentina',
+                'area': 'Propiedades y aplicaciones de nanomateriales en salud',
+                'img': '/static/images/speakers/molina.webp',
+                'scholar': 'https://scholar.google.com/citations?hl=es&user=0qy1xVYAAAAJ'
+            },
+                                    {
+                'nombre': 'Luciano Carlos',
+                'institucion': 'PROBIEN, Universidad Nacional del Comahue, Argentina',
+                'area': 'Aplicaciones de nanomateriales en ambiente',
+                'img': '/static/images/speakers/carlos.webp',
+                'scholar': 'https://scholar.google.com/citations?user=b42pIx0AAAAJ&hl=es'
+            },                                            
+        ] %}
+        <div class="bg-white rounded-2xl shadow p-6 flex gap-5 hover:shadow-md transition">
+            <img src="{{ speaker.img }}" class="w-24 h-24 rounded-full object-cover {{ speaker.img_position or 'object-[center_20%]' }} flex-shrink-0 border-4 border-blue-100" alt="{{ speaker.nombre }}"/>
+            <div>
+                <h3 class="font-bold text-gray-900 text-lg">{{ speaker.nombre }}</h3>
+                <p class="text-blue-600 text-sm font-medium mt-0.5">{{ speaker.institucion }}</p>
+                <p class="text-gray-500 text-sm mt-1">{{ speaker.area }}</p>
+                {% if speaker.scholar %}
+                <a href="{{ speaker.scholar }}" target="_blank" class="text-blue-500 text-xs hover:underline mt-2 inline-block">Google Scholar →</a>
+                {% endif %}
+            </div>
+        </div>
+        {% endfor %}
+
+    </div>
 </div>
 
+<!-- JOVEN -->
+<div class="mb-12">
+    <div class="flex items-center gap-3 mb-6">
+        <span class="bg-indigo-500 text-white text-xs font-bold px-3 py-1 rounded-full uppercase tracking-wider">TALENTO JOVEN</span>
+        <div class="flex-1 h-px bg-gray-200"></div>
+    </div>
+    <div class="grid grid-cols-1 gap-4 sm:grid-cols-2">
+        {% for speaker in [
+            ('Ana Sol Peinetti', 'INQUIMAE, UBA', 'Nanotecnología y salud'),
+            ('Germán Gómez', 'INTEQUI, Universidad Nacional de San Luis', 'Aplicaciones de nanomateriales en ambiente y salud'),
+        ] %}
+        <div class="bg-white rounded-xl shadow p-5 flex items-center gap-4 hover:shadow-md transition">
+            <div class="w-12 h-12 rounded-full bg-indigo-100 flex items-center justify-center text-indigo-600 font-bold text-lg flex-shrink-0">
+                {{ speaker[0][0] }}
+            </div>
+            <div>
+                <h3 class="font-semibold text-gray-900">{{ speaker[0] }}</h3>
+                <p class="text-indigo-600 text-xs">{{ speaker[1] }}</p>
+                <p class="text-gray-500 text-xs mt-0.5">{{ speaker[2] }}</p>
+            </div>
+        </div>
+        {% endfor %}
+    </div>
+</div>
+
+<!-- Mesas -->
 <div class="bg-white rounded-2xl shadow p-8">
-    <h2 class="text-xl font-bold text-gray-800 mb-3">Más información del evento</h2>
-    <p class="text-gray-600 leading-relaxed">
-        Mientras se confirma la lista de conferencias, podés consultar el <a href="/programa" class="text-[#005C53] hover:text-[#042940] font-medium">programa del congreso</a>, la <a href="/inscripcion" class="text-[#005C53] hover:text-[#042940] font-medium">inscripción</a> y la página <a href="/about" class="text-[#005C53] hover:text-[#042940] font-medium">sobre el encuentro</a>.
-    </p>
+    <h2 class="text-xl font-bold text-gray-800 mb-6">Mesas redondas</h2>
+    <div class="grid grid-cols-1 gap-6 sm:grid-cols-2">
+        <div class="bg-gray-50 rounded-xl p-5">
+            <h3 class="font-bold text-gray-800 mb-3">🎓 Educación en Nano</h3>
+            <ul class="text-sm text-gray-600 space-y-1">
+                <li>a confirmar</li>
+            </ul>
+        </div>
+        <div class="bg-gray-50 rounded-xl p-5">
+            <h3 class="font-bold text-gray-800 mb-3">🏭 Del laboratorio a la planta</h3>
+            <ul class="text-sm text-gray-600 space-y-1">
+                <li>a confirmar</li>
+        </div>
+      
+    </div>
 </div>
 
 {% endblock %}
