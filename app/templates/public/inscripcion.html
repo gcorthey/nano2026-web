@@ -144,6 +144,7 @@ Los detalles serán anunciados próximamente.
                             </svg>
                         </button>
                     </span>
+                    indicando categoría, monto en USD y cambio tipo vendedor BNA.
                 </span>
             </li>
             <li class="flex items-start gap-2">
@@ -176,15 +177,15 @@ Los detalles serán anunciados próximamente.
             <div class="mt-4 space-y-3 text-sm">
                 <div class="flex items-center justify-between gap-4 border-b border-white/10 pb-2">
                     <span class="text-teal-200">Hasta 15/4/26</span>
-                    <span class="text-lg font-bold text-white">{{ first_price }}</span>
+                    <span class="text-lg font-bold text-white">{{ first_price }} <span class="text-gray-400">USD</span></span>
                 </div>
                 <div class="flex items-center justify-between gap-4 border-b border-white/10 pb-2">
                     <span class="text-teal-200">Hasta 28/5/26</span>
-                    <span class="text-lg font-bold text-white">{{ second_price }}</span>
+                    <span class="text-lg font-bold text-white">{{ second_price }} <span class="text-gray-400">USD</span></span>
                 </div>
                 <div class="flex items-center justify-between gap-4">
                     <span class="text-teal-200">Hasta 5/6/26</span>
-                    <span class="text-lg font-bold text-white">{{ third_price }}</span>
+                    <span class="text-lg font-bold text-white">{{ third_price }} <span class="text-gray-400">USD</span></span>
                 </div>
             </div>
         </div>
@@ -204,9 +205,9 @@ Los detalles serán anunciados próximamente.
                 {% for category, first_price, second_price, third_price in registration_prices %}
                 <tr>
                     <td class="py-3 pr-6">{{ category }}</td>
-                    <td class="text-center py-3 px-4 font-bold">{{ first_price }}</td>
-                    <td class="text-center py-3 px-4 font-bold">{{ second_price }}</td>
-                    <td class="text-center py-3 px-4 font-bold">{{ third_price }}</td>
+                    <td class="text-center py-3 px-4 font-bold">{{ first_price }} <span class="text-gray-400">USD</span></td>
+                    <td class="text-center py-3 px-4 font-bold">{{ second_price }} <span class="text-gray-400">USD</span></td>
+                    <td class="text-center py-3 px-4 font-bold">{{ third_price }} <span class="text-gray-400">USD</span></td>
                 </tr>
                 {% endfor %}
             </tbody>
@@ -280,7 +281,8 @@ Los detalles serán anunciados próximamente.
                     <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 16H6a2 2 0 01-2-2V6a2 2 0 012-2h8a2 2 0 012 2v2m-6 12h8a2 2 0 002-2v-8a2 2 0 00-2-2h-8a2 2 0 00-2 2v8a2 2 0 002 2z"/>
                 </svg>
             </button>
-        </span>        
+        </span>
+        indicando categoría, monto en USD y cambio tipo vendedor BNA.
     </p>
 </div>
 
