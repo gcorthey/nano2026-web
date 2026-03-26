@@ -67,6 +67,45 @@
     .gallery-carousel.is-dragging {
         cursor: grabbing;
     }
+
+    .speakers-carousel {
+        overflow: hidden;
+        position: relative;
+        cursor: grab;
+        touch-action: pan-y;
+        user-select: none;
+    }
+
+    .speakers-carousel::before,
+    .speakers-carousel::after {
+        content: "";
+        position: absolute;
+        top: 0;
+        bottom: 0;
+        width: 2.5rem;
+        z-index: 1;
+        pointer-events: none;
+    }
+
+    .speakers-carousel::before {
+        left: 0;
+        background: linear-gradient(to right, rgba(255, 255, 255, 0.98), rgba(255, 255, 255, 0));
+    }
+
+    .speakers-carousel::after {
+        right: 0;
+        background: linear-gradient(to left, rgba(255, 255, 255, 0.98), rgba(255, 255, 255, 0));
+    }
+
+    .speakers-track {
+        display: flex;
+        width: max-content;
+        will-change: transform;
+    }
+
+    .speakers-carousel.is-dragging {
+        cursor: grabbing;
+    }
 </style>
 
 <!-- Hero -->
@@ -208,6 +247,45 @@
             <li class="flex items-center gap-2"><span class="text-[#005C53] font-bold">→</span> Mesa de empresas e
                 industria</li>
         </ul>
+    </div>
+</div>
+
+{% set featured_speakers = [
+    ('Roman Krahne', 'IIT, Italia', 'Optoelectrónica y plasmónica', '/static/images/speakers/krahne.webp'),
+    ('Carla Giacomelli', 'UNC, Argentina', 'Nanobiotecnología y materia blanda', '/static/images/speakers/giacomelli.webp'),
+    ('Daniel Lanzillotti Kimura', 'C2N, Francia', 'Películas delgadas y fonónica', '/static/images/speakers/kimura.webp'),
+    ('Leonardo Fraceto', 'UNESP, Brasil', 'Nanotecnología para el agro', '/static/images/speakers/fraceto.webp'),
+    ('Laura Cornaglia', 'UNL, Argentina', 'Catálisis y nanomateriales', '/static/images/speakers/cornaglia.webp'),
+    ('Federico Williams', 'UBA, Argentina', 'Fenómenos de superficies', '/static/images/speakers/williams.webp'),
+    ('María Lidia Herrera', 'UNSAM, Argentina', 'Nanotecnología en alimentos', '/static/images/speakers/herrera.webp'),
+    ('Liliana Mogni', 'CNEA, Argentina', 'Nanomateriales para energía', '/static/images/speakers/mogni.webp')
+] %}
+<div class="bg-white rounded-2xl shadow p-8 mb-12">
+    <div class="flex flex-col gap-3 sm:flex-row sm:items-end sm:justify-between mb-6">
+        <div>
+            <p class="text-xs font-semibold uppercase tracking-[0.2em] text-[#005C53]">Conferencias</p>
+            <h2 class="text-xl font-bold text-gray-800">Conferencistas invitados</h2>
+            <p class="text-sm text-gray-600 mt-1">Plenarios y semiplenarios que formarán parte de NANO2026.</p>
+        </div>
+        <a href="/speakers" class="text-sm font-medium text-[#005C53] hover:text-[#042940]">Ver todas las conferencias →</a>
+    </div>
+    <div class="speakers-carousel" id="speakers-carousel">
+        <div class="speakers-track gap-4" id="speakers-track">
+            {% for _ in range(2) %}
+                {% for name, institution, area, image in featured_speakers %}
+                <div class="shrink-0 w-[255px] sm:w-[285px] rounded-2xl border border-gray-100 bg-gradient-to-br from-white via-[#f7fbfa] to-[#eef6f5] p-4 shadow-sm" draggable="false">
+                    <div class="flex items-center gap-4">
+                        <img src="{{ image }}" alt="{{ name }}" class="w-20 h-20 rounded-full object-cover object-top flex-shrink-0 border-4 border-[#d9ece8]" draggable="false" />
+                        <div class="min-w-0">
+                            <h3 class="font-bold text-gray-900 leading-tight">{{ name }}</h3>
+                            <p class="text-xs font-medium text-[#005C53] mt-1 line-clamp-2">{{ institution }}</p>
+                        </div>
+                    </div>
+                    <p class="text-sm text-gray-600 mt-4 line-clamp-2">{{ area }}</p>
+                </div>
+                {% endfor %}
+            {% endfor %}
+        </div>
     </div>
 </div>
 <!-- Galería visual -->
@@ -498,6 +576,13 @@
         trackId: 'gallery-track',
         mobileSpeed: 0.35,
         desktopSpeed: 0.5
+    });
+
+    initInfiniteCarousel({
+        carouselId: 'speakers-carousel',
+        trackId: 'speakers-track',
+        mobileSpeed: 0.3,
+        desktopSpeed: 0.4
     });
 </script>
 

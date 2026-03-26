@@ -6,14 +6,14 @@
     <div class="absolute inset-0 opacity-20" style="background-image: url('https://images.unsplash.com/photo-1540575467063-178a50c2df87?w=1400&q=80'); background-size: cover; background-position: center;"></div>
     <div class="relative z-10 flex flex-col items-center justify-center text-center px-8 py-16">
         <h1 class="text-4xl font-black text-white mb-2">Conferencias</h1>
-        <p class="text-teal-300 text-lg">Conferencias plenarias y semiplenarias · NANO2026</p>
+        <p class="text-[#DBF227] text-lg">Conferencias plenarias y semiplenarias · NANO2026</p>
     </div>
 </div>
 
 <!-- Conferencias plenarias-->
 <div class="mb-12">
     <div class="flex items-center gap-3 mb-6">
-        <span class="bg-teal-500 text-white text-xs font-bold px-3 py-1 rounded-full uppercase tracking-wider">Conferencias Plenarias</span>
+        <span class="bg-[#005C53] text-white text-xs font-bold px-3 py-1 rounded-full uppercase tracking-wider">Conferencias Plenarias</span>
         <div class="flex-1 h-px bg-gray-200"></div>
     </div>
     <div class="grid grid-cols-1 gap-6 sm:grid-cols-2">
@@ -56,7 +56,7 @@
             },
         ] %}
         <div class="bg-white rounded-2xl shadow p-6 flex gap-5 hover:shadow-md transition">
-            <img src="{{ speaker.img }}" class="w-24 h-24 rounded-full object-cover {{ speaker.img_position or 'object-[center_20%]' }} flex-shrink-0 border-4 border-teal-100" alt="{{ speaker.nombre }}"/>
+            <img src="{{ speaker.img }}" class="w-24 h-24 rounded-full object-cover {{ speaker.img_position or 'object-[center_20%]' }} flex-shrink-0 border-4 border-[#005C53]" alt="{{ speaker.nombre }}"/>
             <div>
                 <h3 class="font-bold text-gray-900 text-lg">{{ speaker.nombre }}</h3>
                 <p class="text-[#005C53] text-sm font-medium mt-0.5">{{ speaker.institucion }}</p>
@@ -72,7 +72,7 @@
 <!-- Conferencias semiplenarias -->
 <div class="mb-12">
     <div class="flex items-center gap-3 mb-6">
-        <span class="bg-blue-600 text-white text-xs font-bold px-3 py-1 rounded-full uppercase tracking-wider">Conferencias semiplenarias</span>
+        <span class="bg-[#9FC131] text-white text-xs font-bold px-3 py-1 rounded-full uppercase tracking-wider">Conferencias semiplenarias</span>
         <div class="flex-1 h-px bg-gray-200"></div>
     </div>
     <div class="grid grid-cols-1 gap-6 sm:grid-cols-2">
@@ -115,10 +115,10 @@
             },                                            
         ] %}
         <div class="bg-white rounded-2xl shadow p-6 flex gap-5 hover:shadow-md transition">
-            <img src="{{ speaker.img }}" class="w-24 h-24 rounded-full object-cover {{ speaker.img_position or 'object-[center_20%]' }} flex-shrink-0 border-4 border-blue-100" alt="{{ speaker.nombre }}"/>
+            <img src="{{ speaker.img }}" class="w-24 h-24 rounded-full object-cover {{ speaker.img_position or 'object-[center_20%]' }} flex-shrink-0 border-4 border-[#9FC131]" alt="{{ speaker.nombre }}"/>
             <div>
                 <h3 class="font-bold text-gray-900 text-lg">{{ speaker.nombre }}</h3>
-                <p class="text-blue-600 text-sm font-medium mt-0.5">{{ speaker.institucion }}</p>
+                <p class="text-[#9FC131] text-sm font-medium mt-0.5">{{ speaker.institucion }}</p>
                 <p class="text-gray-500 text-sm mt-1">{{ speaker.area }}</p>
                 {% if speaker.scholar %}
                 <a href="{{ speaker.scholar }}" target="_blank" class="text-blue-500 text-xs hover:underline mt-2 inline-block">Google Scholar →</a>
@@ -133,7 +133,7 @@
 <!-- JOVEN -->
 <div class="mb-12">
     <div class="flex items-center gap-3 mb-6">
-        <span class="bg-indigo-500 text-white text-xs font-bold px-3 py-1 rounded-full uppercase tracking-wider">TALENTO JOVEN</span>
+        <span class="bg-[#DBF227] text-black text-xs font-bold px-3 py-1 rounded-full uppercase tracking-wider">TALENTO JOVEN</span>
         <div class="flex-1 h-px bg-gray-200"></div>
     </div>
     <div class="grid grid-cols-1 gap-4 sm:grid-cols-2">
@@ -142,12 +142,12 @@
             ('Germán Gómez', 'INTEQUI, Universidad Nacional de San Luis', 'Aplicaciones de nanomateriales en ambiente y salud'),
         ] %}
         <div class="bg-white rounded-xl shadow p-5 flex items-center gap-4 hover:shadow-md transition">
-            <div class="w-12 h-12 rounded-full bg-indigo-100 flex items-center justify-center text-indigo-600 font-bold text-lg flex-shrink-0">
+            <div class="w-12 h-12 rounded-full bg-[#DBF227] flex items-center justify-center text-black font-bold text-lg flex-shrink-0">
                 {{ speaker[0][0] }}
             </div>
             <div>
                 <h3 class="font-semibold text-gray-900">{{ speaker[0] }}</h3>
-                <p class="text-indigo-600 text-xs">{{ speaker[1] }}</p>
+                <p class="text-[#9FC131] text-xs">{{ speaker[1] }}</p>
                 <p class="text-gray-500 text-xs mt-0.5">{{ speaker[2] }}</p>
             </div>
         </div>
