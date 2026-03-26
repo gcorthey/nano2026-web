@@ -3,6 +3,14 @@
 
 <a href="/admin" class="text-blue-600 text-sm hover:underline">← Volver a la lista</a>
 
+{% set abstract_type_labels = {
+    'contribucion': 'Contribución',
+    'plenaria': 'Plenaria',
+    'semiplenaria': 'Semiplenaria',
+    'talento_joven': 'Talento joven',
+} %}
+{% set is_invited = (abstract.tipo_resumen or 'contribucion') != 'contribucion' %}
+
 <div class="mt-4 bg-white rounded shadow p-6 mb-6">
 
     <!-- Encabezado -->
@@ -41,6 +49,7 @@
             {% if abstract.codigo_final %}
                 <span class="bg-slate-100 text-slate-700 px-3 py-1 rounded text-sm font-mono">{{ abstract.codigo_final }}</span>
             {% endif %}
+            <span class="bg-slate-100 text-slate-700 px-3 py-1 rounded text-sm">{{ abstract_type_labels.get(abstract.tipo_resumen or 'contribucion', 'Contribución') }}</span>
             {% if abstract.estado.value == 'pendiente' %}
                 <span class="bg-yellow-100 text-yellow-800 px-3 py-1 rounded text-sm">Pendiente</span>
             {% elif abstract.estado.value == 'aprobado' %}
@@ -117,7 +126,18 @@
 
 </div>
 
+{% if is_invited %}
+<div class="bg-white rounded shadow p-6 mb-6">
+    <h2 class="font-semibold mb-2">Abstract invitado</h2>
+    <p class="text-sm text-gray-600">
+        Este abstract fue cargado por administración como <strong>{{ abstract_type_labels.get(abstract.tipo_resumen or 'contribucion', 'Contribución') }}</strong>.
+        No participa del flujo estándar de evaluación ni del envío manual de decisión al presentador.
+    </p>
+</div>
+{% endif %}
+
 <!-- Asignar evaluadores -->
+{% if not is_invited %}
 <div class="bg-white rounded shadow p-6 mb-6">
     <h2 class="font-semibold mb-3">Asignar evaluadores</h2>
     {% if evaluadores_disponibles %}
@@ -219,9 +239,10 @@
         {% endif %}
     </p>
 </div>
+{% endif %}
 
 <!-- Reviews -->
-{% if reviews %}
+{% if reviews and not is_invited %}
 <div class="bg-white rounded shadow p-6">
     <h2 class="font-semibold mb-3">Evaluaciones recibidas</h2>
     <div class="space-y-3">

@@ -28,6 +28,7 @@ class User(Base):
 class Abstract(Base):
     __tablename__ = "abstracts"
     id = Column(Integer, primary_key=True, index=True)
+    tipo_resumen = Column(String, nullable=False, default="contribucion")
     titulo = Column(String, nullable=False)
     autor = Column(String, nullable=False)
     afiliacion = Column(String, nullable=False)

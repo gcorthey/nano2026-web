@@ -14,14 +14,26 @@
     #referencias-editor .ql-editor { min-height: 120px; }
 </style>
 
+{% set is_create = create_mode if create_mode is defined else False %}
+
 {% if presenter_mode %}
 <a href="/" class="text-blue-600 text-sm hover:underline">← Volver al inicio</a>
+{% elif is_create %}
+<a href="{{ cancel_url if cancel_url is defined else '/admin' }}" class="text-blue-600 text-sm hover:underline">← Volver a la lista</a>
 {% else %}
 <a href="/admin/abstracts/{{ abstract.id }}" class="text-blue-600 text-sm hover:underline">← Volver al detalle</a>
 {% endif %}
 
 <div class="mt-4 bg-white rounded-2xl shadow p-8">
-    <h1 class="text-xl font-bold mb-6">Editar resumen #{{ abstract.id }}</h1>
+    <h1 class="text-xl font-bold mb-6">
+        {% if is_create %}Nuevo abstract invitado{% else %}Editar resumen #{{ abstract.id }}{% endif %}
+    </h1>
+
+    {% if error_message %}
+    <div class="bg-red-100 border border-red-300 text-red-800 px-4 py-3 rounded-xl mb-5">
+        {{ error_message }}
+    </div>
+    {% endif %}
 
     {% if success_revision_submit %}
     <div class="bg-green-100 border border-green-300 text-green-800 px-4 py-3 rounded-xl mb-5">
@@ -29,7 +41,20 @@
     </div>
     {% endif %}
 
-    <form method="post" action="{% if presenter_mode %}/revision/{{ revision_token }}{% else %}/admin/abstracts/{{ abstract.id }}/edit{% endif %}">
+    <form method="post" action="{% if presenter_mode %}/revision/{{ revision_token }}{% elif is_create %}{{ form_action }}{% else %}/admin/abstracts/{{ abstract.id }}/edit{% endif %}">
+
+        {% if not presenter_mode %}
+        <div class="mb-6">
+            <label class="block text-sm font-bold mb-2">Tipo de abstract *</label>
+            <select name="tipo_resumen" required
+                class="w-full border rounded-xl px-3 py-2 focus:outline-none focus:ring-2 focus:ring-blue-400 bg-white">
+                {% for val, label in abstract_type_labels.items() %}
+                <option value="{{ val }}" {% if (abstract.tipo_resumen or 'contribucion') == val %}selected{% endif %}>{{ label }}</option>
+                {% endfor %}
+            </select>
+            <p class="text-xs text-gray-400 mt-1">Los enviados desde la web quedan como contribución. Los cargados por admin pueden ser plenaria, semiplenaria o talento joven.</p>
+        </div>
+        {% endif %}
 
         <!-- Título -->
         <div class="mb-6">
@@ -87,6 +112,7 @@
             </select>
         </div>
 
+        {% if not is_create %}
         <!-- Presentación oral -->
         <div class="mb-6 bg-blue-50 border border-blue-200 rounded-xl px-5 py-4">
             <label class="block text-sm font-medium mb-2">¿Presentación oral?</label>
@@ -101,6 +127,7 @@
                 </label>
             </div>
         </div>
+        {% endif %}
 
         <!-- Resumen -->
         <div class="mb-6">
@@ -128,9 +155,9 @@
         <div class="flex gap-3">
             <button type="submit"
                 class="bg-blue-600 hover:bg-blue-700 text-white px-8 py-3 rounded-full font-semibold transition shadow">
-                {% if presenter_mode %}Enviar versión corregida{% else %}Guardar cambios{% endif %}
+                {% if presenter_mode %}Enviar versión corregida{% elif is_create %}{{ submit_label if submit_label is defined else 'Crear abstract' }}{% else %}Guardar cambios{% endif %}
             </button>
-            <a href="{% if presenter_mode %}/{% else %}/admin/abstracts/{{ abstract.id }}{% endif %}"
+            <a href="{% if presenter_mode %}/{% elif is_create %}{{ cancel_url if cancel_url is defined else '/admin' }}{% else %}/admin/abstracts/{{ abstract.id }}{% endif %}"
                 class="bg-gray-200 hover:bg-gray-300 text-gray-700 px-8 py-3 rounded-full font-semibold transition">
                 Cancelar
             </a>

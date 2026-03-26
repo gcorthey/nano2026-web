@@ -37,6 +37,10 @@ def ensure_schema_updates():
         }
         if "codigo_final" not in abstract_columns:
             conn.execute(text("ALTER TABLE abstracts ADD COLUMN codigo_final VARCHAR"))
+        if "tipo_resumen" not in abstract_columns:
+            conn.execute(text("ALTER TABLE abstracts ADD COLUMN tipo_resumen VARCHAR NOT NULL DEFAULT 'contribucion'"))
+        else:
+            conn.execute(text("UPDATE abstracts SET tipo_resumen = 'contribucion' WHERE tipo_resumen IS NULL OR tipo_resumen = ''"))
 
         user_columns = {
             row[1]
@@ -75,6 +79,15 @@ AREA_NAMES = {
     "G": "Aplicaciones de nanomateriales en ambiente, energía, agro, alimentos y catálisis",
 }
 
+ABSTRACT_TYPE_LABELS = {
+    "contribucion": "Contribución",
+    "plenaria": "Plenaria",
+    "semiplenaria": "Semiplenaria",
+    "talento_joven": "Talento joven",
+}
+
+INVITED_ABSTRACT_TYPES = {"plenaria", "semiplenaria", "talento_joven"}
+
 def strip_tags(text: str) -> str:
     return re.sub(r'<[^>]+>', '', text or '').strip()
 
@@ -82,6 +95,10 @@ def normalize_area_code(area_code: str | None) -> str | None:
     if area_code is None:
         return None
     return AREA_CODE_MAP.get(area_code, area_code)
+
+def normalize_abstract_type(value: str | None) -> str:
+    normalized = (value or "contribucion").strip().lower().replace(" ", "_")
+    return normalized if normalized in ABSTRACT_TYPE_LABELS else "contribucion"
 
 def calculate_final_code(abstract: models.Abstract) -> str | None:
     if abstract.estado != models.EstadoEnum.aprobado:
@@ -370,11 +387,13 @@ def set_minor_revision_flag(db: Session, abstract: models.Abstract, enabled: boo
 
 def apply_abstract_edit_from_form(abstract: models.Abstract, form_data, db: Session):
     abstract.titulo = form_data.get("titulo", "").strip()
+    abstract.tipo_resumen = normalize_abstract_type(form_data.get("tipo_resumen"))
     abstract.email_autor = form_data.get("email_autor", "").strip()
     abstract.contenido_html = form_data.get("contenido_html", "").strip()
     abstract.referencias_html = form_data.get("referencias_html", "")
     abstract.area_tematica = normalize_area_code(form_data.get("area_tematica", "").strip())
     abstract.presentacion_oral = int(form_data.get("presentacion_oral", 0))
+    abstract.tiene_referencias = 1 if strip_tags(abstract.referencias_html) else 0
 
     autor_count = int(form_data.get("autor_count", 0))
     afil_count = int(form_data.get("afil_count", 0))
@@ -406,6 +425,10 @@ def apply_abstract_edit_from_form(abstract: models.Abstract, form_data, db: Sess
                 autor_presentador = nombre_autor
 
     abstract.autor = autor_presentador
+    first_affiliation = db.query(models.Afiliacion).filter(
+        models.Afiliacion.abstract_id == abstract.id
+    ).order_by(models.Afiliacion.orden.asc()).first()
+    abstract.afiliacion = first_affiliation.nombre if first_affiliation else ""
 
 
 # --- Crea admin por defecto si no existe ---
@@ -642,6 +665,7 @@ def submit_form(request: Request):
             ),
             "recaptcha_site_key": get_recaptcha_site_key(),
             "initial_submit_data": {
+                "tipo_resumen": "contribucion",
                 "titulo": "",
                 "email_autor": "",
                 "area_tematica": "",
@@ -671,6 +695,7 @@ async def submit_abstract(
     db: Session = Depends(get_db)
 ):
     form_state = {
+        "tipo_resumen": "contribucion",
         "titulo": titulo,
         "email_autor": email_autor,
         "area_tematica": normalize_area_code(area_tematica) or area_tematica,
@@ -765,6 +790,7 @@ async def submit_abstract(
         return submit_error("Debe seleccionarse exactamente un autor presentador.")
 
     abstract = models.Abstract(
+        tipo_resumen="contribucion",
         titulo=titulo,
         autor=presentadores[0][1],
         afiliacion=afiliaciones_data[0][1],
@@ -812,6 +838,7 @@ async def submit_abstract(
         ),
         "recaptcha_site_key": get_recaptcha_site_key(),
         "initial_submit_data": {
+            "tipo_resumen": "contribucion",
             "titulo": "",
             "email_autor": "",
             "area_tematica": "",
@@ -847,8 +874,163 @@ def admin_abstracts(
         "area_filtro": area,
         "aprobado_tipo_filtro": aprobado_tipo,
         "current_user": current_user,
-        "evaluadores": evaluadores
+        "evaluadores": evaluadores,
+        "abstract_type_labels": ABSTRACT_TYPE_LABELS,
     })
+
+@app.get("/admin/abstracts/new", response_class=HTMLResponse)
+def admin_new_abstract_form(
+    request: Request,
+    current_user: models.User = Depends(require_admin),
+):
+    abstract = models.Abstract(
+        tipo_resumen="plenaria",
+        titulo="",
+        autor="",
+        afiliacion="",
+        email_autor="",
+        contenido_html="",
+        referencias_html="",
+        tiene_referencias=0,
+        presentacion_oral=1,
+        area_tematica="A",
+    )
+    return templates.TemplateResponse("admin/abstract_edit.html", {
+        "request": request,
+        "abstract": abstract,
+        "create_mode": True,
+        "form_action": "/admin/abstracts/new",
+        "submit_label": "Crear abstract",
+        "cancel_url": "/admin",
+        "abstract_type_labels": ABSTRACT_TYPE_LABELS,
+        "current_user": current_user,
+    })
+
+@app.post("/admin/abstracts/new", response_class=HTMLResponse)
+async def admin_create_abstract(
+    request: Request,
+    titulo: str = Form(...),
+    email_autor: str = Form(...),
+    contenido_html: str = Form(...),
+    autor_count: int = Form(...),
+    afil_count: int = Form(...),
+    area_tematica: str = Form(...),
+    referencias_html: str = Form(""),
+    tipo_resumen: str = Form("contribucion"),
+    current_user: models.User = Depends(require_admin),
+    db: Session = Depends(get_db)
+):
+    form_data = await request.form()
+    tipo_resumen = normalize_abstract_type(tipo_resumen)
+    titulo = titulo.strip()
+    email_autor = email_autor.strip()
+    resumen_texto = strip_tags(contenido_html)
+    referencias_texto = strip_tags(referencias_html)
+    presentacion_oral = 1 if tipo_resumen in INVITED_ABSTRACT_TYPES else 0
+
+    abstract = models.Abstract(
+        tipo_resumen=tipo_resumen,
+        titulo=titulo,
+        autor="",
+        afiliacion="",
+        email_autor=email_autor,
+        contenido_html=contenido_html,
+        referencias_html=referencias_html,
+        tiene_referencias=1 if referencias_texto else 0,
+        presentacion_oral=presentacion_oral,
+        area_tematica=normalize_area_code(area_tematica),
+        estado=models.EstadoEnum.aprobado if tipo_resumen in INVITED_ABSTRACT_TYPES else models.EstadoEnum.pendiente,
+    )
+
+    def render_create_error(message: str, status_code: int = 400):
+        abstract.autores = []
+        abstract.afiliaciones = []
+        for i in range(1, autor_count + 1):
+            nombre_autor = form_data.get(f"autor_nombre_{i}", "").strip()
+            afils_str = form_data.get(f"autor_afils_{i}", "").strip()
+            if nombre_autor:
+                abstract.autores.append(models.Autor(
+                    nombre=nombre_autor,
+                    afiliaciones_ids=afils_str,
+                    es_presentador=1 if form_data.get("presentador", "").strip() == str(i) else 0,
+                    orden=i,
+                ))
+        for i in range(1, afil_count + 1):
+            nombre_afil = form_data.get(f"afil_nombre_{i}", "").strip()
+            if nombre_afil:
+                abstract.afiliaciones.append(models.Afiliacion(nombre=nombre_afil, orden=i))
+        return templates.TemplateResponse("admin/abstract_edit.html", {
+            "request": request,
+            "abstract": abstract,
+            "create_mode": True,
+            "form_action": "/admin/abstracts/new",
+            "submit_label": "Crear abstract",
+            "cancel_url": "/admin",
+            "abstract_type_labels": ABSTRACT_TYPE_LABELS,
+            "error_message": message,
+            "current_user": current_user,
+        }, status_code=status_code)
+
+    if not titulo:
+        return render_create_error("El título no puede estar vacío.")
+    if not email_autor:
+        return render_create_error("El email del autor presentador es obligatorio.")
+    if not resumen_texto:
+        return render_create_error("El resumen no puede estar vacío.")
+    if len(resumen_texto) > 2500:
+        return render_create_error("El resumen no puede superar los 2500 caracteres.")
+    if referencias_texto and len(referencias_texto) > 750:
+        return render_create_error("Las referencias bibliográficas no pueden superar los 750 caracteres.")
+
+    afiliaciones_data: list[tuple[int, str]] = []
+    for i in range(1, afil_count + 1):
+        nombre_afil = form_data.get(f"afil_nombre_{i}", "").strip()
+        if nombre_afil:
+            afiliaciones_data.append((i, nombre_afil))
+    if not afiliaciones_data:
+        return render_create_error("Debe haber al menos una afiliación.")
+
+    autores_data: list[tuple[int, str, str]] = []
+    for i in range(1, autor_count + 1):
+        nombre_autor = form_data.get(f"autor_nombre_{i}", "").strip()
+        afils_str = form_data.get(f"autor_afils_{i}", "").strip()
+        if nombre_autor:
+            autores_data.append((i, nombre_autor, afils_str))
+    if not autores_data:
+        return render_create_error("Debe haber al menos un autor.")
+
+    presentador_idx = form_data.get("presentador", "").strip()
+    presentadores = [autor for autor in autores_data if str(autor[0]) == presentador_idx]
+    if len(presentadores) != 1:
+        return render_create_error("Debe seleccionarse exactamente un autor presentador.")
+
+    abstract.autor = presentadores[0][1]
+    abstract.afiliacion = afiliaciones_data[0][1]
+    db.add(abstract)
+    db.flush()
+
+    for orden, nombre_afil in afiliaciones_data:
+        db.add(models.Afiliacion(
+            abstract_id=abstract.id,
+            nombre=nombre_afil,
+            orden=orden
+        ))
+
+    for orden, nombre_autor, afils_str in autores_data:
+        db.add(models.Autor(
+            abstract_id=abstract.id,
+            nombre=nombre_autor,
+            orden=orden,
+            es_presentador=1 if str(orden) == presentador_idx else 0,
+            afiliaciones_ids=afils_str
+        ))
+
+    if tipo_resumen in INVITED_ABSTRACT_TYPES:
+        abstract.tipo_asignado_admin = "oral"
+        sync_final_code(abstract)
+
+    db.commit()
+    return RedirectResponse(url=f"/admin/abstracts/{abstract.id}", status_code=303)
 
 # --- Admin: detalle de abstract ---
 @app.get("/admin/abstracts/{abstract_id}", response_class=HTMLResponse)
@@ -1391,7 +1573,8 @@ def revision_edit_form(
         "abstract": abstract,
         "presenter_mode": True,
         "base_template": "public/base.html",
-        "revision_token": token
+        "revision_token": token,
+        "abstract_type_labels": ABSTRACT_TYPE_LABELS,
     })
 
 @app.post("/revision/{token}", response_class=HTMLResponse)
@@ -1431,7 +1614,8 @@ async def revision_edit_submit(
         "presenter_mode": True,
         "base_template": "public/base.html",
         "revision_token": token,
-        "success_revision_submit": True
+        "success_revision_submit": True,
+        "abstract_type_labels": ABSTRACT_TYPE_LABELS,
     })
 from sqlalchemy import or_
 
@@ -1668,6 +1852,7 @@ def admin_edit_abstract_form(abstract_id: int, request: Request, current_user: m
     return templates.TemplateResponse("admin/abstract_edit.html", {
         "request": request,
         "abstract": abstract,
+        "abstract_type_labels": ABSTRACT_TYPE_LABELS,
     })
 
 @app.post("/admin/abstracts/{abstract_id}/edit")

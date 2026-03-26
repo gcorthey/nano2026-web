@@ -4,6 +4,9 @@
 <div class="mb-6">
     <div class="flex items-center justify-between mb-3">
         <h1 class="text-2xl font-bold">Resúmenes enviados</h1>
+        <a href="/admin/abstracts/new" class="bg-[#005C53] text-white px-4 py-2 rounded-lg hover:bg-[#042940] transition text-sm font-medium">
+            Nuevo abstract invitado
+        </a>
     </div>
     <div class="flex flex-wrap gap-2 text-sm mb-2">
         <span class="text-gray-400 text-xs self-center uppercase tracking-wider mr-1">Estado:</span>
@@ -96,6 +99,11 @@
                 <td class="px-4 py-3 text-gray-600 font-mono whitespace-nowrap">{{ a.codigo_final or '—' }}</td>
                 <td class="px-4 py-3 font-medium" style="max-width: 200px;">
                     <div class="truncate">{{ a.titulo | striptags }}</div>
+                    <div class="mt-1">
+                        <span class="inline-flex px-2 py-0.5 rounded-full text-[11px] font-medium bg-slate-100 text-slate-700">
+                            {{ abstract_type_labels.get(a.tipo_resumen or 'contribucion', 'Contribución') }}
+                        </span>
+                    </div>
                 </td>
                 <td class="px-4 py-3 text-gray-600" style="max-width: 200px;">
                     {% for autor in a.autores %}
