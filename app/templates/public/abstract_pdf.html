@@ -17,12 +17,20 @@
             border-bottom: 2px solid #0d3b6e;
             padding-bottom: 0.3cm;
             margin-bottom: 0.5cm;
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
+            width: 100%;
+        }
+        .header-table {
+            width: 100%;
+            border-collapse: collapse;
+        }
+        .header-table td {
+            vertical-align: middle;
+        }
+        .header-logo-cell {
+            width: 4.5cm;
         }
         .header-logo {
-            width: 4.1cm;
+            width: 3.6cm;
             height: auto;
         }
         .header-info {
@@ -129,11 +137,17 @@
 
     <!-- Encabezado -->
     <div class="header">
-        <img src="/home/gcorthey/congreso_nano/app/static/logos/logo_nano_abstract.svg" class="header-logo" alt="NANO2026">
-        <div class="header-info">
-            XXIV Encuentro de Superficies y Materiales Nanoestructurados<br>
-            3, 4 y 5 de junio de 2026 · Campus UNSAM · San Martín, Buenos Aires
-        </div>
+        <table class="header-table">
+            <tr>
+                <td class="header-logo-cell">
+                    <img src="/home/gcorthey/congreso_nano/app/static/logos/logo_nano_abstract.svg" class="header-logo" alt="NANO2026">
+                </td>
+                <td class="header-info">
+                    XXIV Encuentro de Superficies y Materiales Nanoestructurados<br>
+                    3, 4 y 5 de junio de 2026 · Campus UNSAM · San Martín, Buenos Aires
+                </td>
+            </tr>
+        </table>
     </div>
 
     <!-- Título -->
