@@ -1,12 +1,29 @@
 {% extends "public/base.html" %}
 {% block content %}
 
+{% set abstract_type_labels = {
+    'contribucion': 'Contribución',
+    'plenaria': 'Plenaria',
+    'semiplenaria': 'Semiplenaria',
+    'talento_joven': 'Talento joven',
+} %}
+
 <a href="/abstracts" class="text-blue-600 text-sm hover:underline">← Volver a resúmenes</a>
 
 <div class="mt-4 bg-white rounded shadow p-8">
     <div class="flex items-start justify-between mb-6">
         <div>
             <h1 class="text-2xl font-bold text-blue-900">{{ abstract.titulo }}</h1>
+            <div class="mt-2 flex flex-wrap gap-2">
+                <span class="inline-flex bg-slate-100 text-slate-700 px-2.5 py-1 rounded-full text-xs font-medium">
+                    {{ abstract_type_labels.get(abstract.tipo_resumen or 'contribucion', 'Contribución') }}
+                </span>
+                {% if abstract.codigo_final %}
+                <span class="inline-flex bg-slate-100 text-slate-700 px-2.5 py-1 rounded-full text-xs font-mono">
+                    {{ abstract.codigo_final }}
+                </span>
+                {% endif %}
+            </div>
             <p class="text-gray-600 mt-2">{{ abstract.autor }}</p>
             <p class="text-gray-400 text-sm">{{ abstract.afiliacion }}</p>
         </div>

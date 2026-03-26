@@ -46,13 +46,20 @@
         {% if not presenter_mode %}
         <div class="mb-6">
             <label class="block text-sm font-bold mb-2">Tipo de abstract *</label>
-            <select name="tipo_resumen" required
+            <select name="tipo_resumen" id="tipo-resumen" required onchange="toggleAbstractTypeFields()"
                 class="w-full border rounded-xl px-3 py-2 focus:outline-none focus:ring-2 focus:ring-blue-400 bg-white">
                 {% for val, label in abstract_type_labels.items() %}
                 <option value="{{ val }}" {% if (abstract.tipo_resumen or 'contribucion') == val %}selected{% endif %}>{{ label }}</option>
                 {% endfor %}
             </select>
             <p class="text-xs text-gray-400 mt-1">Los enviados desde la web quedan como contribución. Los cargados por admin pueden ser plenaria, semiplenaria o talento joven.</p>
+        </div>
+        <div class="mb-6" id="invited-number-wrapper">
+            <label class="block text-sm font-bold mb-1">Número de charla *</label>
+            <input type="number" min="1" step="1" name="numero_invitado" id="numero-invitado"
+                value="{{ abstract.numero_invitado if abstract.numero_invitado is not none else '' }}"
+                class="w-full border rounded-xl px-3 py-2 focus:outline-none focus:ring-2 focus:ring-blue-400"/>
+            <p class="text-xs text-gray-400 mt-1">Se usará para generar el código `P-01`, `SP-01` o `TJ-01`.</p>
         </div>
         {% endif %}
 
@@ -94,9 +101,9 @@
         </div>
 
         <!-- Área temática -->
-        <div class="mb-6">
+        <div class="mb-6" id="area-tematica-wrapper">
             <label class="block text-sm font-bold mb-2">Área temática *</label>
-            <select name="area_tematica" required
+            <select name="area_tematica" id="area-tematica-select" required
                 class="w-full border rounded-xl px-3 py-2 focus:outline-none focus:ring-2 focus:ring-blue-400 bg-white">
                 {% for val, label in [
                     ('A', 'A. Síntesis de nanomateriales'),
@@ -114,7 +121,7 @@
 
         {% if not is_create %}
         <!-- Presentación oral -->
-        <div class="mb-6 bg-blue-50 border border-blue-200 rounded-xl px-5 py-4">
+        <div class="mb-6 bg-blue-50 border border-blue-200 rounded-xl px-5 py-4" id="presentacion-oral-wrapper">
             <label class="block text-sm font-medium mb-2">¿Presentación oral?</label>
             <div class="flex gap-6">
                 <label class="flex items-center gap-2 cursor-pointer">
@@ -188,6 +195,24 @@
 <script>
     let autorCount = 0;
     let afiliacionCount = 0;
+
+    function toggleAbstractTypeFields() {
+        const typeSelect = document.getElementById('tipo-resumen');
+        if (!typeSelect) return;
+        const invitedTypes = ['plenaria', 'semiplenaria', 'talento_joven'];
+        const isInvited = invitedTypes.includes(typeSelect.value);
+        const areaWrapper = document.getElementById('area-tematica-wrapper');
+        const areaSelect = document.getElementById('area-tematica-select');
+        const oralWrapper = document.getElementById('presentacion-oral-wrapper');
+        const invitedNumberWrapper = document.getElementById('invited-number-wrapper');
+        const invitedNumberInput = document.getElementById('numero-invitado');
+
+        if (areaWrapper) areaWrapper.style.display = isInvited ? 'none' : '';
+        if (areaSelect) areaSelect.required = !isInvited;
+        if (oralWrapper) oralWrapper.style.display = isInvited ? 'none' : '';
+        if (invitedNumberWrapper) invitedNumberWrapper.style.display = isInvited ? '' : 'none';
+        if (invitedNumberInput) invitedNumberInput.required = isInvited;
+    }
 
     function agregarAutor(nombre='', afils='', esPresentador=false) {
         autorCount++;
@@ -312,6 +337,7 @@
     // Precargar contenido
 
    document.addEventListener('DOMContentLoaded', function() {
+        toggleAbstractTypeFields();
         setTimeout(function() {
         // Título
         quillTitulo.clipboard.dangerouslyPasteHTML(ABSTRACT_DATA.titulo_html);

@@ -92,7 +92,6 @@
                 'F': ('F. Nano y Salud', 'bg-red-100 text-red-800'),
                 'G': ('G. Aplicaciones', 'bg-teal-100 text-teal-800'),
             } %}
-            {% set info = area_info.get(a.area_tematica, ('—', 'bg-gray-100 text-gray-500')) %}
             <tr class="hover:bg-gray-50">
                 <td class="px-4 py-3">     <input type="checkbox" class="row-check cursor-pointer" value="{{ a.id }}" onchange="updateBarra()"></td>
                 <td class="px-4 py-3 text-gray-400">{{ a.id }}</td>
@@ -111,7 +110,12 @@
                     {% endfor %}
                 </td>
                 <td class="px-4 py-3">
+                    {% if (a.tipo_resumen or 'contribucion') == 'contribucion' %}
+                    {% set info = area_info.get(a.area_tematica, ('—', 'bg-gray-100 text-gray-500')) %}
                     <span class="px-2 py-1 rounded-full text-xs font-medium {{ info[1] }}">{{ info[0] }}</span>
+                    {% else %}
+                    <span class="text-gray-300">—</span>
+                    {% endif %}
                 </td>
                 <!-- Tipo solicitado -->
                 <td class="px-4 py-3 text-center">

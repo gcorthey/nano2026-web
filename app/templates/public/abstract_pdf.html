@@ -167,6 +167,13 @@
     <!-- Email -->
     <p class="email">{{ abstract.email_autor }}</p>
 
+    {% set abstract_type_labels = {
+        'contribucion': 'Contribución',
+        'plenaria': 'Plenaria',
+        'semiplenaria': 'Semiplenaria',
+        'talento_joven': 'Talento joven',
+    } %}
+    {% if (abstract.tipo_resumen or 'contribucion') == 'contribucion' %}
     <!-- Área temática -->
     {% set areas = {
         'A': 'A. Síntesis de nanomateriales',
@@ -178,6 +185,9 @@
         'G': 'G. Aplicaciones de nanomateriales en ambiente, energía, agro, alimentos y catálisis'
     } %}
     <p class="area">Área temática: <strong>{{ areas.get(abstract.area_tematica, '—') }}</strong></p>
+    {% else %}
+    <p class="area">Tipo de charla: <strong>{{ abstract_type_labels.get(abstract.tipo_resumen or 'contribucion', '—') }}</strong></p>
+    {% endif %}
 
     <hr>
 

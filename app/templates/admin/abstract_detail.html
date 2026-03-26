@@ -64,6 +64,7 @@
                 <span class="bg-red-100 text-red-800 px-3 py-1 rounded text-sm">Rechazado</span>
             {% endif %}
 
+            {% if not is_invited %}
             {% set area_info = {
                 'A': ('A. Síntesis de nanomateriales', 'bg-blue-100 text-blue-800'),
                 'B': ('B. Autoensamblado', 'bg-purple-100 text-purple-800'),
@@ -75,6 +76,7 @@
             } %}
             {% set info = area_info.get(abstract.area_tematica, ('—', 'bg-gray-100 text-gray-500')) %}
             <span class="px-2 py-1 rounded-full text-xs font-medium {{ info[1] }}">{{ info[0] }}</span>
+            {% endif %}
 
             {% if abstract.presentacion_oral %}
                 <span class="bg-teal-100 text-teal-700 px-2 py-1 rounded text-xs">🎤 Solicita presentación oral</span>

@@ -41,6 +41,8 @@ def ensure_schema_updates():
             conn.execute(text("ALTER TABLE abstracts ADD COLUMN tipo_resumen VARCHAR NOT NULL DEFAULT 'contribucion'"))
         else:
             conn.execute(text("UPDATE abstracts SET tipo_resumen = 'contribucion' WHERE tipo_resumen IS NULL OR tipo_resumen = ''"))
+        if "numero_invitado" not in abstract_columns:
+            conn.execute(text("ALTER TABLE abstracts ADD COLUMN numero_invitado INTEGER"))
 
         user_columns = {
             row[1]
@@ -87,6 +89,11 @@ ABSTRACT_TYPE_LABELS = {
 }
 
 INVITED_ABSTRACT_TYPES = {"plenaria", "semiplenaria", "talento_joven"}
+INVITED_CODE_PREFIXES = {
+    "plenaria": "P",
+    "semiplenaria": "SP",
+    "talento_joven": "TJ",
+}
 
 def strip_tags(text: str) -> str:
     return re.sub(r'<[^>]+>', '', text or '').strip()
@@ -100,9 +107,27 @@ def normalize_abstract_type(value: str | None) -> str:
     normalized = (value or "contribucion").strip().lower().replace(" ", "_")
     return normalized if normalized in ABSTRACT_TYPE_LABELS else "contribucion"
 
+def parse_optional_positive_int(value: str | None) -> int | None:
+    raw = (value or "").strip()
+    if not raw:
+        return None
+    try:
+        parsed = int(raw)
+    except (TypeError, ValueError):
+        return None
+    return parsed if parsed > 0 else None
+
+def invited_code_for(abstract: models.Abstract) -> str | None:
+    prefix = INVITED_CODE_PREFIXES.get(abstract.tipo_resumen)
+    if not prefix or abstract.numero_invitado is None:
+        return None
+    return f"{prefix}-{int(abstract.numero_invitado):02d}"
+
 def calculate_final_code(abstract: models.Abstract) -> str | None:
     if abstract.estado != models.EstadoEnum.aprobado:
         return None
+    if abstract.tipo_resumen in INVITED_ABSTRACT_TYPES:
+        return invited_code_for(abstract)
     area_code = normalize_area_code(abstract.area_tematica)
     if not area_code:
         return None
@@ -388,11 +413,18 @@ def set_minor_revision_flag(db: Session, abstract: models.Abstract, enabled: boo
 def apply_abstract_edit_from_form(abstract: models.Abstract, form_data, db: Session):
     abstract.titulo = form_data.get("titulo", "").strip()
     abstract.tipo_resumen = normalize_abstract_type(form_data.get("tipo_resumen"))
+    abstract.numero_invitado = parse_optional_positive_int(form_data.get("numero_invitado"))
     abstract.email_autor = form_data.get("email_autor", "").strip()
     abstract.contenido_html = form_data.get("contenido_html", "").strip()
     abstract.referencias_html = form_data.get("referencias_html", "")
-    abstract.area_tematica = normalize_area_code(form_data.get("area_tematica", "").strip())
-    abstract.presentacion_oral = int(form_data.get("presentacion_oral", 0))
+    if abstract.tipo_resumen in INVITED_ABSTRACT_TYPES:
+        abstract.area_tematica = None
+        abstract.presentacion_oral = 1
+        abstract.tipo_asignado_admin = "oral"
+    else:
+        abstract.area_tematica = normalize_area_code(form_data.get("area_tematica", "").strip())
+        abstract.presentacion_oral = int(form_data.get("presentacion_oral", 0))
+        abstract.numero_invitado = None
     abstract.tiene_referencias = 1 if strip_tags(abstract.referencias_html) else 0
 
     autor_count = int(form_data.get("autor_count", 0))
@@ -429,6 +461,7 @@ def apply_abstract_edit_from_form(abstract: models.Abstract, form_data, db: Sess
         models.Afiliacion.abstract_id == abstract.id
     ).order_by(models.Afiliacion.orden.asc()).first()
     abstract.afiliacion = first_affiliation.nombre if first_affiliation else ""
+    sync_final_code(abstract)
 
 
 # --- Crea admin por defecto si no existe ---
@@ -885,6 +918,7 @@ def admin_new_abstract_form(
 ):
     abstract = models.Abstract(
         tipo_resumen="plenaria",
+        numero_invitado=1,
         titulo="",
         autor="",
         afiliacion="",
@@ -893,7 +927,7 @@ def admin_new_abstract_form(
         referencias_html="",
         tiene_referencias=0,
         presentacion_oral=1,
-        area_tematica="A",
+        area_tematica=None,
     )
     return templates.TemplateResponse("admin/abstract_edit.html", {
         "request": request,
@@ -914,9 +948,10 @@ async def admin_create_abstract(
     contenido_html: str = Form(...),
     autor_count: int = Form(...),
     afil_count: int = Form(...),
-    area_tematica: str = Form(...),
+    area_tematica: str = Form(""),
     referencias_html: str = Form(""),
     tipo_resumen: str = Form("contribucion"),
+    numero_invitado: str = Form(""),
     current_user: models.User = Depends(require_admin),
     db: Session = Depends(get_db)
 ):
@@ -927,9 +962,11 @@ async def admin_create_abstract(
     resumen_texto = strip_tags(contenido_html)
     referencias_texto = strip_tags(referencias_html)
     presentacion_oral = 1 if tipo_resumen in INVITED_ABSTRACT_TYPES else 0
+    invited_number = parse_optional_positive_int(numero_invitado)
 
     abstract = models.Abstract(
         tipo_resumen=tipo_resumen,
+        numero_invitado=invited_number,
         titulo=titulo,
         autor="",
         afiliacion="",
@@ -938,7 +975,7 @@ async def admin_create_abstract(
         referencias_html=referencias_html,
         tiene_referencias=1 if referencias_texto else 0,
         presentacion_oral=presentacion_oral,
-        area_tematica=normalize_area_code(area_tematica),
+        area_tematica=None if tipo_resumen in INVITED_ABSTRACT_TYPES else normalize_area_code(area_tematica),
         estado=models.EstadoEnum.aprobado if tipo_resumen in INVITED_ABSTRACT_TYPES else models.EstadoEnum.pendiente,
     )
 
@@ -981,6 +1018,10 @@ async def admin_create_abstract(
         return render_create_error("El resumen no puede superar los 2500 caracteres.")
     if referencias_texto and len(referencias_texto) > 750:
         return render_create_error("Las referencias bibliográficas no pueden superar los 750 caracteres.")
+    if tipo_resumen in INVITED_ABSTRACT_TYPES and invited_number is None:
+        return render_create_error("Debés ingresar el número de la charla invitada.")
+    if tipo_resumen not in INVITED_ABSTRACT_TYPES and not normalize_area_code(area_tematica):
+        return render_create_error("Debés seleccionar un área temática para la contribución.")
 
     afiliaciones_data: list[tuple[int, str]] = []
     for i in range(1, afil_count + 1):
@@ -1863,8 +1904,8 @@ def admin_edit_abstract(
     email_autor: str = Form(...),
     contenido_html: str = Form(...),
     referencias_html: str = Form(""),
-    area_tematica: str = Form(...),
-    presentacion_oral: int = Form(...),
+    area_tematica: str = Form(""),
+    presentacion_oral: int = Form(0),
     autor_count: int = Form(...),
     afil_count: int = Form(...),
     current_user: models.User = Depends(require_admin),
@@ -2011,7 +2052,7 @@ def export_abstracts_csv(
     output = io.StringIO()
     writer = csv.writer(output)
     writer.writerow([
-        "ID", "ID final", "Título", "Autores", "Email presentador", "Área",
+        "ID", "ID final", "Tipo resumen", "Título", "Autores", "Email presentador", "Área",
         "Tipo solicitado", "Tipo evaluador", "Tipo admin",
         "Evaluador asignado", "Estado", "Fecha envío"
     ])
@@ -2035,10 +2076,11 @@ def export_abstracts_csv(
         writer.writerow([
             a.id,
             a.codigo_final or "—",
+            ABSTRACT_TYPE_LABELS.get(a.tipo_resumen or "contribucion", "Contribución"),
             strip_tags(a.titulo),
             autores,
             a.email_autor,
-            AREA_NAMES.get(a.area_tematica, "—"),
+            AREA_NAMES.get(a.area_tematica, "—") if (a.tipo_resumen or "contribucion") == "contribucion" else "—",
             "Oral" if a.presentacion_oral else "Póster",
             tipo_eval,
             a.tipo_asignado_admin or "Sin asignar",
