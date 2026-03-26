@@ -1877,6 +1877,7 @@ def admin_delete_abstract(abstract_id: int, current_user: models.User = Depends(
     if not abstract:
         raise HTTPException(status_code=404, detail="No encontrado")
     db.query(models.AbstractAcceptanceFlag).filter(models.AbstractAcceptanceFlag.abstract_id == abstract_id).delete()
+    db.query(models.AbstractLog).filter(models.AbstractLog.abstract_id == abstract_id).delete()
     db.query(models.Review).filter(models.Review.abstract_id == abstract_id).delete()
     db.query(models.Asignacion).filter(models.Asignacion.abstract_id == abstract_id).delete()
     db.query(models.Autor).filter(models.Autor.abstract_id == abstract_id).delete()
