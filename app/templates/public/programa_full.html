@@ -1,6 +1,45 @@
 {% extends "public/base.html" %}
 {% block content %}
 
+<style>
+    .program-table {
+        width: 100%;
+        border-collapse: collapse;
+    }
+
+    .program-table th,
+    .program-table td {
+        border-bottom: 1px solid #e5e7eb;
+        padding: 1rem 1.25rem;
+        vertical-align: top;
+        text-align: center;
+    }
+
+    .program-table tbody tr:last-child td {
+        border-bottom: 0;
+    }
+
+    .program-time {
+        width: 9rem;
+        color: #9ca3af;
+        font-family: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, "Liberation Mono", "Courier New", monospace;
+        font-size: 0.875rem;
+        white-space: nowrap;
+    }
+
+    .program-session-title {
+        color: #111827;
+        font-weight: 600;
+        line-height: 1.4;
+    }
+
+    .program-session-room {
+        color: #9ca3af;
+        font-size: 0.875rem;
+        margin-top: 0.2rem;
+    }
+</style>
+
 <!-- Hero -->
 <div class="relative rounded-2xl overflow-hidden mb-10" style="min-height: 180px; background: linear-gradient(135deg, #0a1628 0%, #0d3b6e 60%, #1a6b4a 100%);">
     <div class="relative z-10 flex flex-col items-center justify-center text-center px-8 py-12">
@@ -17,10 +56,6 @@
 
 <!-- Tabs de días -->
 <div class="flex gap-2 mb-6 border-b border-gray-200" id="tabs">
-    <button onclick="showDay('pre')" id="tab-pre"
-        class="tab-btn px-5 py-2 text-sm font-medium rounded-t-lg border-b-2 border-transparent hover:text-teal-600 transition">
-        Mar 2/6 — Taller
-    </button>
     <button onclick="showDay('d1')" id="tab-d1"
         class="tab-btn px-5 py-2 text-sm font-medium rounded-t-lg border-b-2 border-teal-500 text-teal-600">
         Mié 3/6
@@ -35,150 +70,230 @@
     </button>
 </div>
 
-<!-- Día pre: Taller -->
-<div id="day-pre" class="hidden">
-    <div class="bg-white rounded-2xl shadow overflow-hidden">
-        {% for item in [
-            ('14:00', '18:00', 'Taller para estudiantes', 'taller', 'Aula Magna'),
-            ('18:00', '20:00', 'Acreditación', 'admin', ''),
-        ] %}
-        <div class="flex flex-col sm:flex-row items-start sm:items-center px-6 py-4 border-b last:border-0 gap-2">
-            <div class="text-sm text-gray-400 font-mono whitespace-nowrap w-28">{{ item[0] }} – {{ item[1] }}</div>
-            <div class="flex-1">
-                <span class="font-medium text-gray-800">{{ item[2] }}</span>
-                {% if item[4] %}<span class="text-gray-400 text-sm ml-2">· {{ item[4] }}</span>{% endif %}
-            </div>
-            {% if item[3] == 'taller' %}
-                <span class="bg-purple-100 text-purple-700 text-xs px-2 py-0.5 rounded-full">Taller</span>
-            {% elif item[3] == 'admin' %}
-                <span class="bg-gray-100 text-gray-500 text-xs px-2 py-0.5 rounded-full">Organización</span>
-            {% endif %}
-        </div>
-        {% endfor %}
-    </div>
-</div>
-
 <!-- Día 1 -->
 <div id="day-d1" class="">
-    <div class="bg-white rounded-2xl shadow overflow-hidden">
-        {% for item in [
-            ('09:00', '09:30', 'Acto de apertura', 'apertura', ''),
-            ('09:30', '10:30', 'Conferencia plenaria 1 — Por confirmar', 'plenaria', 'Auditorio principal'),
-            ('10:30', '11:00', 'Coffee break', 'break', ''),
-            ('11:00', '12:30', 'Sesiones orales paralelas', 'oral', 'Salas A y B'),
-            ('12:30', '14:00', 'Almuerzo', 'break', ''),
-            ('14:00', '15:00', 'Conferencia plenaria 2 — Por confirmar', 'plenaria', 'Auditorio principal'),
-            ('15:00', '17:00', 'Sesión de pósters 1', 'poster', 'Hall central'),
-            ('17:00', '17:30', 'Coffee break', 'break', ''),
-            ('17:30', '19:00', 'Mesa de empresas e industria', 'empresas', 'Sala C'),
-        ] %}
-        {% include "public/programa_row.html" ignore missing %}
-        <div class="flex flex-col sm:flex-row items-start sm:items-center px-6 py-4 border-b last:border-0 gap-2">
-            <div class="text-sm text-gray-400 font-mono whitespace-nowrap w-28">{{ item[0] }} – {{ item[1] }}</div>
-            <div class="flex-1">
-                <span class="font-medium text-gray-800">{{ item[2] }}</span>
-                {% if item[4] %}<span class="text-gray-400 text-sm ml-2">· {{ item[4] }}</span>{% endif %}
-            </div>
-            <span class="text-xs px-2 py-0.5 rounded-full whitespace-nowrap
-                {% if item[3] == 'plenaria' %}bg-blue-100 text-blue-700
-                {% elif item[3] == 'oral' %}bg-teal-100 text-teal-700
-                {% elif item[3] == 'poster' %}bg-green-100 text-green-700
-                {% elif item[3] == 'break' %}bg-gray-100 text-gray-400
-                {% elif item[3] == 'empresas' %}bg-orange-100 text-orange-700
-                {% elif item[3] == 'apertura' %}bg-indigo-100 text-indigo-700
-                {% else %}bg-gray-100 text-gray-500{% endif %}">
-                {% if item[3] == 'plenaria' %}Plenaria
-                {% elif item[3] == 'oral' %}Sesión oral
-                {% elif item[3] == 'poster' %}Pósters
-                {% elif item[3] == 'break' %}☕
-                {% elif item[3] == 'empresas' %}Empresas
-                {% elif item[3] == 'apertura' %}Apertura
-                {% else %}{{ item[3] }}{% endif %}
-            </span>
-        </div>
-        {% endfor %}
+    <div class="bg-white rounded-2xl shadow overflow-x-auto">
+        <table class="program-table min-w-full">
+            <thead class="bg-gray-50 text-xs uppercase tracking-wider text-gray-500">
+                <tr>
+                    <th class="text-left">Horario</th>
+                    <th class="text-left">Sesión 1</th>
+                    <th class="text-left">Sesión 2</th>
+                </tr>
+            </thead>
+            <tbody>
+                <tr>
+                    <td class="program-time">09:00 – 09:30</td>
+                    <td colspan="2" class="program-shared-cell">
+                        <div class="program-session-title">Acreditación y bienvenida</div>
+                    </td>
+                </tr>
+                <tr>
+                    <td class="program-time">09:30 – 10:30</td>
+                    <td colspan="2" class="program-shared-cell">
+                        <div class="program-session-title">Conferencia Plenaria 1</div>
+                        <div class="program-session-room">Sala A</div>
+                    </td>
+                </tr>
+                <tr>
+                    <td class="program-time">10:30 – 11:00</td>
+                    <td colspan="2" class="program-shared-cell">
+                        <div class="program-session-title">☕ Coffee break</div>
+                    </td>
+                </tr>
+                <tr>
+                    <td class="program-time">11:00 – 11:30</td>
+                    <td>
+                        <div class="program-session-title">Conferencia Semiplenaria 1</div>
+                        <div class="program-session-room">Sala A</div>
+                    </td>
+                    <td>
+                        <div class="program-session-title">Conferencia Semiplenaria 2</div>
+                        <div class="program-session-room">Sala 2</div>
+                    </td>
+                </tr>
+                 <tr>
+                    <td class="program-time">11:30 – 12:30</td>
+                    <td>
+                        <div class="program-session-title">Sesión Oral 1</div>
+                        <div class="program-session-room">Sala 1</div>
+                    </td>
+                    <td>
+                        <div class="program-session-title">Sesión Oral 1</div>
+                        <div class="program-session-room">Sala 2</div>
+                    </td>
+                </tr>
+                <tr>
+                    <td class="program-time">12:30 – 14:00</td>
+                    <td colspan="2" class="program-shared-cell">
+                        <div class="program-session-title">🍽️ Almuerzo</div>
+                    </td>
+                </tr>
+                <tr>
+                    <td class="program-time">14:00 – 15:00</td>
+                    <td colspan="2" class="program-shared-cell">
+                        <div class="program-session-title">Conferencia plenaria 2 — Por confirmar</div>
+                        <div class="program-session-room">Sala 1</div>
+                    </td>
+                </tr>
+                <tr>
+                    <td class="program-time">15:00 – 17:00</td>
+                    <td colspan="2" class="program-shared-cell">
+                        <div class="program-session-title">Sesión de pósters 1</div>
+                        <div class="program-session-room">Hall central</div>
+                    </td>
+                </tr>
+                <tr>
+                    <td class="program-time">17:00 – 17:30</td>
+                    <td colspan="2" class="program-shared-cell">
+                        <div class="program-session-title">☕ Coffee break</div>
+                    </td>
+                </tr>
+                <tr>
+                    <td class="program-time">17:30 – 19:00</td>
+                    <td>
+                        <div class="program-session-title">Sesión 1 — Por confirmar</div>
+                        <div class="program-session-room">Sala 1</div>
+                    </td>
+                    <td>
+                        <div class="program-session-title">Mesa de empresas e industria</div>
+                        <div class="program-session-room">Sala 2</div>
+                    </td>
+                </tr>
+            </tbody>
+        </table>
     </div>
 </div>
 
 <!-- Día 2 -->
 <div id="day-d2" class="hidden">
-    <div class="bg-white rounded-2xl shadow overflow-hidden">
-        {% for item in [
-            ('09:00', '10:00', 'Conferencia plenaria 3 — Por confirmar', 'plenaria', 'Auditorio principal'),
-            ('10:00', '10:30', 'Coffee break', 'break', ''),
-            ('10:30', '12:30', 'Sesiones orales paralelas', 'oral', 'Salas A y B'),
-            ('12:30', '14:00', 'Almuerzo', 'break', ''),
-            ('14:00', '15:00', 'Conferencia plenaria 4 — Por confirmar', 'plenaria', 'Auditorio principal'),
-            ('15:00', '17:00', 'Sesión de pósters 2', 'poster', 'Hall central'),
-            ('17:00', '17:30', 'Coffee break', 'break', ''),
-            ('17:30', '19:00', 'Sesiones orales paralelas', 'oral', 'Salas A y B'),
-            ('21:00', '23:00', 'Cena de congresistas', 'social', ''),
-        ] %}
-        <div class="flex flex-col sm:flex-row items-start sm:items-center px-6 py-4 border-b last:border-0 gap-2">
-            <div class="text-sm text-gray-400 font-mono whitespace-nowrap w-28">{{ item[0] }} – {{ item[1] }}</div>
-            <div class="flex-1">
-                <span class="font-medium text-gray-800">{{ item[2] }}</span>
-                {% if item[4] %}<span class="text-gray-400 text-sm ml-2">· {{ item[4] }}</span>{% endif %}
-            </div>
-            <span class="text-xs px-2 py-0.5 rounded-full whitespace-nowrap
-                {% if item[3] == 'plenaria' %}bg-blue-100 text-blue-700
-                {% elif item[3] == 'oral' %}bg-teal-100 text-teal-700
-                {% elif item[3] == 'poster' %}bg-green-100 text-green-700
-                {% elif item[3] == 'break' %}bg-gray-100 text-gray-400
-                {% elif item[3] == 'empresas' %}bg-orange-100 text-orange-700
-                {% elif item[3] == 'social' %}bg-pink-100 text-pink-700
-                {% else %}bg-gray-100 text-gray-500{% endif %}">
-                {% if item[3] == 'plenaria' %}Plenaria
-                {% elif item[3] == 'oral' %}Sesión oral
-                {% elif item[3] == 'poster' %}Pósters
-                {% elif item[3] == 'break' %}☕
-                {% elif item[3] == 'empresas' %}Empresas
-                {% elif item[3] == 'social' %}🍽️ Social
-                {% else %}{{ item[3] }}{% endif %}
-            </span>
-        </div>
-        {% endfor %}
+    <div class="bg-white rounded-2xl shadow overflow-x-auto">
+        <table class="program-table min-w-full">
+            <thead class="bg-gray-50 text-xs uppercase tracking-wider text-gray-500">
+                <tr>
+                    <th class="text-left">Horario</th>
+                    <th class="text-left">Sesión 1</th>
+                    <th class="text-left">Sesión 2</th>
+                </tr>
+            </thead>
+            <tbody>
+                <tr>
+                    <td class="program-time">09:00 – 10:00</td>
+                    <td colspan="2" class="program-shared-cell">
+                        <div class="program-session-title">Conferencia plenaria 3 — Por confirmar</div>
+                        <div class="program-session-room">Auditorio principal</div>
+                    </td>
+                </tr>
+                <tr>
+                    <td class="program-time">10:00 – 10:30</td>
+                    <td colspan="2" class="program-shared-cell"><div class="program-session-title">☕ Coffee break</div></td>
+                </tr>
+                <tr>
+                    <td class="program-time">10:30 – 12:30</td>
+                    <td>
+                        <div class="program-session-title">Sesión oral 1</div>
+                        <div class="program-session-room">Sala A</div>
+                    </td>
+                    <td>
+                        <div class="program-session-title">Sesión oral 2</div>
+                        <div class="program-session-room">Sala B</div>
+                    </td>
+                </tr>
+                <tr>
+                    <td class="program-time">12:30 – 14:00</td>
+                    <td colspan="2" class="program-shared-cell"><div class="program-session-title">🍽️ Almuerzo</div></td>
+                </tr>
+                <tr>
+                    <td class="program-time">14:00 – 15:00</td>
+                    <td colspan="2" class="program-shared-cell">
+                        <div class="program-session-title">Conferencia plenaria 4 — Por confirmar</div>
+                        <div class="program-session-room">Auditorio principal</div>
+                    </td>
+                </tr>
+                <tr>
+                    <td class="program-time">15:00 – 17:00</td>
+                    <td colspan="2" class="program-shared-cell">
+                        <div class="program-session-title">Sesión de pósters 2</div>
+                        <div class="program-session-room">Hall central</div>
+                    </td>
+                </tr>
+                <tr>
+                    <td class="program-time">17:00 – 17:30</td>
+                    <td colspan="2" class="program-shared-cell"><div class="program-session-title">☕ Coffee break</div></td>
+                </tr>
+                <tr>
+                    <td class="program-time">17:30 – 19:00</td>
+                    <td>
+                        <div class="program-session-title">Sesión oral 1</div>
+                        <div class="program-session-room">Sala A</div>
+                    </td>
+                    <td>
+                        <div class="program-session-title">Sesión oral 2</div>
+                        <div class="program-session-room">Sala B</div>
+                    </td>
+                </tr>
+                <tr>
+                    <td class="program-time">21:00 – 23:00</td>
+                    <td colspan="2" class="program-shared-cell"><div class="program-session-title">Cena de congresistas</div></td>
+                </tr>
+            </tbody>
+        </table>
     </div>
 </div>
 
 <!-- Día 3 -->
 <div id="day-d3" class="hidden">
-    <div class="bg-white rounded-2xl shadow overflow-hidden">
-        {% for item in [
-            ('09:00', '10:00', 'Conferencia plenaria 5 — Por confirmar', 'plenaria', 'Auditorio principal'),
-            ('10:00', '10:30', 'Coffee break', 'break', ''),
-            ('10:30', '12:30', 'Sesiones orales paralelas', 'oral', 'Salas A y B'),
-            ('12:30', '13:00', 'Acto de cierre', 'cierre', 'Auditorio principal'),
-            ('13:00', '14:30', 'Almuerzo de cierre', 'break', ''),
-        ] %}
-        <div class="flex flex-col sm:flex-row items-start sm:items-center px-6 py-4 border-b last:border-0 gap-2">
-            <div class="text-sm text-gray-400 font-mono whitespace-nowrap w-28">{{ item[0] }} – {{ item[1] }}</div>
-            <div class="flex-1">
-                <span class="font-medium text-gray-800">{{ item[2] }}</span>
-                {% if item[4] %}<span class="text-gray-400 text-sm ml-2">· {{ item[4] }}</span>{% endif %}
-            </div>
-            <span class="text-xs px-2 py-0.5 rounded-full whitespace-nowrap
-                {% if item[3] == 'plenaria' %}bg-blue-100 text-blue-700
-                {% elif item[3] == 'oral' %}bg-teal-100 text-teal-700
-                {% elif item[3] == 'poster' %}bg-green-100 text-green-700
-                {% elif item[3] == 'break' %}bg-gray-100 text-gray-400
-                {% elif item[3] == 'cierre' %}bg-indigo-100 text-indigo-700
-                {% else %}bg-gray-100 text-gray-500{% endif %}">
-                {% if item[3] == 'plenaria' %}Plenaria
-                {% elif item[3] == 'oral' %}Sesión oral
-                {% elif item[3] == 'poster' %}Pósters
-                {% elif item[3] == 'break' %}☕
-                {% elif item[3] == 'cierre' %}Cierre
-                {% else %}{{ item[3] }}{% endif %}
-            </span>
-        </div>
-        {% endfor %}
+    <div class="bg-white rounded-2xl shadow overflow-x-auto">
+        <table class="program-table min-w-full">
+            <thead class="bg-gray-50 text-xs uppercase tracking-wider text-gray-500">
+                <tr>
+                    <th class="text-left">Horario</th>
+                    <th class="text-left">Sesión 1</th>
+                    <th class="text-left">Sesión 2</th>
+                </tr>
+            </thead>
+            <tbody>
+                <tr>
+                    <td class="program-time">09:00 – 10:00</td>
+                    <td colspan="2" class="program-shared-cell">
+                        <div class="program-session-title">Conferencia plenaria 5 — Por confirmar</div>
+                        <div class="program-session-room">Auditorio principal</div>
+                    </td>
+                </tr>
+                <tr>
+                    <td class="program-time">10:00 – 10:30</td>
+                    <td colspan="2" class="program-shared-cell"><div class="program-session-title">☕ Coffee break</div></td>
+                </tr>
+                <tr>
+                    <td class="program-time">10:30 – 12:30</td>
+                    <td>
+                        <div class="program-session-title">Sesión oral 1</div>
+                        <div class="program-session-room">Sala A</div>
+                    </td>
+                    <td>
+                        <div class="program-session-title">Sesión oral 2</div>
+                        <div class="program-session-room">Sala B</div>
+                    </td>
+                </tr>
+                <tr>
+                    <td class="program-time">12:30 – 13:00</td>
+                    <td colspan="2" class="program-shared-cell">
+                        <div class="program-session-title">Acto de cierre</div>
+                        <div class="program-session-room">Auditorio principal</div>
+                    </td>
+                </tr>
+                <tr>
+                    <td class="program-time">13:00 – 14:30</td>
+                    <td colspan="2" class="program-shared-cell"><div class="program-session-title">🍽️ Almuerzo de cierre</div></td>
+                </tr>
+            </tbody>
+        </table>
     </div>
 </div>
 
 <script>
     function showDay(day) {
-        ['pre', 'd1', 'd2', 'd3'].forEach(d => {
+        ['d1', 'd2', 'd3'].forEach(d => {
             document.getElementById('day-' + d).classList.add('hidden');
             document.getElementById('tab-' + d).classList.remove('border-teal-500', 'text-teal-600');
             document.getElementById('tab-' + d).classList.add('border-transparent');

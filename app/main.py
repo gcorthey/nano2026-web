@@ -121,7 +121,7 @@ def invited_code_for(abstract: models.Abstract) -> str | None:
     prefix = INVITED_CODE_PREFIXES.get(abstract.tipo_resumen)
     if not prefix or abstract.numero_invitado is None:
         return None
-    return f"{prefix}-{int(abstract.numero_invitado):02d}"
+    return f"{prefix}{int(abstract.numero_invitado):02d}"
 
 def calculate_final_code(abstract: models.Abstract) -> str | None:
     if abstract.estado != models.EstadoEnum.aprobado:
