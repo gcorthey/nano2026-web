@@ -13,7 +13,7 @@
 <div class="mt-4 bg-white rounded shadow p-8">
     <div class="flex items-start justify-between mb-6">
         <div>
-            <h1 class="text-2xl font-bold text-blue-900">{{ abstract.titulo }}</h1>
+            <h1 class="text-2xl font-bold text-blue-900">{{ abstract.titulo | striptags }}</h1>
             <div class="mt-2 flex flex-wrap gap-2">
                 <span class="inline-flex bg-slate-100 text-slate-700 px-2.5 py-1 rounded-full text-xs font-medium">
                     {{ abstract_type_labels.get(abstract.tipo_resumen or 'contribucion', 'Contribución') }}
@@ -26,6 +26,7 @@
             </div>
             <p class="text-gray-600 mt-2">{{ abstract.autor }}</p>
             <p class="text-gray-400 text-sm">{{ abstract.afiliacion }}</p>
+            <p class="text-gray-400 text-sm">{{ abstract.email_autor }}</p>
         </div>
         <a href="/abstracts/{{ abstract.id }}/pdf" target="_blank"
             class="bg-gray-100 text-gray-600 px-4 py-2 rounded hover:bg-gray-200 text-sm whitespace-nowrap">

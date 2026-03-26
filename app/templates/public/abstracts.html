@@ -32,7 +32,7 @@
 <div class="space-y-4">
     {% for a in abstracts %}
     <div class="bg-white rounded-2xl shadow p-5 hover:shadow-md transition">
-        <a href="/abstracts/{{ a.id }}" class="text-lg font-semibold text-blue-800 hover:underline">{{ a.titulo }}</a>
+        <a href="/abstracts/{{ a.id }}" class="text-lg font-semibold text-blue-800 hover:underline">{{ a.titulo | striptags }}</a>
         <p class="text-gray-600 text-sm mt-1">{{ a.autor }} — <span class="text-gray-400">{{ a.afiliacion }}</span></p>
     </div>
     {% endfor %}
