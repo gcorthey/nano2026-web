@@ -1809,7 +1809,7 @@ def venue(request: Request):
 @app.get("/programa", response_class=HTMLResponse)
 def programa(request: Request):
     return templates.TemplateResponse(
-        "public/programa.html",
+        "public/programa_full.html",
         public_page_context(
             request,
             title="Programa del congreso | NANO2026",

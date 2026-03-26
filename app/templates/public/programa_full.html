@@ -1,46 +1,92 @@
 {% extends "public/base.html" %}
 {% block content %}
 
-<style>
-    .program-table {
-        width: 100%;
-        border-collapse: collapse;
-    }
+{% macro track_card(track) -%}
+<div class="rounded-2xl border border-[#D7E3E0] bg-[#F7FBFA] px-4 py-4 h-full text-center">
+    <div class="flex flex-col items-center gap-3 mb-2">
+        <div class="text-center">
+            <p class="text-xs font-semibold uppercase tracking-[0.2em] text-[#005C53]">{{ track.label }}</p>
+            <h3 class="text-base font-bold text-slate-900">{{ track.title }}</h3>
+        </div>
+        <span class="text-[11px] px-2 py-1 rounded-full whitespace-nowrap
+            {% if track.type == 'oral' %}bg-[#D7EDE9] text-[#005C53]
+            {% elif track.type == 'poster' %}bg-[#EEF6D0] text-[#6E8E1F]
+            {% elif track.type == 'empresas' %}bg-[#DBF227] text-[#042940]
+            {% else %}bg-[#E7EEEC] text-[#4B635D]{% endif %}">
+            {% if track.type == 'oral' %}Sesión oral
+            {% elif track.type == 'poster' %}Pósters
+            {% elif track.type == 'empresas' %}Industria
+            {% else %}{{ track.type }}{% endif %}
+        </span>
+    </div>
+    {% if track.room %}
+    <p class="text-sm text-slate-500">{{ track.room }}</p>
+    {% endif %}
+</div>
+{%- endmacro %}
 
-    .program-table th,
-    .program-table td {
-        border-bottom: 1px solid #e5e7eb;
-        padding: 1rem 1.25rem;
-        vertical-align: top;
-        text-align: center;
+{% set schedule = {
+    'd1': {
+        'label': 'Mié 3/6',
+        'items': [
+            {'kind': 'shared', 'start': '09:00', 'end': '09:30', 'title': 'Acto de apertura', 'type': 'apertura', 'location': 'Auditorio principal'},
+            {'kind': 'shared', 'start': '09:30', 'end': '10:30', 'title': 'Conferencia plenaria 1 — Por confirmar', 'type': 'plenaria', 'location': 'Auditorio principal'},
+            {'kind': 'shared', 'start': '10:30', 'end': '11:00', 'title': 'Coffee break', 'type': 'break', 'location': 'Espacio común'},
+            {'kind': 'parallel', 'start': '11:00', 'end': '12:30', 'type': 'oral', 'tracks': [
+                {'label': 'Sesión A', 'title': 'Síntesis y procesamiento de nanomateriales', 'type': 'oral', 'room': 'Sala A'},
+                {'label': 'Sesión B', 'title': 'Propiedades, superficies e interfaces', 'type': 'oral', 'room': 'Sala B'}
+            ]},
+            {'kind': 'shared', 'start': '12:30', 'end': '14:00', 'title': 'Almuerzo', 'type': 'break', 'location': 'Espacio común'},
+            {'kind': 'shared', 'start': '14:00', 'end': '15:00', 'title': 'Conferencia plenaria 2 — Por confirmar', 'type': 'plenaria', 'location': 'Auditorio principal'},
+            {'kind': 'parallel', 'start': '15:00', 'end': '17:00', 'type': 'poster', 'tracks': [
+                {'label': 'Sesión A', 'title': 'Pósters de materiales y nanocompuestos', 'type': 'poster', 'room': 'Hall central'},
+                {'label': 'Sesión B', 'title': 'Pósters de nano-bio y ambiente', 'type': 'poster', 'room': 'Hall central'}
+            ]},
+            {'kind': 'shared', 'start': '17:00', 'end': '17:30', 'title': 'Coffee break', 'type': 'break', 'location': 'Espacio común'},
+            {'kind': 'parallel', 'start': '17:30', 'end': '19:00', 'type': 'mixed', 'tracks': [
+                {'label': 'Sesión A', 'title': 'Mesa de empresas e industria', 'type': 'empresas', 'room': 'Sala C'},
+                {'label': 'Sesión B', 'title': 'Comunicaciones orales de estudiantes', 'type': 'oral', 'room': 'Sala B'}
+            ]}
+        ]
+    },
+    'd2': {
+        'label': 'Jue 4/6',
+        'items': [
+            {'kind': 'shared', 'start': '09:00', 'end': '10:00', 'title': 'Conferencia plenaria 3 — Por confirmar', 'type': 'plenaria', 'location': 'Auditorio principal'},
+            {'kind': 'shared', 'start': '10:00', 'end': '10:30', 'title': 'Coffee break', 'type': 'break', 'location': 'Espacio común'},
+            {'kind': 'parallel', 'start': '10:30', 'end': '12:30', 'type': 'oral', 'tracks': [
+                {'label': 'Sesión A', 'title': 'Nanoestructuras para energía y catálisis', 'type': 'oral', 'room': 'Sala A'},
+                {'label': 'Sesión B', 'title': 'Nano en salud, sensores y biomateriales', 'type': 'oral', 'room': 'Sala B'}
+            ]},
+            {'kind': 'shared', 'start': '12:30', 'end': '14:00', 'title': 'Almuerzo', 'type': 'break', 'location': 'Espacio común'},
+            {'kind': 'shared', 'start': '14:00', 'end': '15:00', 'title': 'Conferencia plenaria 4 — Por confirmar', 'type': 'plenaria', 'location': 'Auditorio principal'},
+            {'kind': 'parallel', 'start': '15:00', 'end': '17:00', 'type': 'poster', 'tracks': [
+                {'label': 'Sesión A', 'title': 'Pósters de caracterización y superficies', 'type': 'poster', 'room': 'Hall central'},
+                {'label': 'Sesión B', 'title': 'Pósters de dispositivos, ambiente y remediación', 'type': 'poster', 'room': 'Hall central'}
+            ]},
+            {'kind': 'shared', 'start': '17:00', 'end': '17:30', 'title': 'Coffee break', 'type': 'break', 'location': 'Espacio común'},
+            {'kind': 'parallel', 'start': '17:30', 'end': '19:00', 'type': 'oral', 'tracks': [
+                {'label': 'Sesión A', 'title': 'Orales invitadas y jóvenes investigadores', 'type': 'oral', 'room': 'Sala A'},
+                {'label': 'Sesión B', 'title': 'Aplicaciones industriales y transferencia', 'type': 'oral', 'room': 'Sala B'}
+            ]},
+            {'kind': 'shared', 'start': '21:00', 'end': '23:00', 'title': 'Cena de congresistas', 'type': 'social', 'location': 'Sede a confirmar'}
+        ]
+    },
+    'd3': {
+        'label': 'Vie 5/6',
+        'items': [
+            {'kind': 'shared', 'start': '09:00', 'end': '10:00', 'title': 'Conferencia plenaria 5 — Por confirmar', 'type': 'plenaria', 'location': 'Auditorio principal'},
+            {'kind': 'shared', 'start': '10:00', 'end': '10:30', 'title': 'Coffee break', 'type': 'break', 'location': 'Espacio común'},
+            {'kind': 'parallel', 'start': '10:30', 'end': '12:30', 'type': 'oral', 'tracks': [
+                {'label': 'Sesión A', 'title': 'Nanofabricación y autoensamblado', 'type': 'oral', 'room': 'Sala A'},
+                {'label': 'Sesión B', 'title': 'Ambiente, procesos biológicos y escalado', 'type': 'oral', 'room': 'Sala B'}
+            ]},
+            {'kind': 'shared', 'start': '12:30', 'end': '13:00', 'title': 'Acto de cierre', 'type': 'cierre', 'location': 'Auditorio principal'},
+            {'kind': 'shared', 'start': '13:00', 'end': '14:30', 'title': 'Almuerzo de cierre', 'type': 'break', 'location': 'Espacio común'}
+        ]
     }
+} %}
 
-    .program-table tbody tr:last-child td {
-        border-bottom: 0;
-    }
-
-    .program-time {
-        width: 9rem;
-        color: #9ca3af;
-        font-family: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, "Liberation Mono", "Courier New", monospace;
-        font-size: 0.875rem;
-        white-space: nowrap;
-    }
-
-    .program-session-title {
-        color: #111827;
-        font-weight: 600;
-        line-height: 1.4;
-    }
-
-    .program-session-room {
-        color: #9ca3af;
-        font-size: 0.875rem;
-        margin-top: 0.2rem;
-    }
-</style>
-
-<!-- Hero -->
 <div class="relative rounded-2xl overflow-hidden mb-10" style="min-height: 180px; background: linear-gradient(135deg, #0a1628 0%, #0d3b6e 60%, #1a6b4a 100%);">
     <div class="relative z-10 flex flex-col items-center justify-center text-center px-8 py-12">
         <h1 class="text-3xl font-black text-white mb-2">Programa</h1>
@@ -48,258 +94,96 @@
     </div>
 </div>
 
-<!-- Aviso placeholder -->
-<div class="bg-yellow-50 border border-yellow-200 rounded-2xl px-6 py-4 mb-8 text-center">
-    <p class="text-yellow-700 font-medium">📅 El programa completo estará disponible próximamente.</p>
-    <p class="text-yellow-600 text-sm mt-1">Esta es una vista preliminar de la estructura del congreso.</p>
+<div class="bg-[#F7FBEA] border border-[#DBF227] rounded-2xl px-6 py-4 mb-8 text-center">
+    <p class="text-[#6E8E1F] font-medium">📅 El programa completo estará disponible próximamente.</p>
+    <p class="text-[#7B8B4A] text-sm mt-1">Esta es una vista preliminar de la estructura del congreso.</p>
 </div>
 
-<!-- Tabs de días -->
 <div class="flex gap-2 mb-6 border-b border-gray-200" id="tabs">
-    <button onclick="showDay('d1')" id="tab-d1"
-        class="tab-btn px-5 py-2 text-sm font-medium rounded-t-lg border-b-2 border-teal-500 text-teal-600">
-        Mié 3/6
+    {% for day_id, day in schedule.items() %}
+    <button onclick="showDay('{{ day_id }}')" id="tab-{{ day_id }}"
+        class="tab-btn px-5 py-2 text-sm font-medium rounded-t-lg border-b-2 {% if loop.first %}border-[#005C53] text-[#005C53]{% else %}border-transparent hover:text-[#005C53] transition{% endif %}">
+        {{ day.label }}
     </button>
-    <button onclick="showDay('d2')" id="tab-d2"
-        class="tab-btn px-5 py-2 text-sm font-medium rounded-t-lg border-b-2 border-transparent hover:text-teal-600 transition">
-        Jue 4/6
-    </button>
-    <button onclick="showDay('d3')" id="tab-d3"
-        class="tab-btn px-5 py-2 text-sm font-medium rounded-t-lg border-b-2 border-transparent hover:text-teal-600 transition">
-        Vie 5/6
-    </button>
+    {% endfor %}
 </div>
 
-<!-- Día 1 -->
-<div id="day-d1" class="">
-    <div class="bg-white rounded-2xl shadow overflow-x-auto">
-        <table class="program-table min-w-full">
-            <thead class="bg-gray-50 text-xs uppercase tracking-wider text-gray-500">
-                <tr>
-                    <th class="text-left">Horario</th>
-                    <th class="text-left">Sesión 1</th>
-                    <th class="text-left">Sesión 2</th>
-                </tr>
-            </thead>
-            <tbody>
-                <tr>
-                    <td class="program-time">09:00 – 09:30</td>
-                    <td colspan="2" class="program-shared-cell">
-                        <div class="program-session-title">Acreditación y bienvenida</div>
-                    </td>
-                </tr>
-                <tr>
-                    <td class="program-time">09:30 – 10:30</td>
-                    <td colspan="2" class="program-shared-cell">
-                        <div class="program-session-title">Conferencia Plenaria 1</div>
-                        <div class="program-session-room">Sala A</div>
-                    </td>
-                </tr>
-                <tr>
-                    <td class="program-time">10:30 – 11:00</td>
-                    <td colspan="2" class="program-shared-cell">
-                        <div class="program-session-title">☕ Coffee break</div>
-                    </td>
-                </tr>
-                <tr>
-                    <td class="program-time">11:00 – 11:30</td>
-                    <td>
-                        <div class="program-session-title">Conferencia Semiplenaria 1</div>
-                        <div class="program-session-room">Sala A</div>
-                    </td>
-                    <td>
-                        <div class="program-session-title">Conferencia Semiplenaria 2</div>
-                        <div class="program-session-room">Sala 2</div>
-                    </td>
-                </tr>
-                 <tr>
-                    <td class="program-time">11:30 – 12:30</td>
-                    <td>
-                        <div class="program-session-title">Sesión Oral 1</div>
-                        <div class="program-session-room">Sala 1</div>
-                    </td>
-                    <td>
-                        <div class="program-session-title">Sesión Oral 1</div>
-                        <div class="program-session-room">Sala 2</div>
-                    </td>
-                </tr>
-                <tr>
-                    <td class="program-time">12:30 – 14:00</td>
-                    <td colspan="2" class="program-shared-cell">
-                        <div class="program-session-title">🍽️ Almuerzo</div>
-                    </td>
-                </tr>
-                <tr>
-                    <td class="program-time">14:00 – 15:00</td>
-                    <td colspan="2" class="program-shared-cell">
-                        <div class="program-session-title">Conferencia plenaria 2 — Por confirmar</div>
-                        <div class="program-session-room">Sala 1</div>
-                    </td>
-                </tr>
-                <tr>
-                    <td class="program-time">15:00 – 17:00</td>
-                    <td colspan="2" class="program-shared-cell">
-                        <div class="program-session-title">Sesión de pósters 1</div>
-                        <div class="program-session-room">Hall central</div>
-                    </td>
-                </tr>
-                <tr>
-                    <td class="program-time">17:00 – 17:30</td>
-                    <td colspan="2" class="program-shared-cell">
-                        <div class="program-session-title">☕ Coffee break</div>
-                    </td>
-                </tr>
-                <tr>
-                    <td class="program-time">17:30 – 19:00</td>
-                    <td>
-                        <div class="program-session-title">Sesión 1 — Por confirmar</div>
-                        <div class="program-session-room">Sala 1</div>
-                    </td>
-                    <td>
-                        <div class="program-session-title">Mesa de empresas e industria</div>
-                        <div class="program-session-room">Sala 2</div>
-                    </td>
-                </tr>
-            </tbody>
-        </table>
-    </div>
-</div>
+{% for day_id, day in schedule.items() %}
+<div id="day-{{ day_id }}" class="{% if not loop.first %}hidden{% endif %}">
+    <div class="bg-white rounded-2xl shadow overflow-hidden border border-[#D7E3E0]">
+        <div class="hidden md:grid md:grid-cols-[130px_minmax(0,1fr)] px-6 py-4 bg-[#042940] text-white text-center">
+            <div class="text-xs font-semibold uppercase tracking-[0.2em] text-white/70">Horario</div>
+            <div class="grid grid-cols-2 gap-4">
+                <div class="text-xs font-semibold uppercase tracking-[0.2em] text-white/70">Sesión A</div>
+                <div class="text-xs font-semibold uppercase tracking-[0.2em] text-white/70">Sesión B</div>
+            </div>
+        </div>
 
-<!-- Día 2 -->
-<div id="day-d2" class="hidden">
-    <div class="bg-white rounded-2xl shadow overflow-x-auto">
-        <table class="program-table min-w-full">
-            <thead class="bg-gray-50 text-xs uppercase tracking-wider text-gray-500">
-                <tr>
-                    <th class="text-left">Horario</th>
-                    <th class="text-left">Sesión 1</th>
-                    <th class="text-left">Sesión 2</th>
-                </tr>
-            </thead>
-            <tbody>
-                <tr>
-                    <td class="program-time">09:00 – 10:00</td>
-                    <td colspan="2" class="program-shared-cell">
-                        <div class="program-session-title">Conferencia plenaria 3 — Por confirmar</div>
-                        <div class="program-session-room">Auditorio principal</div>
-                    </td>
-                </tr>
-                <tr>
-                    <td class="program-time">10:00 – 10:30</td>
-                    <td colspan="2" class="program-shared-cell"><div class="program-session-title">☕ Coffee break</div></td>
-                </tr>
-                <tr>
-                    <td class="program-time">10:30 – 12:30</td>
-                    <td>
-                        <div class="program-session-title">Sesión oral 1</div>
-                        <div class="program-session-room">Sala A</div>
-                    </td>
-                    <td>
-                        <div class="program-session-title">Sesión oral 2</div>
-                        <div class="program-session-room">Sala B</div>
-                    </td>
-                </tr>
-                <tr>
-                    <td class="program-time">12:30 – 14:00</td>
-                    <td colspan="2" class="program-shared-cell"><div class="program-session-title">🍽️ Almuerzo</div></td>
-                </tr>
-                <tr>
-                    <td class="program-time">14:00 – 15:00</td>
-                    <td colspan="2" class="program-shared-cell">
-                        <div class="program-session-title">Conferencia plenaria 4 — Por confirmar</div>
-                        <div class="program-session-room">Auditorio principal</div>
-                    </td>
-                </tr>
-                <tr>
-                    <td class="program-time">15:00 – 17:00</td>
-                    <td colspan="2" class="program-shared-cell">
-                        <div class="program-session-title">Sesión de pósters 2</div>
-                        <div class="program-session-room">Hall central</div>
-                    </td>
-                </tr>
-                <tr>
-                    <td class="program-time">17:00 – 17:30</td>
-                    <td colspan="2" class="program-shared-cell"><div class="program-session-title">☕ Coffee break</div></td>
-                </tr>
-                <tr>
-                    <td class="program-time">17:30 – 19:00</td>
-                    <td>
-                        <div class="program-session-title">Sesión oral 1</div>
-                        <div class="program-session-room">Sala A</div>
-                    </td>
-                    <td>
-                        <div class="program-session-title">Sesión oral 2</div>
-                        <div class="program-session-room">Sala B</div>
-                    </td>
-                </tr>
-                <tr>
-                    <td class="program-time">21:00 – 23:00</td>
-                    <td colspan="2" class="program-shared-cell"><div class="program-session-title">Cena de congresistas</div></td>
-                </tr>
-            </tbody>
-        </table>
+        {% for item in day['items'] %}
+        <div class="border-t border-[#E3ECE9] first:border-t-0">
+            {% if item.kind == 'shared' %}
+            <div class="px-6 py-5 grid gap-4 md:grid-cols-[130px_minmax(0,1fr)] bg-gradient-to-r text-center
+                {% if item.type == 'plenaria' %}from-[#EAF5F2] to-[#F7FBFA]
+                {% elif item.type == 'break' %}from-[#F8FAFA] to-[#EEF3F1]
+                {% elif item.type == 'apertura' or item.type == 'cierre' %}from-[#EEF6D0] to-[#F7FBEA]
+                {% elif item.type == 'social' %}from-[#F7FBEA] to-[#EEF6D0]
+                {% else %}from-[#F7FBFA] to-white{% endif %}">
+                <div class="text-sm text-slate-500 font-mono whitespace-nowrap">{{ item.start }} – {{ item.end }}</div>
+                <div class="rounded-2xl border border-white/80 bg-white/90 px-5 py-4">
+                    <div class="flex flex-col items-center gap-3">
+                        <div class="text-center">
+                            <p class="text-xs font-semibold uppercase tracking-[0.2em]
+                                {% if item.type == 'plenaria' %}text-[#005C53]
+                                {% elif item.type == 'break' %}text-slate-500
+                                {% elif item.type == 'social' %}text-[#6E8E1F]
+                                {% else %}text-[#6E8E1F]{% endif %}">
+                                Actividad común
+                            </p>
+                            <h3 class="text-lg font-bold text-slate-900">{{ item.title }}</h3>
+                            {% if item.location %}
+                            <p class="text-sm text-slate-500 mt-1">{{ item.location }}</p>
+                            {% endif %}
+                        </div>
+                        <span class="text-xs px-2.5 py-1 rounded-full whitespace-nowrap
+                            {% if item.type == 'plenaria' %}bg-[#D7EDE9] text-[#005C53]
+                            {% elif item.type == 'break' %}bg-[#E7EEEC] text-[#4B635D]
+                            {% elif item.type == 'social' %}bg-[#EEF6D0] text-[#6E8E1F]
+                            {% elif item.type == 'apertura' or item.type == 'cierre' %}bg-[#DBF227] text-[#042940]
+                            {% else %}bg-[#E7EEEC] text-[#4B635D]{% endif %}">
+                            {% if item.type == 'plenaria' %}Plenaria
+                            {% elif item.type == 'break' %}☕ Receso
+                            {% elif item.type == 'social' %}Social
+                            {% elif item.type == 'apertura' %}Apertura
+                            {% elif item.type == 'cierre' %}Cierre
+                            {% else %}{{ item.type }}{% endif %}
+                        </span>
+                    </div>
+                </div>
+            </div>
+            {% else %}
+            <div class="px-6 py-5 grid gap-4 md:grid-cols-[130px_minmax(0,1fr)] text-center">
+                <div class="text-sm text-slate-500 font-mono whitespace-nowrap">{{ item.start }} – {{ item.end }}</div>
+                <div class="grid gap-4 md:grid-cols-2">
+                    {{ track_card(item.tracks[0]) }}
+                    {{ track_card(item.tracks[1]) }}
+                </div>
+            </div>
+            {% endif %}
+        </div>
+        {% endfor %}
     </div>
 </div>
-
-<!-- Día 3 -->
-<div id="day-d3" class="hidden">
-    <div class="bg-white rounded-2xl shadow overflow-x-auto">
-        <table class="program-table min-w-full">
-            <thead class="bg-gray-50 text-xs uppercase tracking-wider text-gray-500">
-                <tr>
-                    <th class="text-left">Horario</th>
-                    <th class="text-left">Sesión 1</th>
-                    <th class="text-left">Sesión 2</th>
-                </tr>
-            </thead>
-            <tbody>
-                <tr>
-                    <td class="program-time">09:00 – 10:00</td>
-                    <td colspan="2" class="program-shared-cell">
-                        <div class="program-session-title">Conferencia plenaria 5 — Por confirmar</div>
-                        <div class="program-session-room">Auditorio principal</div>
-                    </td>
-                </tr>
-                <tr>
-                    <td class="program-time">10:00 – 10:30</td>
-                    <td colspan="2" class="program-shared-cell"><div class="program-session-title">☕ Coffee break</div></td>
-                </tr>
-                <tr>
-                    <td class="program-time">10:30 – 12:30</td>
-                    <td>
-                        <div class="program-session-title">Sesión oral 1</div>
-                        <div class="program-session-room">Sala A</div>
-                    </td>
-                    <td>
-                        <div class="program-session-title">Sesión oral 2</div>
-                        <div class="program-session-room">Sala B</div>
-                    </td>
-                </tr>
-                <tr>
-                    <td class="program-time">12:30 – 13:00</td>
-                    <td colspan="2" class="program-shared-cell">
-                        <div class="program-session-title">Acto de cierre</div>
-                        <div class="program-session-room">Auditorio principal</div>
-                    </td>
-                </tr>
-                <tr>
-                    <td class="program-time">13:00 – 14:30</td>
-                    <td colspan="2" class="program-shared-cell"><div class="program-session-title">🍽️ Almuerzo de cierre</div></td>
-                </tr>
-            </tbody>
-        </table>
-    </div>
-</div>
+{% endfor %}
 
 <script>
     function showDay(day) {
         ['d1', 'd2', 'd3'].forEach(d => {
             document.getElementById('day-' + d).classList.add('hidden');
-            document.getElementById('tab-' + d).classList.remove('border-teal-500', 'text-teal-600');
+            document.getElementById('tab-' + d).classList.remove('border-[#005C53]', 'text-[#005C53]');
             document.getElementById('tab-' + d).classList.add('border-transparent');
         });
         document.getElementById('day-' + day).classList.remove('hidden');
-        document.getElementById('tab-' + day).classList.add('border-teal-500', 'text-teal-600');
+        document.getElementById('tab-' + day).classList.add('border-[#005C53]', 'text-[#005C53]');
         document.getElementById('tab-' + day).classList.remove('border-transparent');
     }
 </script>
