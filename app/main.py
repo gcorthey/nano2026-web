@@ -140,7 +140,7 @@ DEFAULT_PROGRAM_SCHEDULE = {
         ],
     },
     "d2": {
-        "label": "Mié 3/6",
+        "label": "Jue 4/6",
         "items": [
             {"kind": "shared", "start": "09:00", "end": "10:00", "title": "Conferencia plenaria 4 — Por confirmar", "type": "plenaria", "location": "Auditorio principal"},
             {"kind": "shared", "start": "10:00", "end": "10:30", "title": "Charla Sponsor", "type": "break", "location": "Espacio común"},
@@ -165,7 +165,7 @@ DEFAULT_PROGRAM_SCHEDULE = {
         ],
     },
     "d3": {
-        "label": "Mié 3/6",
+        "label": "Vie 5/6",
         "items": [
             {"kind": "shared", "start": "09:00", "end": "10:00", "title": "Conferencia plenaria 5 — Por confirmar", "type": "plenaria", "location": "Auditorio principal"},
             {"kind": "shared", "start": "10:00", "end": "10:30", "title": "Charla Sponsor", "type": "break", "location": "Espacio común"},
@@ -209,6 +209,7 @@ def normalize_program_kind(value: str | None) -> str:
 
 
 def seed_program_entries(db: Session) -> None:
+    seed_program_days(db)
     if db.query(models.ProgramEntry).count() > 0:
         return
 
@@ -238,17 +239,34 @@ def seed_program_entries(db: Session) -> None:
     db.commit()
 
 
+def seed_program_days(db: Session) -> None:
+    existing = {day.day_key for day in db.query(models.ProgramDay).all()}
+    if existing:
+        return
+
+    for index, (day_key, day) in enumerate(DEFAULT_PROGRAM_SCHEDULE.items()):
+        db.add(models.ProgramDay(day_key=day_key, label=day["label"], position=index))
+    db.commit()
+
+
+def get_program_days(db: Session) -> list[models.ProgramDay]:
+    seed_program_days(db)
+    return db.query(models.ProgramDay).order_by(models.ProgramDay.position, models.ProgramDay.id).all()
+
+
 def build_program_schedule(db: Session) -> dict[str, dict[str, object]]:
     seed_program_entries(db)
+    days = get_program_days(db)
     entries = (
         db.query(models.ProgramEntry)
         .order_by(models.ProgramEntry.day_key, models.ProgramEntry.position, models.ProgramEntry.id)
         .all()
     )
-    schedule: dict[str, dict[str, object]] = {}
+    schedule: dict[str, dict[str, object]] = {
+        day.day_key: {"label": day.label, "items": []} for day in days
+    }
     for entry in entries:
-        day = schedule.setdefault(entry.day_key, {"label": entry.day_label, "items": []})
-        day["label"] = entry.day_label
+        day = schedule.setdefault(entry.day_key, {"label": entry.day_label or entry.day_key, "items": []})
         if entry.kind == "parallel":
             day["items"].append({
                 "kind": "parallel",
@@ -278,7 +296,7 @@ def build_program_schedule(db: Session) -> dict[str, dict[str, object]]:
                 "location": entry.location or "",
             })
 
-    return dict(sorted(schedule.items(), key=lambda item: PROGRAM_DAY_ORDER.get(item[0], 999)))
+    return schedule
 
 
 def next_program_position(db: Session, day_key: str) -> int:
@@ -300,13 +318,19 @@ def compact_program_positions(db: Session, day_key: str) -> None:
 
 def render_program_entry_form(
     request: Request,
+    db: Session,
     program_entry: models.ProgramEntry | None = None,
     *,
     error: str | None = None,
 ) -> HTMLResponse:
+    days = get_program_days(db)
+    if not days:
+        seed_program_days(db)
+        days = get_program_days(db)
+    default_day = days[0]
     entry = program_entry or models.ProgramEntry(
-        day_key="d1",
-        day_label="Mié 3/6",
+        day_key=default_day.day_key,
+        day_label=default_day.label,
         kind="shared",
         start_time="09:00",
         end_time="10:00",
@@ -322,6 +346,7 @@ def render_program_entry_form(
         "error": error,
         "program_type_options": PROGRAM_TYPE_OPTIONS,
         "program_kind_options": PROGRAM_KIND_OPTIONS,
+        "program_days": days,
     })
 
 def parse_optional_positive_int(value: str | None) -> int | None:
@@ -1999,6 +2024,7 @@ def admin_programa(
     db: Session = Depends(get_db),
 ):
     schedule = build_program_schedule(db)
+    days = get_program_days(db)
     entries = (
         db.query(models.ProgramEntry)
         .order_by(models.ProgramEntry.day_key, models.ProgramEntry.position, models.ProgramEntry.id)
@@ -2007,6 +2033,7 @@ def admin_programa(
     return templates.TemplateResponse("admin/programa.html", {
         "request": request,
         "schedule": schedule,
+        "days": days,
         "entries": entries,
     })
 
@@ -2015,15 +2042,15 @@ def admin_programa(
 def admin_programa_new_form(
     request: Request,
     current_user: models.User = Depends(require_admin),
+    db: Session = Depends(get_db),
 ):
-    return render_program_entry_form(request)
+    return render_program_entry_form(request, db)
 
 
 @app.post("/admin/programa/new", response_class=HTMLResponse)
 def admin_programa_create(
     request: Request,
     day_key: str = Form(...),
-    day_label: str = Form(...),
     kind: str = Form(...),
     start_time: str = Form(...),
     end_time: str = Form(...),
@@ -2040,9 +2067,12 @@ def admin_programa_create(
     db: Session = Depends(get_db),
 ):
     kind = normalize_program_kind(kind)
+    day = db.query(models.ProgramDay).filter(models.ProgramDay.day_key == day_key.strip()).first()
+    if not day:
+        raise HTTPException(status_code=400, detail="Día inválido")
     entry = models.ProgramEntry(
         day_key=day_key.strip(),
-        day_label=day_label.strip(),
+        day_label=day.label,
         position=next_program_position(db, day_key.strip()),
         kind=kind,
         start_time=start_time.strip(),
@@ -2058,9 +2088,9 @@ def admin_programa_create(
         track_2_room=track_2_room.strip() or None,
     )
     if kind == "shared" and not entry.title:
-        return render_program_entry_form(request, entry, error="Las actividades comunes necesitan un título.")
+        return render_program_entry_form(request, db, entry, error="Las actividades comunes necesitan un título.")
     if kind == "parallel" and (not entry.track_1_title or not entry.track_2_title):
-        return render_program_entry_form(request, entry, error="Las sesiones paralelas necesitan título para ambas tarjetas.")
+        return render_program_entry_form(request, db, entry, error="Las sesiones paralelas necesitan título para ambas tarjetas.")
     db.add(entry)
     db.commit()
     return RedirectResponse(url="/admin/programa", status_code=303)
@@ -2076,7 +2106,7 @@ def admin_programa_edit_form(
     entry = db.query(models.ProgramEntry).filter(models.ProgramEntry.id == entry_id).first()
     if not entry:
         raise HTTPException(status_code=404, detail="Entrada no encontrada")
-    return render_program_entry_form(request, entry)
+    return render_program_entry_form(request, db, entry)
 
 
 @app.post("/admin/programa/{entry_id}/edit", response_class=HTMLResponse)
@@ -2084,7 +2114,6 @@ def admin_programa_edit(
     entry_id: int,
     request: Request,
     day_key: str = Form(...),
-    day_label: str = Form(...),
     kind: str = Form(...),
     start_time: str = Form(...),
     end_time: str = Form(...),
@@ -2103,10 +2132,13 @@ def admin_programa_edit(
     entry = db.query(models.ProgramEntry).filter(models.ProgramEntry.id == entry_id).first()
     if not entry:
         raise HTTPException(status_code=404, detail="Entrada no encontrada")
+    day = db.query(models.ProgramDay).filter(models.ProgramDay.day_key == day_key.strip()).first()
+    if not day:
+        raise HTTPException(status_code=400, detail="Día inválido")
 
     old_day_key = entry.day_key
     entry.day_key = day_key.strip()
-    entry.day_label = day_label.strip()
+    entry.day_label = day.label
     entry.kind = normalize_program_kind(kind)
     entry.start_time = start_time.strip()
     entry.end_time = end_time.strip()
@@ -2121,9 +2153,9 @@ def admin_programa_edit(
     entry.track_2_room = track_2_room.strip() or None
 
     if entry.kind == "shared" and not entry.title:
-        return render_program_entry_form(request, entry, error="Las actividades comunes necesitan un título.")
+        return render_program_entry_form(request, db, entry, error="Las actividades comunes necesitan un título.")
     if entry.kind == "parallel" and (not entry.track_1_title or not entry.track_2_title):
-        return render_program_entry_form(request, entry, error="Las sesiones paralelas necesitan título para ambas tarjetas.")
+        return render_program_entry_form(request, db, entry, error="Las sesiones paralelas necesitan título para ambas tarjetas.")
 
     if old_day_key != entry.day_key:
         entry.position = next_program_position(db, entry.day_key)
@@ -2209,6 +2241,77 @@ def admin_programa_reorder(
         entry_by_id[entry_id].position = position
     db.commit()
     return {"ok": True}
+
+
+@app.post("/admin/programa/day/new")
+def admin_programa_day_create(
+    day_key: str = Form(...),
+    label: str = Form(...),
+    current_user: models.User = Depends(require_admin),
+    db: Session = Depends(get_db),
+):
+    normalized_key = day_key.strip().lower()
+    if not normalized_key:
+        raise HTTPException(status_code=400, detail="Clave inválida")
+    exists = db.query(models.ProgramDay).filter(models.ProgramDay.day_key == normalized_key).first()
+    if exists:
+        raise HTTPException(status_code=400, detail="Ese día ya existe")
+    position = db.query(models.ProgramDay).count()
+    db.add(models.ProgramDay(day_key=normalized_key, label=label.strip(), position=position))
+    db.commit()
+    return RedirectResponse(url="/admin/programa", status_code=303)
+
+
+@app.post("/admin/programa/day/{day_key}/edit")
+def admin_programa_day_edit(
+    day_key: str,
+    new_day_key: str = Form(...),
+    label: str = Form(...),
+    current_user: models.User = Depends(require_admin),
+    db: Session = Depends(get_db),
+):
+    day = db.query(models.ProgramDay).filter(models.ProgramDay.day_key == day_key).first()
+    if not day:
+        raise HTTPException(status_code=404, detail="Día no encontrado")
+    normalized_key = new_day_key.strip().lower()
+    duplicate = db.query(models.ProgramDay).filter(
+        models.ProgramDay.day_key == normalized_key,
+        models.ProgramDay.id != day.id,
+    ).first()
+    if duplicate:
+        raise HTTPException(status_code=400, detail="Esa clave de día ya existe")
+    old_key = day.day_key
+    day.day_key = normalized_key
+    day.label = label.strip()
+    entries = db.query(models.ProgramEntry).filter(models.ProgramEntry.day_key == old_key).all()
+    for entry in entries:
+        entry.day_key = normalized_key
+        entry.day_label = day.label
+    db.commit()
+    return RedirectResponse(url="/admin/programa", status_code=303)
+
+
+@app.post("/admin/programa/day/{day_key}/delete")
+def admin_programa_day_delete(
+    day_key: str,
+    current_user: models.User = Depends(require_admin),
+    db: Session = Depends(get_db),
+):
+    day = db.query(models.ProgramDay).filter(models.ProgramDay.day_key == day_key).first()
+    if not day:
+        raise HTTPException(status_code=404, detail="Día no encontrado")
+    if db.query(models.ProgramDay).count() <= 1:
+        raise HTTPException(status_code=400, detail="Debe quedar al menos un día en el programa.")
+    entries = db.query(models.ProgramEntry).filter(models.ProgramEntry.day_key == day_key).all()
+    for entry in entries:
+        db.delete(entry)
+    db.delete(day)
+    db.commit()
+    remaining_days = get_program_days(db)
+    for index, remaining_day in enumerate(remaining_days):
+        remaining_day.position = index
+    db.commit()
+    return RedirectResponse(url="/admin/programa", status_code=303)
 
 
 @app.get("/speakers", response_class=HTMLResponse)

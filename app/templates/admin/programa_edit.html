@@ -19,14 +19,10 @@
                 <label class="block">
                     <span class="block text-sm font-medium text-slate-700 mb-1">Día</span>
                     <select name="day_key" class="w-full border rounded-lg px-3 py-2 bg-white">
-                        <option value="d1" {% if entry.day_key == 'd1' %}selected{% endif %}>d1</option>
-                        <option value="d2" {% if entry.day_key == 'd2' %}selected{% endif %}>d2</option>
-                        <option value="d3" {% if entry.day_key == 'd3' %}selected{% endif %}>d3</option>
+                        {% for day in program_days %}
+                        <option value="{{ day.day_key }}" {% if entry.day_key == day.day_key %}selected{% endif %}>{{ day.label }} ({{ day.day_key }})</option>
+                        {% endfor %}
                     </select>
-                </label>
-                <label class="block">
-                    <span class="block text-sm font-medium text-slate-700 mb-1">Etiqueta del día</span>
-                    <input type="text" name="day_label" value="{{ entry.day_label or '' }}" class="w-full border rounded-lg px-3 py-2" required>
                 </label>
                 <label class="block">
                     <span class="block text-sm font-medium text-slate-700 mb-1">Tipo de bloque</span>

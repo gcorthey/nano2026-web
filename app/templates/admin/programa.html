@@ -12,6 +12,38 @@
         </a>
     </div>
 
+    <section class="bg-white rounded-2xl border border-slate-200 shadow-sm p-6">
+        <div class="flex flex-col lg:flex-row gap-6">
+            <div class="flex-1 space-y-3">
+                <h2 class="text-lg font-semibold text-slate-900">Días del programa</h2>
+                <p class="text-sm text-slate-500">Podés cambiar la etiqueta pública, agregar nuevos días o borrar uno completo.</p>
+                {% for day in days %}
+                <div class="grid md:grid-cols-[minmax(0,1fr)_auto] gap-3 items-center rounded-xl border border-slate-200 p-3">
+                    <form method="post" action="/admin/programa/day/{{ day.day_key }}/edit" class="grid md:grid-cols-[140px_minmax(0,1fr)_auto] gap-3 items-center">
+                        <input type="text" name="new_day_key" value="{{ day.day_key }}" class="border rounded-lg px-3 py-2 text-sm" required>
+                        <input type="text" name="label" value="{{ day.label }}" class="border rounded-lg px-3 py-2 text-sm" required>
+                        <button type="submit" class="px-3 py-2 rounded-lg border border-slate-200 bg-white text-sm hover:bg-slate-50">Guardar día</button>
+                    </form>
+                    <form method="post" action="/admin/programa/day/{{ day.day_key }}/delete" onsubmit="return confirm('¿Eliminar este día y todos sus bloques?');">
+                        <button type="submit" class="px-3 py-2 rounded-lg border border-red-200 bg-red-50 text-red-700 text-sm hover:bg-red-100">Borrar día</button>
+                    </form>
+                </div>
+                {% endfor %}
+            </div>
+
+            <div class="lg:w-[320px] rounded-xl border border-dashed border-slate-300 p-4 bg-slate-50 h-fit">
+                <h3 class="font-semibold text-slate-900 mb-3">Agregar día</h3>
+                <form method="post" action="/admin/programa/day/new" class="space-y-3">
+                    <input type="text" name="day_key" placeholder="ej: d4" class="w-full border rounded-lg px-3 py-2 text-sm" required>
+                    <input type="text" name="label" placeholder="ej: Sáb 6/6" class="w-full border rounded-lg px-3 py-2 text-sm" required>
+                    <button type="submit" class="w-full bg-[#005C53] text-white px-4 py-2 rounded-lg hover:bg-[#042940] transition text-sm font-medium">
+                        Crear día
+                    </button>
+                </form>
+            </div>
+        </div>
+    </section>
+
     {% for day_id, day in schedule.items() %}
     <section class="bg-white rounded-2xl border border-slate-200 shadow-sm overflow-hidden">
         <div class="px-6 py-4 border-b border-slate-200 bg-slate-50">
@@ -49,11 +81,41 @@
 
                     {% if entry.kind == 'parallel' %}
                     <div class="grid md:grid-cols-2 gap-3">
-                        <div class="rounded-xl border border-slate-200 p-3 bg-slate-50">
+                        <div class="rounded-xl border p-3
+                            {% if entry.track_1_type == 'plenaria' %}border-[#005C53] bg-[#F7FBFA]
+                            {% elif entry.track_1_type == 'semiplenaria' %}border-[#9FC131] bg-[#FBFDEA]
+                            {% elif entry.track_1_type == 'talento_joven' %}border-[#DBF227] bg-[#F7FBEA]
+                            {% elif entry.track_1_type == 'oral' %}border-[#D6D58E] bg-[#FBFBEA]
+                            {% elif entry.track_1_type == 'poster' %}border-[#E7EFC7] bg-[#FCFDEB]
+                            {% else %}border-slate-200 bg-slate-50{% endif %}">
+                            <span class="inline-flex mb-2 text-xs rounded-full px-2 py-1
+                                {% if entry.track_1_type == 'plenaria' %}bg-[#005C53] text-white
+                                {% elif entry.track_1_type == 'semiplenaria' %}bg-[#9FC131] text-white
+                                {% elif entry.track_1_type == 'talento_joven' %}bg-[#DBF227] text-black
+                                {% elif entry.track_1_type == 'oral' %}bg-[#D6D58E] text-slate-900
+                                {% elif entry.track_1_type == 'poster' %}bg-[#B7CB5D] text-white
+                                {% else %}bg-slate-100 text-slate-600{% endif %}">
+                                {{ (entry.track_1_type or '').replace('_', ' ') }}
+                            </span>
                             <p class="font-semibold text-slate-900">{{ entry.track_1_title }}</p>
                             <p class="text-sm text-slate-500 mt-1">{{ entry.track_1_room }}</p>
                         </div>
-                        <div class="rounded-xl border border-slate-200 p-3 bg-slate-50">
+                        <div class="rounded-xl border p-3
+                            {% if entry.track_2_type == 'plenaria' %}border-[#005C53] bg-[#F7FBFA]
+                            {% elif entry.track_2_type == 'semiplenaria' %}border-[#9FC131] bg-[#FBFDEA]
+                            {% elif entry.track_2_type == 'talento_joven' %}border-[#DBF227] bg-[#F7FBEA]
+                            {% elif entry.track_2_type == 'oral' %}border-[#D6D58E] bg-[#FBFBEA]
+                            {% elif entry.track_2_type == 'poster' %}border-[#E7EFC7] bg-[#FCFDEB]
+                            {% else %}border-slate-200 bg-slate-50{% endif %}">
+                            <span class="inline-flex mb-2 text-xs rounded-full px-2 py-1
+                                {% if entry.track_2_type == 'plenaria' %}bg-[#005C53] text-white
+                                {% elif entry.track_2_type == 'semiplenaria' %}bg-[#9FC131] text-white
+                                {% elif entry.track_2_type == 'talento_joven' %}bg-[#DBF227] text-black
+                                {% elif entry.track_2_type == 'oral' %}bg-[#D6D58E] text-slate-900
+                                {% elif entry.track_2_type == 'poster' %}bg-[#B7CB5D] text-white
+                                {% else %}bg-slate-100 text-slate-600{% endif %}">
+                                {{ (entry.track_2_type or '').replace('_', ' ') }}
+                            </span>
                             <p class="font-semibold text-slate-900">{{ entry.track_2_title }}</p>
                             <p class="text-sm text-slate-500 mt-1">{{ entry.track_2_room }}</p>
                         </div>

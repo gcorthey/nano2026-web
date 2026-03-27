@@ -151,3 +151,11 @@ class ProgramEntry(Base):
     track_2_title = Column(String, nullable=True)
     track_2_type = Column(String, nullable=True)
     track_2_room = Column(String, nullable=True)
+
+
+class ProgramDay(Base):
+    __tablename__ = "program_days"
+    id = Column(Integer, primary_key=True, index=True)
+    day_key = Column(String, nullable=False, unique=True, index=True)
+    label = Column(String, nullable=False)
+    position = Column(Integer, nullable=False, default=0, index=True)
