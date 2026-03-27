@@ -1,39 +1,211 @@
 {% extends "public/base.html" %}
 {% block content %}
 
-<!-- Hero -->
+{% macro track_card(track) -%}
+<div class="rounded-2xl h-full text-center border overflow-hidden shadow-sm
+    {% if track.type == 'semiplenaria' %}border-[#9FC131] bg-[#FBFDEA]
+    {% elif track.type == 'talento_joven' %}border-[#DBF227] bg-[#F7FBEA]
+    {% elif track.type == 'oral' %}border-[#D6D58E] bg-[#FBFBEA]
+    {% elif track.type == 'poster' %}border-[#E7EFC7] bg-[#FCFDEB]
+    {% elif track.type == 'empresas' %}border-[#DBF227] bg-[#F7FBEA]
+    {% else %}border-[#D7E3E0] bg-white{% endif %}">
+    <div class="h-1.5
+        {% if track.type == 'semiplenaria' %}bg-[#9FC131]
+        {% elif track.type == 'talento_joven' %}bg-[#DBF227]
+        {% elif track.type == 'oral' %}bg-[#D6D58E]
+        {% elif track.type == 'poster' %}bg-[#B7CB5D]
+        {% elif track.type == 'empresas' %}bg-[#042940]
+        {% else %}bg-[#D7E3E0]{% endif %}"></div>
+    <div class="px-4 py-3">
+    <div class="flex flex-col items-center gap-2">
+        <div class="text-center">
+            <h3 class="text-base font-bold text-slate-900">{{ track.title }}</h3>
+        </div>
+    </div>
+    {% if track.room %}
+    <p class="text-sm {% if track.type == 'semiplenaria' %}text-[#9FC131]{% elif track.type == 'talento_joven' %}text-[#6E8E1F]{% elif track.type == 'oral' %}text-[#8F8E4A]{% else %}text-slate-500{% endif %}">{{ track.room }}</p>
+    {% endif %}
+    </div>
+</div>
+{%- endmacro %}
+
+{% set schedule = {
+    'd1': {
+        'label': 'Mié 3/6',
+        'items': [
+            {'kind': 'shared', 'start': '08:30', 'end': '09:30', 'title': 'Acreditación y bienvenida', 'type': 'apertura', 'location': 'Auditorio principal'},
+            {'kind': 'shared', 'start': '09:30', 'end': '10:30', 'title': 'Conferencia plenaria 1 — Por confirmar', 'type': 'plenaria', 'location': 'Auditorio principal'},
+            {'kind': 'shared', 'start': '10:30', 'end': '11:00', 'title': '☕ Coffee break', 'type': 'break', 'location': 'Espacio común'},
+            {'kind': 'parallel', 'start': '11:00', 'end': '11:30', 'type': 'oral', 'tracks': [
+                {'label': 'Sesión 1', 'title': 'Conferencia Semiplenaria 1', 'type': 'semiplenaria', 'room': 'Sala 1'},
+                {'label': 'Sesión 2', 'title': 'Conferencia Semiplenaria 2', 'type': 'semiplenaria', 'room': 'Sala 2'}
+            ]},
+             {'kind': 'parallel', 'start': '11:30', 'end': '12:30', 'type': 'oral', 'tracks': [
+                {'label': 'Sesión 1', 'title': 'Sesión oral', 'type': 'oral', 'room': 'Sala 1'},
+                {'label': 'Sesión 2', 'title': 'Sesión oral', 'type': 'oral', 'room': 'Sala 2'}
+            ]},
+            {'kind': 'shared', 'start': '12:30', 'end': '14:00', 'title': '🍽️ Almuerzo', 'type': 'break', 'location': 'Espacio común'},
+            {'kind': 'shared', 'start': '14:00', 'end': '15:00', 'title': 'Conferencia plenaria 2 — Por confirmar', 'type': 'plenaria', 'location': 'Auditorio principal'},
+            {'kind': 'parallel', 'start': '15:00', 'end': '15:30', 'type': 'oral', 'tracks': [
+                {'label': 'Talento Joven 1', 'title': 'Talento joven 1', 'type': 'talento_joven', 'room': 'Sala 1'},
+                {'label': 'Talento Joven 2', 'title': 'Sesión oral', 'type': 'oral', 'room': 'Sala 2'}
+            ]},
+            {'kind': 'shared', 'start': '15:30', 'end': '16:00', 'title': '☕ Coffee break', 'type': 'break', 'location': 'Espacio común'},
+            {'kind': 'shared', 'start': '16:00', 'end': '17:00', 'title': 'Mesa redonda: Industria', 'type': 'plenaria', 'location': 'Auditorio principal'},
+           
+            {'kind': 'shared', 'start': '17:00', 'end': '19:00', 'title': 'Sesión de posters 1', 'type': 'poster', 'location': 'Espacio común'},
+            {'kind': 'shared', 'start': '19:00', 'end': '20:00', 'title': 'Evento de bienvenida', 'type': 'poster', 'location': 'Espacio común'},
+  
+            
+        ]
+    },
+    'd2': {
+        'label': 'Mié 3/6',
+        'items': [          
+            {'kind': 'shared', 'start': '09:00', 'end': '10:00', 'title': 'Conferencia plenaria 4 — Por confirmar', 'type': 'plenaria', 'location': 'Auditorio principal'},
+            {'kind': 'shared', 'start': '10:00', 'end': '10:30', 'title': 'Charla Sponsor', 'type': 'break', 'location': 'Espacio común'},
+            {'kind': 'shared', 'start': '10:30', 'end': '11:00', 'title': '☕ Coffee break', 'type': 'break', 'location': 'Espacio común'},
+            {'kind': 'parallel', 'start': '11:00', 'end': '11:30', 'type': 'oral', 'tracks': [
+                {'label': 'Sesión 1', 'title': 'Conferencia Semiplenaria 3', 'type': 'semiplenaria', 'room': 'Sala 1'},
+                {'label': 'Sesión 2', 'title': 'Conferencia Semiplenaria 4', 'type': 'semiplenaria', 'room': 'Sala 2'}
+            ]},
+             {'kind': 'parallel', 'start': '11:30', 'end': '12:30', 'type': 'oral', 'tracks': [
+                {'label': 'Sesión 1', 'title': 'Sesión oral', 'type': 'oral', 'room': 'Sala 1'},
+                {'label': 'Sesión 2', 'title': 'Sesión oral', 'type': 'oral', 'room': 'Sala 2'}
+            ]},
+            {'kind': 'shared', 'start': '12:30', 'end': '14:00', 'title': '🍽️ Almuerzo', 'type': 'break', 'location': 'Espacio común'},
+            {'kind': 'shared', 'start': '14:00', 'end': '15:00', 'title': 'Conferencia plenaria 4 — Por confirmar', 'type': 'plenaria', 'location': 'Auditorio principal'},
+            {'kind': 'parallel', 'start': '15:00', 'end': '15:30', 'type': 'oral', 'tracks': [
+                {'label': 'Talento Joven 1', 'title': 'Talento joven 2', 'type': 'talento_joven', 'room': 'Sala 1'},
+                {'label': 'Talento Joven 2', 'title': 'Sesión oral', 'type': 'oral', 'room': 'Sala 2'}
+            ]},
+            {'kind': 'shared', 'start': '15:30', 'end': '16:00', 'title': '☕ Coffee break', 'type': 'break', 'location': 'Espacio común'},
+            {'kind': 'shared', 'start': '16:00', 'end': '17:00', 'title': 'Mesa redonda: Educación', 'type': 'plenaria', 'location': 'Auditorio principal'},
+           
+            {'kind': 'shared', 'start': '17:00', 'end': '19:00', 'title': 'Sesión de posters 2', 'type': 'poster', 'location': 'Espacio común'},
+  
+            
+        ]
+    },
+    'd3': {
+        'label': 'Mié 3/6',
+        'items': [          
+            {'kind': 'shared', 'start': '09:00', 'end': '10:00', 'title': 'Conferencia plenaria 5 — Por confirmar', 'type': 'plenaria', 'location': 'Auditorio principal'},
+            {'kind': 'shared', 'start': '10:00', 'end': '10:30', 'title': 'Charla Sponsor', 'type': 'break', 'location': 'Espacio común'},
+            {'kind': 'shared', 'start': '10:30', 'end': '11:00', 'title': '☕ Coffee break', 'type': 'break', 'location': 'Espacio común'},
+            {'kind': 'parallel', 'start': '11:00', 'end': '11:30', 'type': 'oral', 'tracks': [
+                {'label': 'Sesión 1', 'title': 'Conferencia Semiplenaria 5', 'type': 'semiplenaria', 'room': 'Sala 1'},
+                {'label': 'Sesión 2', 'title': 'Conferencia Semiplenaria 6', 'type': 'semiplenaria', 'room': 'Sala 2'}
+            ]},
+             {'kind': 'parallel', 'start': '11:30', 'end': '12:00', 'type': 'oral', 'tracks': [
+                {'label': 'Sesión 1', 'title': 'Sesión oral', 'type': 'oral', 'room': 'Sala 1'},
+                {'label': 'Sesión 2 ', 'title': 'Sesión oral', 'type': 'oral', 'room': 'Sala 2'}
+            ]},
+            {'kind': 'shared', 'start': '12:00', 'end': '12:30', 'title': 'Presentación de la Asociación Argentina de Nanotecnología', 'type': 'break', 'location': 'Espacio común'},
+            {'kind': 'shared', 'start': '12:00', 'end': '12:30', 'title': 'Acto de finalización y premiación', 'type': 'break', 'location': 'Espacio común'},
+                        
+        ]
+    },
+} %}
+
 <div class="relative rounded-2xl overflow-hidden mb-10" style="min-height: 180px; background: linear-gradient(135deg, #0a1628 0%, #0d3b6e 60%, #1a6b4a 100%);">
     <div class="relative z-10 flex flex-col items-center justify-center text-center px-8 py-12">
-        <h1 class="text-3xl font-black text-white mb-2">Programa de NANO2026</h1>
+        <h1 class="text-3xl font-black text-white mb-2">Programa</h1>
         <p class="text-[#DBF227]">3, 4 y 5 de junio de 2026 · Campus UNSAM</p>
     </div>
 </div>
 
-<div class="bg-white rounded-2xl shadow p-8 mb-8">
-    <h2 class="text-xl font-bold text-gray-800 mb-3">Agenda del congreso de nanotecnología</h2>
-    <p class="text-gray-600 leading-relaxed">
-        El programa de NANO2026 incluirá conferencias plenarias, sesiones semiplenarias, presentaciones orales, pósters y espacios de intercambio con empresas e instituciones. Esta sección se actualizará a medida que se confirme la agenda académica.
-    </p>
+<div class="bg-[#F7FBEA] border border-[#DBF227] rounded-2xl px-6 py-4 mb-8 text-center">
+    <p class="text-[#6E8E1F] font-medium">📅 El programa completo estará disponible próximamente.</p>
+    <p class="text-[#7B8B4A] text-sm mt-1">Esta es una vista preliminar de la estructura del congreso.</p>
 </div>
 
-<div class="bg-yellow-50 border border-yellow-200 rounded-2xl px-6 py-4 mb-8 text-center">
-    <p class="text-yellow-700 font-medium">📅 El programa completo estará disponible próximamente.</p>
-    <p class="text-yellow-600 text-sm mt-1">¡Seguí de cerca el sitio para no perderte las novedades!</p>
+<div class="flex gap-2 mb-6 border-b border-gray-200" id="tabs">
+    {% for day_id, day in schedule.items() %}
+    <button onclick="showDay('{{ day_id }}')" id="tab-{{ day_id }}"
+        class="tab-btn px-5 py-2 text-sm font-medium rounded-t-lg border-b-2 {% if loop.first %}border-[#005C53] text-[#005C53]{% else %}border-transparent hover:text-[#005C53] transition{% endif %}">
+        {{ day.label }}
+    </button>
+    {% endfor %}
 </div>
 
-<div class="grid grid-cols-1 md:grid-cols-2 gap-6">
-    <div class="bg-white rounded-2xl shadow p-8">
-        <h2 class="text-xl font-bold text-gray-800 mb-3">Mientras tanto podés consultar</h2>
-        <p class="text-gray-600 leading-relaxed">
-            Revisá las páginas de <a href="/speakers" class="text-[#005C53] hover:text-[#042940] font-medium">conferencias</a>, <a href="/inscripcion" class="text-[#005C53] hover:text-[#042940] font-medium">inscripción</a> y <a href="/venue" class="text-[#005C53] hover:text-[#042940] font-medium">sede</a>.
-        </p>
-    </div>
-    <div class="bg-white rounded-2xl shadow p-8">
-        <h2 class="text-xl font-bold text-gray-800 mb-3">Presentación de trabajos</h2>
-        <p class="text-gray-600 leading-relaxed">
-            Si querés participar con un trabajo, accedé a <a href="/submit" class="text-[#005C53] hover:text-[#042940] font-medium">envío de resúmenes</a> y seguí las fechas publicadas en el sitio.
-        </p>
+{% for day_id, day in schedule.items() %}
+<div id="day-{{ day_id }}" class="{% if not loop.first %}hidden{% endif %}">
+    <div class="bg-white rounded-2xl shadow overflow-hidden border border-[#D7E3E0]">
+        <div class="hidden md:grid md:grid-cols-[130px_minmax(0,1fr)] px-6 py-4 bg-[#042940] text-white text-center">
+            <div class="text-xs font-semibold uppercase tracking-[0.2em] text-white/70">Horario</div>
+            <div class="grid grid-cols-2 gap-4">
+                <div class="text-xs font-semibold uppercase tracking-[0.2em] text-white/70">Sesión 1</div>
+                <div class="text-xs font-semibold uppercase tracking-[0.2em] text-white/70">Sesión 2</div>
+            </div>
+        </div>
+
+        {% for item in day['items'] %}
+        <div class="border-t border-[#E3ECE9] first:border-t-0">
+            {% if item.kind == 'shared' %}
+            <div class="px-6 py-4 grid gap-4 md:grid-cols-[130px_minmax(0,1fr)] items-center bg-gradient-to-r text-center
+                {% if item.type == 'plenaria' %}from-[#ECF7F4] to-[#F8FCFB]
+                {% elif item.type == 'break' %}from-[#F8FAFA] to-[#EEF3F1]
+                {% elif item.type == 'apertura' or item.type == 'cierre' %}from-[#EEF6D0] to-[#F7FBEA]
+                {% elif item.type == 'social' %}from-[#F7FBEA] to-[#EEF6D0]
+                {% else %}from-[#F7FBFA] to-white{% endif %}">
+                <div class="flex justify-center md:justify-start">
+                    <div class="inline-flex items-center rounded-full border border-[#D7E3E0] bg-white px-3 py-1.5 text-sm text-slate-600 font-mono whitespace-nowrap shadow-sm">
+                        {{ item.start }} – {{ item.end }}
+                    </div>
+                </div>
+                <div class="rounded-2xl border overflow-hidden shadow-sm
+                    {% if item.type == 'plenaria' %}border-[#005C53] bg-[#F7FBFA]
+                    {% elif item.type == 'break' %}border-[#DDE7E4] bg-white
+                    {% elif item.type == 'apertura' or item.type == 'cierre' %}border-[#DBF227] bg-[#F7FBEA]
+                    {% elif item.type == 'social' %}border-[#C9DB7A] bg-[#F7FBEA]
+                    {% else %}border-white/80 bg-white/90{% endif %}">
+                    <div class="h-1.5
+                        {% if item.type == 'plenaria' %}bg-[#005C53]
+                        {% elif item.type == 'break' %}bg-[#BFCBC6]
+                        {% elif item.type == 'apertura' or item.type == 'cierre' %}bg-[#DBF227]
+                        {% elif item.type == 'social' %}bg-[#9FC131]
+                        {% else %}bg-[#D7E3E0]{% endif %}"></div>
+                    <div class="px-5 py-3 flex flex-col items-center gap-2">
+                        <div class="text-center">
+                            <h3 class="text-lg font-bold text-slate-900">{{ item.title }}</h3>
+                            {% if item.location %}
+                            <p class="text-sm mt-1 {% if item.type == 'plenaria' %}text-[#005C53]{% else %}text-slate-500{% endif %}">{{ item.location }}</p>
+                            {% endif %}
+                        </div>
+                    </div>
+                </div>
+            </div>
+            {% else %}
+            <div class="px-6 py-4 grid gap-4 md:grid-cols-[130px_minmax(0,1fr)] items-center text-center">
+                <div class="flex justify-center md:justify-start">
+                    <div class="inline-flex items-center rounded-full border border-[#D7E3E0] bg-white px-3 py-1.5 text-sm text-slate-600 font-mono whitespace-nowrap shadow-sm">
+                        {{ item.start }} – {{ item.end }}
+                    </div>
+                </div>
+                <div class="grid gap-4 md:grid-cols-2">
+                    {{ track_card(item.tracks[0]) }}
+                    {{ track_card(item.tracks[1]) }}
+                </div>
+            </div>
+            {% endif %}
+        </div>
+        {% endfor %}
     </div>
 </div>
+{% endfor %}
+
+<script>
+    function showDay(day) {
+        ['d1', 'd2', 'd3'].forEach(d => {
+            document.getElementById('day-' + d).classList.add('hidden');
+            document.getElementById('tab-' + d).classList.remove('border-[#005C53]', 'text-[#005C53]');
+            document.getElementById('tab-' + d).classList.add('border-transparent');
+        });
+        document.getElementById('day-' + day).classList.remove('hidden');
+        document.getElementById('tab-' + day).classList.add('border-[#005C53]', 'text-[#005C53]');
+        document.getElementById('tab-' + day).classList.remove('border-transparent');
+    }
+</script>
 
 {% endblock %}
