@@ -1,7 +1,7 @@
 #!/bin/bash
 set -euo pipefail
 
-BACKUP_DIR="/mnt/backups"
+BACKUP_DIR="${HOME}/backups"
 LOG_DIR="${BACKUP_DIR}/logs"
 DATE="$(date +%Y-%m-%d)"
 IMAGE_PATH="${BACKUP_DIR}/rpi-${DATE}.img"
