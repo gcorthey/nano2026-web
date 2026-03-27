@@ -1,0 +1,182 @@
+{% extends "admin/base.html" %}
+{% block content %}
+
+<div class="max-w-7xl mx-auto space-y-6">
+    <div class="flex flex-col md:flex-row md:items-center md:justify-between gap-4">
+        <div>
+            <h1 class="text-2xl font-bold text-gray-900">Programa</h1>
+            <p class="text-sm text-gray-500 mt-1">Editá el cronograma público del congreso sin tocar templates.</p>
+        </div>
+        <a href="/admin/programa/new" class="inline-flex items-center justify-center bg-[#005C53] text-white px-4 py-2 rounded-lg hover:bg-[#042940] transition text-sm font-medium">
+            Agregar bloque
+        </a>
+    </div>
+
+    {% for day_id, day in schedule.items() %}
+    <section class="bg-white rounded-2xl border border-slate-200 shadow-sm overflow-hidden">
+        <div class="px-6 py-4 border-b border-slate-200 bg-slate-50">
+            <h2 class="text-lg font-semibold text-slate-900">{{ day.label }}</h2>
+        </div>
+        <div class="divide-y divide-slate-100 program-day-list" data-day-key="{{ day_id }}">
+            {% for entry in entries if entry.day_key == day_id %}
+            <div class="program-entry px-6 py-4 flex flex-col lg:flex-row lg:items-start gap-4 bg-white" data-entry-id="{{ entry.id }}">
+                <div class="flex items-start gap-3">
+                    <button type="button" class="drag-handle mt-0.5 inline-flex h-9 w-9 items-center justify-center rounded-lg border border-slate-200 bg-slate-50 text-slate-400 hover:bg-slate-100 hover:text-slate-600 cursor-grab active:cursor-grabbing" title="Arrastrar para reordenar" aria-label="Arrastrar para reordenar">
+                        <svg class="w-4 h-4" viewBox="0 0 20 20" fill="currentColor" aria-hidden="true">
+                            <path d="M7 4a1.5 1.5 0 1 1-3 0 1.5 1.5 0 0 1 3 0Zm0 6a1.5 1.5 0 1 1-3 0 1.5 1.5 0 0 1 3 0Zm-1.5 7.5a1.5 1.5 0 1 0 0-3 1.5 1.5 0 0 0 0 3ZM16 4a1.5 1.5 0 1 1-3 0 1.5 1.5 0 0 1 3 0Zm-1.5 7.5a1.5 1.5 0 1 0 0-3 1.5 1.5 0 0 0 0 3ZM16 16a1.5 1.5 0 1 1-3 0 1.5 1.5 0 0 1 3 0Z"/>
+                        </svg>
+                    </button>
+                    <div class="min-w-[120px]">
+                        <div class="inline-flex items-center rounded-full border border-slate-200 bg-white px-3 py-1 text-sm font-mono text-slate-600">
+                            {{ entry.start_time }} - {{ entry.end_time }}
+                        </div>
+                    </div>
+                </div>
+                <div class="flex-1 space-y-2">
+                    <div class="flex flex-wrap items-center gap-2">
+                        <span class="text-xs font-semibold uppercase tracking-[0.18em] text-slate-500">
+                            {% if entry.kind == 'parallel' %}Sesiones paralelas{% else %}Actividad común{% endif %}
+                        </span>
+                        <span class="text-xs rounded-full px-2 py-1
+                            {% if entry.item_type == 'plenaria' %}bg-[#005C53] text-white
+                            {% elif entry.item_type == 'semiplenaria' %}bg-[#9FC131] text-white
+                            {% elif entry.item_type == 'talento_joven' %}bg-[#DBF227] text-black
+                            {% elif entry.item_type == 'oral' %}bg-[#D6D58E] text-slate-900
+                            {% else %}bg-slate-100 text-slate-600{% endif %}">
+                            {{ entry.item_type.replace('_', ' ') }}
+                        </span>
+                    </div>
+
+                    {% if entry.kind == 'parallel' %}
+                    <div class="grid md:grid-cols-2 gap-3">
+                        <div class="rounded-xl border border-slate-200 p-3 bg-slate-50">
+                            <p class="font-semibold text-slate-900">{{ entry.track_1_title }}</p>
+                            <p class="text-sm text-slate-500 mt-1">{{ entry.track_1_room }}</p>
+                        </div>
+                        <div class="rounded-xl border border-slate-200 p-3 bg-slate-50">
+                            <p class="font-semibold text-slate-900">{{ entry.track_2_title }}</p>
+                            <p class="text-sm text-slate-500 mt-1">{{ entry.track_2_room }}</p>
+                        </div>
+                    </div>
+                    {% else %}
+                    <div>
+                        <p class="font-semibold text-slate-900">{{ entry.title }}</p>
+                        {% if entry.location %}
+                        <p class="text-sm text-slate-500 mt-1">{{ entry.location }}</p>
+                        {% endif %}
+                    </div>
+                    {% endif %}
+                </div>
+                <div class="flex lg:flex-col gap-2">
+                    <a href="/admin/programa/{{ entry.id }}/edit" class="px-3 py-2 rounded-lg border border-slate-200 bg-white text-sm hover:bg-slate-50 text-center">Editar</a>
+                    <form method="post" action="/admin/programa/{{ entry.id }}/delete" onsubmit="return confirm('¿Eliminar este bloque del programa?');">
+                        <button type="submit" class="px-3 py-2 rounded-lg border border-red-200 bg-red-50 text-red-700 text-sm hover:bg-red-100">Borrar</button>
+                    </form>
+                </div>
+            </div>
+            {% endfor %}
+        </div>
+    </section>
+    {% endfor %}
+</div>
+
+<style>
+    .program-entry.dragging {
+        opacity: 0.45;
+    }
+
+    .program-entry.drag-over {
+        box-shadow: inset 0 2px 0 #005c53;
+    }
+</style>
+
+<script>
+    const dayLists = document.querySelectorAll('.program-day-list');
+    let draggedEntry = null;
+
+    function getDragAfterElement(container, y) {
+        const draggableElements = [...container.querySelectorAll('.program-entry:not(.dragging)')];
+        return draggableElements.reduce((closest, child) => {
+            const box = child.getBoundingClientRect();
+            const offset = y - box.top - box.height / 2;
+            if (offset < 0 && offset > closest.offset) {
+                return { offset, element: child };
+            }
+            return closest;
+        }, { offset: Number.NEGATIVE_INFINITY, element: null }).element;
+    }
+
+    async function persistOrder(container) {
+        const dayKey = container.dataset.dayKey;
+        const orderedIds = [...container.querySelectorAll('.program-entry')]
+            .map((entry) => entry.dataset.entryId)
+            .join(',');
+
+        const response = await fetch('/admin/programa/reorder', {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/x-www-form-urlencoded;charset=UTF-8',
+            },
+            body: new URLSearchParams({
+                day_key: dayKey,
+                ordered_ids: orderedIds,
+            }),
+        });
+
+        if (!response.ok) {
+            window.location.reload();
+        }
+    }
+
+    dayLists.forEach((container) => {
+        container.querySelectorAll('.program-entry').forEach((entry) => {
+            const handle = entry.querySelector('.drag-handle');
+
+            handle.addEventListener('mousedown', () => {
+                entry.draggable = true;
+            });
+
+            handle.addEventListener('mouseup', () => {
+                if (!entry.classList.contains('dragging')) {
+                    entry.draggable = false;
+                }
+            });
+
+            entry.addEventListener('dragstart', (event) => {
+                draggedEntry = entry;
+                entry.classList.add('dragging');
+                event.dataTransfer.effectAllowed = 'move';
+            });
+
+            entry.addEventListener('dragend', async () => {
+                entry.classList.remove('dragging');
+                entry.draggable = false;
+                container.querySelectorAll('.program-entry').forEach((item) => item.classList.remove('drag-over'));
+                if (draggedEntry) {
+                    await persistOrder(container);
+                }
+                draggedEntry = null;
+            });
+        });
+
+        container.addEventListener('dragover', (event) => {
+            event.preventDefault();
+            if (!draggedEntry) return;
+            const afterElement = getDragAfterElement(container, event.clientY);
+            container.querySelectorAll('.program-entry').forEach((item) => item.classList.remove('drag-over'));
+            if (afterElement == null) {
+                container.appendChild(draggedEntry);
+            } else {
+                afterElement.classList.add('drag-over');
+                container.insertBefore(draggedEntry, afterElement);
+            }
+        });
+
+        container.addEventListener('drop', (event) => {
+            event.preventDefault();
+            container.querySelectorAll('.program-entry').forEach((item) => item.classList.remove('drag-over'));
+        });
+    });
+</script>
+
+{% endblock %}

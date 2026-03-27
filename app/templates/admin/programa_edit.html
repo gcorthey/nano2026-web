@@ -1,0 +1,118 @@
+{% extends "admin/base.html" %}
+{% block content %}
+
+<div class="max-w-4xl mx-auto">
+    <div class="mb-6">
+        <a href="/admin/programa" class="text-blue-600 text-sm hover:underline">← Volver al programa</a>
+    </div>
+
+    <div class="bg-white rounded-2xl shadow border border-slate-200 p-8">
+        <h1 class="text-2xl font-bold text-slate-900 mb-2">{% if is_create %}Nuevo bloque{% else %}Editar bloque{% endif %}</h1>
+        <p class="text-sm text-slate-500 mb-6">Podés crear una actividad común o una franja con dos sesiones paralelas.</p>
+
+        {% if error %}
+        <div class="mb-6 rounded-xl border border-red-200 bg-red-50 px-4 py-3 text-sm text-red-700">{{ error }}</div>
+        {% endif %}
+
+        <form method="post" action="{{ action }}" class="space-y-8">
+            <div class="grid md:grid-cols-2 gap-4">
+                <label class="block">
+                    <span class="block text-sm font-medium text-slate-700 mb-1">Día</span>
+                    <select name="day_key" class="w-full border rounded-lg px-3 py-2 bg-white">
+                        <option value="d1" {% if entry.day_key == 'd1' %}selected{% endif %}>d1</option>
+                        <option value="d2" {% if entry.day_key == 'd2' %}selected{% endif %}>d2</option>
+                        <option value="d3" {% if entry.day_key == 'd3' %}selected{% endif %}>d3</option>
+                    </select>
+                </label>
+                <label class="block">
+                    <span class="block text-sm font-medium text-slate-700 mb-1">Etiqueta del día</span>
+                    <input type="text" name="day_label" value="{{ entry.day_label or '' }}" class="w-full border rounded-lg px-3 py-2" required>
+                </label>
+                <label class="block">
+                    <span class="block text-sm font-medium text-slate-700 mb-1">Tipo de bloque</span>
+                    <select name="kind" id="kind-select" class="w-full border rounded-lg px-3 py-2 bg-white">
+                        {% for value, label in program_kind_options %}
+                        <option value="{{ value }}" {% if entry.kind == value %}selected{% endif %}>{{ label }}</option>
+                        {% endfor %}
+                    </select>
+                </label>
+                <label class="block">
+                    <span class="block text-sm font-medium text-slate-700 mb-1">Tipo visual</span>
+                    <select name="item_type" class="w-full border rounded-lg px-3 py-2 bg-white">
+                        {% for value, label in program_type_options %}
+                        <option value="{{ value }}" {% if entry.item_type == value %}selected{% endif %}>{{ label }}</option>
+                        {% endfor %}
+                    </select>
+                </label>
+                <label class="block">
+                    <span class="block text-sm font-medium text-slate-700 mb-1">Hora inicio</span>
+                    <input type="text" name="start_time" value="{{ entry.start_time or '' }}" class="w-full border rounded-lg px-3 py-2" required>
+                </label>
+                <label class="block">
+                    <span class="block text-sm font-medium text-slate-700 mb-1">Hora fin</span>
+                    <input type="text" name="end_time" value="{{ entry.end_time or '' }}" class="w-full border rounded-lg px-3 py-2" required>
+                </label>
+            </div>
+
+            <div id="shared-fields" class="space-y-4">
+                <h2 class="text-lg font-semibold text-slate-900">Actividad común</h2>
+                <label class="block">
+                    <span class="block text-sm font-medium text-slate-700 mb-1">Título</span>
+                    <input type="text" name="title" value="{{ entry.title or '' }}" class="w-full border rounded-lg px-3 py-2">
+                </label>
+                <label class="block">
+                    <span class="block text-sm font-medium text-slate-700 mb-1">Ubicación</span>
+                    <input type="text" name="location" value="{{ entry.location or '' }}" class="w-full border rounded-lg px-3 py-2">
+                </label>
+            </div>
+
+            <div id="parallel-fields" class="space-y-4">
+                <h2 class="text-lg font-semibold text-slate-900">Sesiones paralelas</h2>
+                <div class="grid md:grid-cols-2 gap-6">
+                    <div class="rounded-xl border border-slate-200 p-4 space-y-3">
+                        <h3 class="font-medium text-slate-900">Tarjeta 1</h3>
+                        <input type="text" name="track_1_title" value="{{ entry.track_1_title or '' }}" class="w-full border rounded-lg px-3 py-2" placeholder="Título">
+                        <select name="track_1_type" class="w-full border rounded-lg px-3 py-2 bg-white">
+                            {% for value, label in program_type_options %}
+                            <option value="{{ value }}" {% if entry.track_1_type == value %}selected{% endif %}>{{ label }}</option>
+                            {% endfor %}
+                        </select>
+                        <input type="text" name="track_1_room" value="{{ entry.track_1_room or '' }}" class="w-full border rounded-lg px-3 py-2" placeholder="Sala">
+                    </div>
+                    <div class="rounded-xl border border-slate-200 p-4 space-y-3">
+                        <h3 class="font-medium text-slate-900">Tarjeta 2</h3>
+                        <input type="text" name="track_2_title" value="{{ entry.track_2_title or '' }}" class="w-full border rounded-lg px-3 py-2" placeholder="Título">
+                        <select name="track_2_type" class="w-full border rounded-lg px-3 py-2 bg-white">
+                            {% for value, label in program_type_options %}
+                            <option value="{{ value }}" {% if entry.track_2_type == value %}selected{% endif %}>{{ label }}</option>
+                            {% endfor %}
+                        </select>
+                        <input type="text" name="track_2_room" value="{{ entry.track_2_room or '' }}" class="w-full border rounded-lg px-3 py-2" placeholder="Sala">
+                    </div>
+                </div>
+            </div>
+
+            <div class="flex items-center gap-3">
+                <button type="submit" class="bg-[#005C53] text-white px-5 py-2.5 rounded-lg hover:bg-[#042940] transition font-medium">Guardar</button>
+                <a href="/admin/programa" class="text-slate-500 hover:text-slate-700">Cancelar</a>
+            </div>
+        </form>
+    </div>
+</div>
+
+<script>
+    const kindSelect = document.getElementById('kind-select');
+    const sharedFields = document.getElementById('shared-fields');
+    const parallelFields = document.getElementById('parallel-fields');
+
+    function toggleProgramFields() {
+        const isParallel = kindSelect.value === 'parallel';
+        sharedFields.classList.toggle('hidden', isParallel);
+        parallelFields.classList.toggle('hidden', !isParallel);
+    }
+
+    kindSelect.addEventListener('change', toggleProgramFields);
+    toggleProgramFields();
+</script>
+
+{% endblock %}

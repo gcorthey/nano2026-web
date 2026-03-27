@@ -29,84 +29,9 @@
 </div>
 {%- endmacro %}
 
-{% set schedule = {
-    'd1': {
-        'label': 'Mié 3/6',
-        'items': [
-            {'kind': 'shared', 'start': '08:30', 'end': '09:30', 'title': 'Acreditación y bienvenida', 'type': 'apertura', 'location': 'Auditorio principal'},
-            {'kind': 'shared', 'start': '09:30', 'end': '10:30', 'title': 'Conferencia plenaria 1 — Por confirmar', 'type': 'plenaria', 'location': 'Auditorio principal'},
-            {'kind': 'shared', 'start': '10:30', 'end': '11:00', 'title': '☕ Coffee break', 'type': 'break', 'location': 'Espacio común'},
-            {'kind': 'parallel', 'start': '11:00', 'end': '11:30', 'type': 'oral', 'tracks': [
-                {'label': 'Sesión 1', 'title': 'Conferencia Semiplenaria 1', 'type': 'semiplenaria', 'room': 'Sala 1'},
-                {'label': 'Sesión 2', 'title': 'Conferencia Semiplenaria 2', 'type': 'semiplenaria', 'room': 'Sala 2'}
-            ]},
-             {'kind': 'parallel', 'start': '11:30', 'end': '12:30', 'type': 'oral', 'tracks': [
-                {'label': 'Sesión 1', 'title': 'Sesión oral', 'type': 'oral', 'room': 'Sala 1'},
-                {'label': 'Sesión 2', 'title': 'Sesión oral', 'type': 'oral', 'room': 'Sala 2'}
-            ]},
-            {'kind': 'shared', 'start': '12:30', 'end': '14:00', 'title': '🍽️ Almuerzo', 'type': 'break', 'location': 'Espacio común'},
-            {'kind': 'shared', 'start': '14:00', 'end': '15:00', 'title': 'Conferencia plenaria 2 — Por confirmar', 'type': 'plenaria', 'location': 'Auditorio principal'},
-            {'kind': 'parallel', 'start': '15:00', 'end': '15:30', 'type': 'oral', 'tracks': [
-                {'label': 'Talento Joven 1', 'title': 'Talento joven 1', 'type': 'talento_joven', 'room': 'Sala 1'},
-                {'label': 'Talento Joven 2', 'title': 'Sesión oral', 'type': 'oral', 'room': 'Sala 2'}
-            ]},
-            {'kind': 'shared', 'start': '15:30', 'end': '16:00', 'title': '☕ Coffee break', 'type': 'break', 'location': 'Espacio común'},
-            {'kind': 'shared', 'start': '16:00', 'end': '17:00', 'title': 'Mesa redonda: Industria', 'type': 'plenaria', 'location': 'Auditorio principal'},
-           
-            {'kind': 'shared', 'start': '17:00', 'end': '19:00', 'title': 'Sesión de posters 1', 'type': 'poster', 'location': 'Espacio común'},
-            {'kind': 'shared', 'start': '19:00', 'end': '20:00', 'title': 'Evento de bienvenida', 'type': 'poster', 'location': 'Espacio común'},
-  
-            
-        ]
-    },
-    'd2': {
-        'label': 'Mié 3/6',
-        'items': [          
-            {'kind': 'shared', 'start': '09:00', 'end': '10:00', 'title': 'Conferencia plenaria 4 — Por confirmar', 'type': 'plenaria', 'location': 'Auditorio principal'},
-            {'kind': 'shared', 'start': '10:00', 'end': '10:30', 'title': 'Charla Sponsor', 'type': 'break', 'location': 'Espacio común'},
-            {'kind': 'shared', 'start': '10:30', 'end': '11:00', 'title': '☕ Coffee break', 'type': 'break', 'location': 'Espacio común'},
-            {'kind': 'parallel', 'start': '11:00', 'end': '11:30', 'type': 'oral', 'tracks': [
-                {'label': 'Sesión 1', 'title': 'Conferencia Semiplenaria 3', 'type': 'semiplenaria', 'room': 'Sala 1'},
-                {'label': 'Sesión 2', 'title': 'Conferencia Semiplenaria 4', 'type': 'semiplenaria', 'room': 'Sala 2'}
-            ]},
-             {'kind': 'parallel', 'start': '11:30', 'end': '12:30', 'type': 'oral', 'tracks': [
-                {'label': 'Sesión 1', 'title': 'Sesión oral', 'type': 'oral', 'room': 'Sala 1'},
-                {'label': 'Sesión 2', 'title': 'Sesión oral', 'type': 'oral', 'room': 'Sala 2'}
-            ]},
-            {'kind': 'shared', 'start': '12:30', 'end': '14:00', 'title': '🍽️ Almuerzo', 'type': 'break', 'location': 'Espacio común'},
-            {'kind': 'shared', 'start': '14:00', 'end': '15:00', 'title': 'Conferencia plenaria 4 — Por confirmar', 'type': 'plenaria', 'location': 'Auditorio principal'},
-            {'kind': 'parallel', 'start': '15:00', 'end': '15:30', 'type': 'oral', 'tracks': [
-                {'label': 'Talento Joven 1', 'title': 'Talento joven 2', 'type': 'talento_joven', 'room': 'Sala 1'},
-                {'label': 'Talento Joven 2', 'title': 'Sesión oral', 'type': 'oral', 'room': 'Sala 2'}
-            ]},
-            {'kind': 'shared', 'start': '15:30', 'end': '16:00', 'title': '☕ Coffee break', 'type': 'break', 'location': 'Espacio común'},
-            {'kind': 'shared', 'start': '16:00', 'end': '17:00', 'title': 'Mesa redonda: Educación', 'type': 'plenaria', 'location': 'Auditorio principal'},
-           
-            {'kind': 'shared', 'start': '17:00', 'end': '19:00', 'title': 'Sesión de posters 2', 'type': 'poster', 'location': 'Espacio común'},
-  
-            
-        ]
-    },
-    'd3': {
-        'label': 'Mié 3/6',
-        'items': [          
-            {'kind': 'shared', 'start': '09:00', 'end': '10:00', 'title': 'Conferencia plenaria 5 — Por confirmar', 'type': 'plenaria', 'location': 'Auditorio principal'},
-            {'kind': 'shared', 'start': '10:00', 'end': '10:30', 'title': 'Charla Sponsor', 'type': 'break', 'location': 'Espacio común'},
-            {'kind': 'shared', 'start': '10:30', 'end': '11:00', 'title': '☕ Coffee break', 'type': 'break', 'location': 'Espacio común'},
-            {'kind': 'parallel', 'start': '11:00', 'end': '11:30', 'type': 'oral', 'tracks': [
-                {'label': 'Sesión 1', 'title': 'Conferencia Semiplenaria 5', 'type': 'semiplenaria', 'room': 'Sala 1'},
-                {'label': 'Sesión 2', 'title': 'Conferencia Semiplenaria 6', 'type': 'semiplenaria', 'room': 'Sala 2'}
-            ]},
-             {'kind': 'parallel', 'start': '11:30', 'end': '12:00', 'type': 'oral', 'tracks': [
-                {'label': 'Sesión 1', 'title': 'Sesión oral', 'type': 'oral', 'room': 'Sala 1'},
-                {'label': 'Sesión 2 ', 'title': 'Sesión oral', 'type': 'oral', 'room': 'Sala 2'}
-            ]},
-            {'kind': 'shared', 'start': '12:00', 'end': '12:30', 'title': 'Presentación de la Asociación Argentina de Nanotecnología', 'type': 'break', 'location': 'Espacio común'},
-            {'kind': 'shared', 'start': '12:00', 'end': '12:30', 'title': 'Acto de finalización y premiación', 'type': 'break', 'location': 'Espacio común'},
-                        
-        ]
-    },
-} %}
+{% if schedule is not defined %}
+{% set schedule = {} %}
+{% endif %}
 
 <div class="relative rounded-2xl overflow-hidden mb-10" style="min-height: 180px; background: linear-gradient(135deg, #0a1628 0%, #0d3b6e 60%, #1a6b4a 100%);">
     <div class="relative z-10 flex flex-col items-center justify-center text-center px-8 py-12">

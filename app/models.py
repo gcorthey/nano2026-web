@@ -131,3 +131,23 @@ class AbstractAcceptanceFlag(Base):
     minor_revision = Column(Integer, default=0, nullable=False)  # 1 = aceptado con revisiones menores
     updated_at = Column(DateTime, default=datetime.utcnow, onupdate=datetime.utcnow, nullable=False)
     abstract = relationship("Abstract", back_populates="acceptance_flag")
+
+
+class ProgramEntry(Base):
+    __tablename__ = "program_entries"
+    id = Column(Integer, primary_key=True, index=True)
+    day_key = Column(String, nullable=False, index=True)
+    day_label = Column(String, nullable=False)
+    position = Column(Integer, nullable=False, default=0, index=True)
+    kind = Column(String, nullable=False, default="shared")  # shared | parallel
+    start_time = Column(String, nullable=False)
+    end_time = Column(String, nullable=False)
+    item_type = Column(String, nullable=False, default="break")
+    title = Column(String, nullable=True)
+    location = Column(String, nullable=True)
+    track_1_title = Column(String, nullable=True)
+    track_1_type = Column(String, nullable=True)
+    track_1_room = Column(String, nullable=True)
+    track_2_title = Column(String, nullable=True)
+    track_2_type = Column(String, nullable=True)
+    track_2_room = Column(String, nullable=True)

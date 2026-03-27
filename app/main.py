@@ -95,6 +95,95 @@ INVITED_CODE_PREFIXES = {
     "talento_joven": "TJ",
 }
 
+PROGRAM_DAY_ORDER = {"d1": 0, "d2": 1, "d3": 2}
+PROGRAM_TYPE_OPTIONS = [
+    ("apertura", "Apertura"),
+    ("plenaria", "Plenaria"),
+    ("semiplenaria", "Semiplenaria"),
+    ("talento_joven", "Talento joven"),
+    ("oral", "Sesión oral"),
+    ("poster", "Póster"),
+    ("empresas", "Industria"),
+    ("break", "Break"),
+    ("social", "Social"),
+    ("cierre", "Cierre"),
+]
+PROGRAM_KIND_OPTIONS = [
+    ("shared", "Actividad común"),
+    ("parallel", "Sesiones paralelas"),
+]
+DEFAULT_PROGRAM_SCHEDULE = {
+    "d1": {
+        "label": "Mié 3/6",
+        "items": [
+            {"kind": "shared", "start": "08:30", "end": "09:30", "title": "Acreditación y bienvenida", "type": "apertura", "location": "Auditorio principal"},
+            {"kind": "shared", "start": "09:30", "end": "10:30", "title": "Conferencia plenaria 1 — Por confirmar", "type": "plenaria", "location": "Auditorio principal"},
+            {"kind": "shared", "start": "10:30", "end": "11:00", "title": "☕ Coffee break", "type": "break", "location": "Espacio común"},
+            {"kind": "parallel", "start": "11:00", "end": "11:30", "type": "oral", "tracks": [
+                {"title": "Conferencia Semiplenaria 1", "type": "semiplenaria", "room": "Sala 1"},
+                {"title": "Conferencia Semiplenaria 2", "type": "semiplenaria", "room": "Sala 2"},
+            ]},
+            {"kind": "parallel", "start": "11:30", "end": "12:30", "type": "oral", "tracks": [
+                {"title": "Sesión oral", "type": "oral", "room": "Sala 1"},
+                {"title": "Sesión oral", "type": "oral", "room": "Sala 2"},
+            ]},
+            {"kind": "shared", "start": "12:30", "end": "14:00", "title": "🍽️ Almuerzo", "type": "break", "location": "Espacio común"},
+            {"kind": "shared", "start": "14:00", "end": "15:00", "title": "Conferencia plenaria 2 — Por confirmar", "type": "plenaria", "location": "Auditorio principal"},
+            {"kind": "parallel", "start": "15:00", "end": "15:30", "type": "oral", "tracks": [
+                {"title": "Talento joven 1", "type": "talento_joven", "room": "Sala 1"},
+                {"title": "Sesión oral", "type": "talento_joven", "room": "Sala 2"},
+            ]},
+            {"kind": "shared", "start": "15:30", "end": "16:00", "title": "☕ Coffee break", "type": "break", "location": "Espacio común"},
+            {"kind": "shared", "start": "16:00", "end": "17:00", "title": "Mesa redonda: Industria", "type": "plenaria", "location": "Auditorio principal"},
+            {"kind": "shared", "start": "17:00", "end": "19:00", "title": "Sesión de posters 1", "type": "poster", "location": "Espacio común"},
+            {"kind": "shared", "start": "19:00", "end": "20:00", "title": "Evento de bienvenida", "type": "poster", "location": "Espacio común"},
+        ],
+    },
+    "d2": {
+        "label": "Mié 3/6",
+        "items": [
+            {"kind": "shared", "start": "09:00", "end": "10:00", "title": "Conferencia plenaria 4 — Por confirmar", "type": "plenaria", "location": "Auditorio principal"},
+            {"kind": "shared", "start": "10:00", "end": "10:30", "title": "Charla Sponsor", "type": "break", "location": "Espacio común"},
+            {"kind": "shared", "start": "10:30", "end": "11:00", "title": "☕ Coffee break", "type": "break", "location": "Espacio común"},
+            {"kind": "parallel", "start": "11:00", "end": "11:30", "type": "oral", "tracks": [
+                {"title": "Conferencia Semiplenaria 3", "type": "semiplenaria", "room": "Sala 1"},
+                {"title": "Conferencia Semiplenaria 4", "type": "semiplenaria", "room": "Sala 2"},
+            ]},
+            {"kind": "parallel", "start": "11:30", "end": "12:30", "type": "oral", "tracks": [
+                {"title": "Sesión oral", "type": "oral", "room": "Sala 1"},
+                {"title": "Sesión oral", "type": "oral", "room": "Sala 2"},
+            ]},
+            {"kind": "shared", "start": "12:30", "end": "14:00", "title": "🍽️ Almuerzo", "type": "break", "location": "Espacio común"},
+            {"kind": "shared", "start": "14:00", "end": "15:00", "title": "Conferencia plenaria 4 — Por confirmar", "type": "plenaria", "location": "Auditorio principal"},
+            {"kind": "parallel", "start": "15:00", "end": "15:30", "type": "oral", "tracks": [
+                {"title": "Talento joven 2", "type": "talento_joven", "room": "Sala 1"},
+                {"title": "Sesión oral", "type": "talento_joven", "room": "Sala 2"},
+            ]},
+            {"kind": "shared", "start": "15:30", "end": "16:00", "title": "☕ Coffee break", "type": "break", "location": "Espacio común"},
+            {"kind": "shared", "start": "16:00", "end": "17:00", "title": "Mesa redonda: Educación", "type": "plenaria", "location": "Auditorio principal"},
+            {"kind": "shared", "start": "17:00", "end": "19:00", "title": "Sesión de posters 2", "type": "poster", "location": "Espacio común"},
+        ],
+    },
+    "d3": {
+        "label": "Mié 3/6",
+        "items": [
+            {"kind": "shared", "start": "09:00", "end": "10:00", "title": "Conferencia plenaria 5 — Por confirmar", "type": "plenaria", "location": "Auditorio principal"},
+            {"kind": "shared", "start": "10:00", "end": "10:30", "title": "Charla Sponsor", "type": "break", "location": "Espacio común"},
+            {"kind": "shared", "start": "10:30", "end": "11:00", "title": "☕ Coffee break", "type": "break", "location": "Espacio común"},
+            {"kind": "parallel", "start": "11:00", "end": "11:30", "type": "oral", "tracks": [
+                {"title": "Conferencia Semiplenaria 5", "type": "semiplenaria", "room": "Sala 1"},
+                {"title": "Conferencia Semiplenaria 6", "type": "semiplenaria", "room": "Sala 2"},
+            ]},
+            {"kind": "parallel", "start": "11:30", "end": "12:00", "type": "oral", "tracks": [
+                {"title": "Sesión oral", "type": "oral", "room": "Sala 1"},
+                {"title": "Sesión oral", "type": "oral", "room": "Sala 2"},
+            ]},
+            {"kind": "shared", "start": "12:00", "end": "12:30", "title": "Presentación de la Asociación Argentina de Nanotecnología", "type": "break", "location": "Espacio común"},
+            {"kind": "shared", "start": "12:00", "end": "12:30", "title": "Acto de finalización y premiación", "type": "break", "location": "Espacio común"},
+        ],
+    },
+}
+
 def strip_tags(text: str) -> str:
     return re.sub(r'<[^>]+>', '', text or '').strip()
 
@@ -106,6 +195,134 @@ def normalize_area_code(area_code: str | None) -> str | None:
 def normalize_abstract_type(value: str | None) -> str:
     normalized = (value or "contribucion").strip().lower().replace(" ", "_")
     return normalized if normalized in ABSTRACT_TYPE_LABELS else "contribucion"
+
+
+def normalize_program_type(value: str | None) -> str:
+    normalized = (value or "break").strip().lower().replace(" ", "_")
+    allowed = {option[0] for option in PROGRAM_TYPE_OPTIONS}
+    return normalized if normalized in allowed else "break"
+
+
+def normalize_program_kind(value: str | None) -> str:
+    normalized = (value or "shared").strip().lower()
+    return normalized if normalized in {"shared", "parallel"} else "shared"
+
+
+def seed_program_entries(db: Session) -> None:
+    if db.query(models.ProgramEntry).count() > 0:
+        return
+
+    for day_key, day in DEFAULT_PROGRAM_SCHEDULE.items():
+        for index, item in enumerate(day["items"]):
+            entry = models.ProgramEntry(
+                day_key=day_key,
+                day_label=day["label"],
+                position=index,
+                kind=item["kind"],
+                start_time=item["start"],
+                end_time=item["end"],
+                item_type=item["type"],
+                title=item.get("title"),
+                location=item.get("location"),
+            )
+            if item["kind"] == "parallel":
+                track_1 = item["tracks"][0]
+                track_2 = item["tracks"][1]
+                entry.track_1_title = track_1.get("title")
+                entry.track_1_type = track_1.get("type")
+                entry.track_1_room = track_1.get("room")
+                entry.track_2_title = track_2.get("title")
+                entry.track_2_type = track_2.get("type")
+                entry.track_2_room = track_2.get("room")
+            db.add(entry)
+    db.commit()
+
+
+def build_program_schedule(db: Session) -> dict[str, dict[str, object]]:
+    seed_program_entries(db)
+    entries = (
+        db.query(models.ProgramEntry)
+        .order_by(models.ProgramEntry.day_key, models.ProgramEntry.position, models.ProgramEntry.id)
+        .all()
+    )
+    schedule: dict[str, dict[str, object]] = {}
+    for entry in entries:
+        day = schedule.setdefault(entry.day_key, {"label": entry.day_label, "items": []})
+        day["label"] = entry.day_label
+        if entry.kind == "parallel":
+            day["items"].append({
+                "kind": "parallel",
+                "start": entry.start_time,
+                "end": entry.end_time,
+                "type": entry.item_type,
+                "tracks": [
+                    {
+                        "title": entry.track_1_title or "",
+                        "type": normalize_program_type(entry.track_1_type),
+                        "room": entry.track_1_room or "",
+                    },
+                    {
+                        "title": entry.track_2_title or "",
+                        "type": normalize_program_type(entry.track_2_type),
+                        "room": entry.track_2_room or "",
+                    },
+                ],
+            })
+        else:
+            day["items"].append({
+                "kind": "shared",
+                "start": entry.start_time,
+                "end": entry.end_time,
+                "title": entry.title or "",
+                "type": normalize_program_type(entry.item_type),
+                "location": entry.location or "",
+            })
+
+    return dict(sorted(schedule.items(), key=lambda item: PROGRAM_DAY_ORDER.get(item[0], 999)))
+
+
+def next_program_position(db: Session, day_key: str) -> int:
+    count = db.query(models.ProgramEntry).filter(models.ProgramEntry.day_key == day_key).count()
+    return count
+
+
+def compact_program_positions(db: Session, day_key: str) -> None:
+    entries = (
+        db.query(models.ProgramEntry)
+        .filter(models.ProgramEntry.day_key == day_key)
+        .order_by(models.ProgramEntry.position, models.ProgramEntry.id)
+        .all()
+    )
+    for index, entry in enumerate(entries):
+        entry.position = index
+    db.commit()
+
+
+def render_program_entry_form(
+    request: Request,
+    program_entry: models.ProgramEntry | None = None,
+    *,
+    error: str | None = None,
+) -> HTMLResponse:
+    entry = program_entry or models.ProgramEntry(
+        day_key="d1",
+        day_label="Mié 3/6",
+        kind="shared",
+        start_time="09:00",
+        end_time="10:00",
+        item_type="break",
+    )
+    is_create = program_entry is None
+    action = "/admin/programa/new" if is_create else f"/admin/programa/{entry.id}/edit"
+    return templates.TemplateResponse("admin/programa_edit.html", {
+        "request": request,
+        "entry": entry,
+        "is_create": is_create,
+        "action": action,
+        "error": error,
+        "program_type_options": PROGRAM_TYPE_OPTIONS,
+        "program_kind_options": PROGRAM_KIND_OPTIONS,
+    })
 
 def parse_optional_positive_int(value: str | None) -> int | None:
     raw = (value or "").strip()
@@ -1775,6 +1992,224 @@ def abstract_pdf(abstract_id: int, db: Session = Depends(get_db)):
 
 
 
+@app.get("/admin/programa", response_class=HTMLResponse)
+def admin_programa(
+    request: Request,
+    current_user: models.User = Depends(require_admin),
+    db: Session = Depends(get_db),
+):
+    schedule = build_program_schedule(db)
+    entries = (
+        db.query(models.ProgramEntry)
+        .order_by(models.ProgramEntry.day_key, models.ProgramEntry.position, models.ProgramEntry.id)
+        .all()
+    )
+    return templates.TemplateResponse("admin/programa.html", {
+        "request": request,
+        "schedule": schedule,
+        "entries": entries,
+    })
+
+
+@app.get("/admin/programa/new", response_class=HTMLResponse)
+def admin_programa_new_form(
+    request: Request,
+    current_user: models.User = Depends(require_admin),
+):
+    return render_program_entry_form(request)
+
+
+@app.post("/admin/programa/new", response_class=HTMLResponse)
+def admin_programa_create(
+    request: Request,
+    day_key: str = Form(...),
+    day_label: str = Form(...),
+    kind: str = Form(...),
+    start_time: str = Form(...),
+    end_time: str = Form(...),
+    item_type: str = Form(...),
+    title: str = Form(""),
+    location: str = Form(""),
+    track_1_title: str = Form(""),
+    track_1_type: str = Form(""),
+    track_1_room: str = Form(""),
+    track_2_title: str = Form(""),
+    track_2_type: str = Form(""),
+    track_2_room: str = Form(""),
+    current_user: models.User = Depends(require_admin),
+    db: Session = Depends(get_db),
+):
+    kind = normalize_program_kind(kind)
+    entry = models.ProgramEntry(
+        day_key=day_key.strip(),
+        day_label=day_label.strip(),
+        position=next_program_position(db, day_key.strip()),
+        kind=kind,
+        start_time=start_time.strip(),
+        end_time=end_time.strip(),
+        item_type=normalize_program_type(item_type),
+        title=title.strip() or None,
+        location=location.strip() or None,
+        track_1_title=track_1_title.strip() or None,
+        track_1_type=normalize_program_type(track_1_type),
+        track_1_room=track_1_room.strip() or None,
+        track_2_title=track_2_title.strip() or None,
+        track_2_type=normalize_program_type(track_2_type),
+        track_2_room=track_2_room.strip() or None,
+    )
+    if kind == "shared" and not entry.title:
+        return render_program_entry_form(request, entry, error="Las actividades comunes necesitan un título.")
+    if kind == "parallel" and (not entry.track_1_title or not entry.track_2_title):
+        return render_program_entry_form(request, entry, error="Las sesiones paralelas necesitan título para ambas tarjetas.")
+    db.add(entry)
+    db.commit()
+    return RedirectResponse(url="/admin/programa", status_code=303)
+
+
+@app.get("/admin/programa/{entry_id}/edit", response_class=HTMLResponse)
+def admin_programa_edit_form(
+    entry_id: int,
+    request: Request,
+    current_user: models.User = Depends(require_admin),
+    db: Session = Depends(get_db),
+):
+    entry = db.query(models.ProgramEntry).filter(models.ProgramEntry.id == entry_id).first()
+    if not entry:
+        raise HTTPException(status_code=404, detail="Entrada no encontrada")
+    return render_program_entry_form(request, entry)
+
+
+@app.post("/admin/programa/{entry_id}/edit", response_class=HTMLResponse)
+def admin_programa_edit(
+    entry_id: int,
+    request: Request,
+    day_key: str = Form(...),
+    day_label: str = Form(...),
+    kind: str = Form(...),
+    start_time: str = Form(...),
+    end_time: str = Form(...),
+    item_type: str = Form(...),
+    title: str = Form(""),
+    location: str = Form(""),
+    track_1_title: str = Form(""),
+    track_1_type: str = Form(""),
+    track_1_room: str = Form(""),
+    track_2_title: str = Form(""),
+    track_2_type: str = Form(""),
+    track_2_room: str = Form(""),
+    current_user: models.User = Depends(require_admin),
+    db: Session = Depends(get_db),
+):
+    entry = db.query(models.ProgramEntry).filter(models.ProgramEntry.id == entry_id).first()
+    if not entry:
+        raise HTTPException(status_code=404, detail="Entrada no encontrada")
+
+    old_day_key = entry.day_key
+    entry.day_key = day_key.strip()
+    entry.day_label = day_label.strip()
+    entry.kind = normalize_program_kind(kind)
+    entry.start_time = start_time.strip()
+    entry.end_time = end_time.strip()
+    entry.item_type = normalize_program_type(item_type)
+    entry.title = title.strip() or None
+    entry.location = location.strip() or None
+    entry.track_1_title = track_1_title.strip() or None
+    entry.track_1_type = normalize_program_type(track_1_type)
+    entry.track_1_room = track_1_room.strip() or None
+    entry.track_2_title = track_2_title.strip() or None
+    entry.track_2_type = normalize_program_type(track_2_type)
+    entry.track_2_room = track_2_room.strip() or None
+
+    if entry.kind == "shared" and not entry.title:
+        return render_program_entry_form(request, entry, error="Las actividades comunes necesitan un título.")
+    if entry.kind == "parallel" and (not entry.track_1_title or not entry.track_2_title):
+        return render_program_entry_form(request, entry, error="Las sesiones paralelas necesitan título para ambas tarjetas.")
+
+    if old_day_key != entry.day_key:
+        entry.position = next_program_position(db, entry.day_key)
+    db.commit()
+    compact_program_positions(db, old_day_key)
+    if old_day_key != entry.day_key:
+        compact_program_positions(db, entry.day_key)
+    return RedirectResponse(url="/admin/programa", status_code=303)
+
+
+@app.post("/admin/programa/{entry_id}/delete")
+def admin_programa_delete(
+    entry_id: int,
+    current_user: models.User = Depends(require_admin),
+    db: Session = Depends(get_db),
+):
+    entry = db.query(models.ProgramEntry).filter(models.ProgramEntry.id == entry_id).first()
+    if not entry:
+        raise HTTPException(status_code=404, detail="Entrada no encontrada")
+    day_key = entry.day_key
+    db.delete(entry)
+    db.commit()
+    compact_program_positions(db, day_key)
+    return RedirectResponse(url="/admin/programa", status_code=303)
+
+
+@app.post("/admin/programa/{entry_id}/move")
+def admin_programa_move(
+    entry_id: int,
+    direction: str = Form(...),
+    current_user: models.User = Depends(require_admin),
+    db: Session = Depends(get_db),
+):
+    entry = db.query(models.ProgramEntry).filter(models.ProgramEntry.id == entry_id).first()
+    if not entry:
+        raise HTTPException(status_code=404, detail="Entrada no encontrada")
+    siblings = (
+        db.query(models.ProgramEntry)
+        .filter(models.ProgramEntry.day_key == entry.day_key)
+        .order_by(models.ProgramEntry.position, models.ProgramEntry.id)
+        .all()
+    )
+    index = next((idx for idx, sibling in enumerate(siblings) if sibling.id == entry.id), None)
+    if index is None:
+        raise HTTPException(status_code=404, detail="Entrada no encontrada")
+    swap_index = index - 1 if direction == "up" else index + 1
+    if 0 <= swap_index < len(siblings):
+        siblings[index].position, siblings[swap_index].position = siblings[swap_index].position, siblings[index].position
+        db.commit()
+    compact_program_positions(db, entry.day_key)
+    return RedirectResponse(url="/admin/programa", status_code=303)
+
+
+@app.post("/admin/programa/reorder")
+def admin_programa_reorder(
+    day_key: str = Form(...),
+    ordered_ids: str = Form(...),
+    current_user: models.User = Depends(require_admin),
+    db: Session = Depends(get_db),
+):
+    ids = []
+    for raw_id in ordered_ids.split(","):
+        raw_id = raw_id.strip()
+        if not raw_id:
+            continue
+        try:
+            ids.append(int(raw_id))
+        except ValueError:
+            raise HTTPException(status_code=400, detail="IDs inválidos")
+
+    entries = (
+        db.query(models.ProgramEntry)
+        .filter(models.ProgramEntry.day_key == day_key)
+        .order_by(models.ProgramEntry.position, models.ProgramEntry.id)
+        .all()
+    )
+    existing_ids = {entry.id for entry in entries}
+    if existing_ids != set(ids):
+        raise HTTPException(status_code=400, detail="El orden enviado no coincide con los bloques del día.")
+
+    entry_by_id = {entry.id: entry for entry in entries}
+    for position, entry_id in enumerate(ids):
+        entry_by_id[entry_id].position = position
+    db.commit()
+    return {"ok": True}
+
 
 @app.get("/speakers", response_class=HTMLResponse)
 def speakers(request: Request):
@@ -1807,7 +2242,7 @@ def venue(request: Request):
     )
 
 @app.get("/programa", response_class=HTMLResponse)
-def programa(request: Request):
+def programa(request: Request, db: Session = Depends(get_db)):
     return templates.TemplateResponse(
         "public/programa.html",
         public_page_context(
@@ -1817,7 +2252,8 @@ def programa(request: Request):
                 "Revisá el programa del NANO2026 con sesiones, conferencias y "
                 "actividades del encuentro."
             ),
-            canonical_path="/programa"
+            canonical_path="/programa",
+            extra={"schedule": build_program_schedule(db)},
         )
     )
 
