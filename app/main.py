@@ -1978,15 +1978,19 @@ def abstract_publico_detalle(
     ).first()
     if not abstract:
         raise HTTPException(status_code=404, detail="Resumen no encontrado")
+    clean_title = strip_tags(abstract.titulo)
     abstract_description = trim_text(strip_tags(abstract.contenido_html), 160)
     return templates.TemplateResponse(
         "public/abstract_detail.html",
         public_page_context(
             request,
-            title=f"{abstract.titulo} | Resumen NANO2026",
+            title=f"{clean_title} | Resumen NANO2026",
             description=abstract_description or "Resumen aprobado del NANO2026.",
             canonical_path=f"/abstracts/{abstract_id}",
-            extra={"abstract": abstract}
+            extra={
+                "abstract": abstract,
+                "area_names": AREA_NAMES,
+            }
         )
     )
 
