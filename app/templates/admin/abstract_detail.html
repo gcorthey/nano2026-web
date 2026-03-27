@@ -93,6 +93,10 @@
         <div class="prose max-w-none bg-gray-50 rounded p-4">
             {{ abstract.contenido_html | safe }}
         </div>
+        <div class="mt-4 flex justify-start">
+            <a href="/abstracts/{{ abstract.id }}/pdf" target="_blank"
+                class="bg-gray-200 text-gray-700 px-4 py-2 rounded hover:bg-gray-300 text-sm inline-block">📄 Ver PDF</a>
+        </div>
     </div>
 
     <!-- Referencias -->
@@ -107,8 +111,6 @@
 
   <!-- Acciones -->
 <div class="border-t pt-4 flex flex-wrap gap-3">
-    <a href="/abstracts/{{ abstract.id }}/pdf" target="_blank"
-        class="bg-gray-200 text-gray-700 px-4 py-2 rounded hover:bg-gray-300 text-sm inline-block">📄 Ver PDF</a>
     <a href="/admin/abstracts/{{ abstract.id }}/edit"
         class="bg-blue-600 text-white px-4 py-2 rounded hover:bg-blue-700 text-sm inline-block">✏️ Editar</a>
     {% if abstract.estado.value == 'aprobado' and abstract.acceptance_flag and abstract.acceptance_flag.minor_revision == 1 %}
