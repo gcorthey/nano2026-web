@@ -53,13 +53,7 @@ congreso_nano/
 │   ├── restore_db.sh
 │   ├── rpi-backup.sh
 │   └── webhook.py
-├── cloudflared.deb
-├── Dockerfile
-├── Procfile
-├── main
-├── nixpacks.toml
 ├── requirements.txt
-├── runtime.txt
 ├── LICENSE
 └── README.md
 ```
