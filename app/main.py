@@ -2,6 +2,7 @@ import json
 import os
 import string
 import secrets
+import subprocess
 from dotenv import load_dotenv
 load_dotenv()
 import httpx
@@ -58,6 +59,31 @@ ensure_schema_updates()
 app = FastAPI(title="Congreso")
 app.mount("/static", StaticFiles(directory="app/static"), name="static")
 templates = Jinja2Templates(directory="app/templates")
+
+
+def get_site_last_updated() -> str:
+    repo_root = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
+    try:
+        result = subprocess.run(
+            [
+                "git",
+                "-C",
+                repo_root,
+                "log",
+                "-1",
+                "--date=format-local:%d/%m/%Y %H:%M",
+                "--format=%cd",
+            ],
+            capture_output=True,
+            text=True,
+            check=True,
+        )
+        return result.stdout.strip()
+    except Exception:
+        return datetime.now().strftime("%d/%m/%Y %H:%M")
+
+
+templates.env.globals["site_last_updated"] = get_site_last_updated()
 
 import re
 
