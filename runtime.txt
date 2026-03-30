@@ -1,3 +1,0 @@
-git add Procfile runtime.txt
-git commit -m "Add Railway deployment config"
-git pushpython-3.11

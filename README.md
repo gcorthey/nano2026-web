@@ -1,124 +1,112 @@
-# NANO2026 — Web del Congreso
+# NANO2026 - Web del Congreso
 
-Sistema web para el **XXIV Encuentro de Superficies y Materiales Nanoestructurados (NANO2026)**  
-Campus UNSAM · San Martín, Buenos Aires · 3, 4 y 5 de junio de 2026
+Sistema web para el XXIV Encuentro de Superficies y Materiales Nanoestructurados (NANO2026).
+
+Campus UNSAM · San Martin, Buenos Aires · 3, 4 y 5 de junio de 2026
 
 ---
 
-## Stack tecnológico
+## Stack tecnologico
 
-| Capa | Tecnología |
+| Capa | Tecnologia |
 |---|---|
 | Backend | FastAPI + Python 3.11 |
 | Templates | Jinja2 |
 | Base de datos | SQLite |
 | ORM / acceso a datos | SQLAlchemy |
-| Autenticación | JWT (python-jose) + bcrypt 4.0.1 |
-| Editor de texto | Quill.js 1.3.6 (CDN) + KaTeX 0.16.9 |
-| Generación PDF | xhtml2pdf |
-| CSS | Tailwind CSS (CDN) |
-| Servidor (producción) | Caddy en Raspberry Pi 5 |
-| DNS | AWS Route 53 |
+| Autenticacion | JWT (`python-jose`) + bcrypt |
+| Editor de texto | Quill.js 1.3.6 + KaTeX 0.16.9 |
+| Generacion de PDF | xhtml2pdf |
+| CSS | Tailwind CSS via CDN |
+| Produccion principal | Uvicorn + systemd + Caddy en Raspberry Pi 5 |
+| Edge / proxy | Operacion externa al repo; hoy se usa Cloudflare |
+
+Nota: el README anterior mencionaba AWS Route 53 para DNS, pero eso ya no refleja el despliegue actual.
 
 ---
 
 ## Estructura del proyecto
-```
+
+```text
 congreso_nano/
 ├── app/
 │   ├── __init__.py
-│   ├── main.py          # Rutas y lógica principal
-│   ├── models.py        # Modelos SQLAlchemy
-│   ├── database.py      # Configuración de la base de datos
-│   ├── auth.py          # Autenticación JWT y roles
+│   ├── auth.py
+│   ├── database.py
+│   ├── main.py
+│   ├── models.py
 │   ├── static/
-│   │   ├── css/
-│   │   ├── js/
+│   │   ├── icons/
+│   │   ├── images/
 │   │   ├── logos/
 │   │   └── og/
 │   └── templates/
-│       ├── login.html
 │       ├── forgot_password.html
+│       ├── login.html
 │       ├── reset_password.html
-│       ├── public/
-│       │   ├── base.html
-│       │   ├── home.html
-│       │   ├── about.html
-│       │   ├── abstracts.html
-│       │   ├── abstract_detail.html
-│       │   ├── abstract_pdf.html
-│       │   ├── circulares.html
-│       │   ├── contacto.html
-│       │   ├── inscripcion.html
-│       │   ├── sponsors.html
-│       │   ├── submit.html
-│       │   ├── char_panel_content.html
-│       │   ├── speakers.html
-│       │   ├── speakers_full.html
-│       │   ├── venue.html
-│       │   ├── programa.html
-│       │   └── programa_full.html
 │       ├── admin/
-│       │   ├── base.html
-│       │   ├── abstracts.html
-│       │   ├── abstract_detail.html
-│       │   ├── abstract_edit.html
-│       │   └── evaluadores.html
-│       └── eval/
-│           ├── base.html
-│           ├── lista.html
-│           └── detalle.html
+│       ├── eval/
+│       └── public/
 ├── scripts/
-│   ├── deploy.sh
-│   ├── webhook.py
 │   ├── backup_db.sh
+│   ├── deploy.sh
 │   ├── restore_db.sh
-│   └── rpi-backup.sh
+│   ├── rpi-backup.sh
+│   └── webhook.py
 ├── Dockerfile
 ├── Procfile
 ├── nixpacks.toml
 ├── requirements.txt
 ├── runtime.txt
+├── LICENSE
 └── README.md
 ```
 
+Notas sobre despliegue:
+
+- La operacion principal hoy esta documentada para Raspberry Pi con `systemd`.
+- `Dockerfile`, `Procfile`, `nixpacks.toml` y `runtime.txt` quedaron como soporte o restos de despliegues alternativos; no son la fuente principal de verdad operativa.
+
 ---
 
-## Instalación
+## Instalacion local
 
 ### 1. Clonar el repositorio
+
 ```bash
 git clone https://gitlab.com/nano2026/web.git congreso_nano
 cd congreso_nano
 ```
 
-### 2. Instalar dependencias del sistema (solo RPi / Debian)
+### 2. Instalar dependencias del sistema
+
+En Debian / Ubuntu / Raspberry Pi OS:
+
 ```bash
-sudo apt install -y libcairo2-dev pkg-config python3-dev cmake libxslt1-dev libxml2-dev libjpeg-dev libopenjp2-7
+sudo apt install -y libcairo2-dev pkg-config python3-dev cmake libxslt1-dev libxml2-dev libjpeg-dev libopenjp2-7 sqlite3
 ```
 
 ### 3. Crear entorno virtual e instalar dependencias Python
+
 ```bash
 python3 -m venv venv
 source venv/bin/activate
 pip install -r requirements.txt
 ```
 
-### 4. Configurar variables de entorno
+### 4. Crear `.env`
 
-Crear un archivo `.env` en la raíz del proyecto.
-
-Variables actualmente utilizadas por la aplicación:
+Variables usadas por la aplicacion:
 
 | Variable | Obligatoria | Uso |
 |---|---|---|
-| `SECRET_KEY` | Sí | Firma de JWT de login y links de revisión |
-| `MAIL_USERNAME` | Sí, si se envían mails | Usuario SMTP |
-| `MAIL_PASSWORD` | Sí, si se envían mails | Password / app password SMTP |
-| `MAIL_FROM` | Sí, si se envían mails | Remitente visible |
-| `PUBLIC_BASE_URL` | Recomendado | Base pública para links en correos, ej. `https://nano2026.org` |
-| `RECAPTCHA_SITE_KEY` | Opcional | Site key pública de reCAPTCHA para renderizar formularios |
-| `RECAPTCHA_SECRET` | Opcional | Validación de reCAPTCHA si el flujo lo usa |
+| `SECRET_KEY` | Si | Firma de JWT, login y links firmados |
+| `MAIL_USERNAME` | Si, si se envian mails | Usuario SMTP |
+| `MAIL_PASSWORD` | Si, si se envian mails | Password o app password SMTP |
+| `MAIL_FROM` | Si, si se envian mails | Remitente visible |
+| `PUBLIC_BASE_URL` | Recomendado | Base publica para links absolutos |
+| `RECAPTCHA_SITE_KEY` | Opcional | Site key publica |
+| `RECAPTCHA_SECRET` | Opcional | Verificacion de reCAPTCHA |
 
 Ejemplo:
 
@@ -132,64 +120,82 @@ RECAPTCHA_SITE_KEY=tu-site-key
 RECAPTCHA_SECRET=tu-secret
 ```
 
-### 5. Inicializar la base de datos
-```bash
-python -c "from app.database import engine; from app import models; models.Base.metadata.create_all(bind=engine)"
-```
+### 5. Base de datos
 
-La base actualmente usa SQLite local en:
+La aplicacion usa SQLite local en:
 
 ```text
 sqlite:///./congreso.db
 ```
 
+Las tablas se crean al iniciar la app y `app.main` tambien aplica algunas actualizaciones de esquema compatibles hacia adelante.
+
+Si queres forzar la creacion inicial sin levantar el servidor:
+
+```bash
+python -c "from app.database import engine; from app import models; models.Base.metadata.create_all(bind=engine)"
+```
+
 ### 6. Correr el servidor de desarrollo
+
 ```bash
 uvicorn app.main:app --reload
 ```
 
-Abrí `http://127.0.0.1:8000` en el navegador.
+Abrir `http://127.0.0.1:8000`.
 
-> ⚠️ Siempre correr uvicorn desde `congreso_nano/`, nunca desde `app/`.
+Importante:
+
+- correr `uvicorn` desde la raiz del repo, no desde `app/`;
+- al importar `app.main`, tambien se ejecuta la creacion del admin por defecto si no existe.
 
 ---
 
 ## Credenciales por defecto
 
-Al iniciar por primera vez se crea automáticamente un usuario admin:
+Si la base esta vacia, al iniciar se crea automaticamente un usuario admin:
 
 | Campo | Valor |
 |---|---|
 | Email | `admin@congreso.com` |
-| Contraseña | `admin1234` |
+| Contrasena | `admin1234` |
 
-⚠️ **Cambiar la contraseña antes de poner en producción.**
-El primer ingreso fuerza cambio de contraseña antes de habilitar el panel.
+En el primer ingreso se fuerza cambio de contrasena.
+
+No dejar estas credenciales activas en produccion.
 
 ---
 
-## Tablas principales de la base de datos
+## Modelo de datos principal
 
-| Tabla | Descripción |
+Tablas definidas actualmente en `app/models.py`:
+
+| Tabla | Descripcion |
 |---|---|
-| `users` | Usuarios del sistema (admin / evaluador) |
-| `abstracts` | Resúmenes enviados |
-| `autores` | Autores por resumen (con superíndices de afiliación) |
+| `users` | Usuarios admin y evaluadores |
+| `abstracts` | Resumenes enviados, invitados y contribuciones |
+| `autores` | Autores por resumen |
 | `afiliaciones` | Afiliaciones por resumen |
-| `reviews` | Evaluaciones de los revisores |
-| `asignaciones` | Asignación evaluador ↔ abstract |
-| `abstract_logs` | Historial de eventos y envíos de correo |
-| `registrations` | Inscripciones al congreso |
-| `sessions` | Sesiones del programa |
-| `speakers` | Oradores invitados |
+| `reviews` | Evaluaciones |
+| `asignaciones` | Asignacion evaluador ↔ abstract |
+| `abstract_logs` | Historial de eventos del abstract |
+| `abstract_acceptance_flags` | Flags auxiliares de aceptacion / revision menor |
+| `registrations` | Inscripciones |
+| `sessions` | Tabla legacy de sesiones |
+| `speakers` | Tabla legacy de speakers |
+| `program_entries` | Programa actual editable |
+| `program_days` | Metadata de dias del programa |
 
-### Campos destacados en `abstracts`
-- `titulo` — HTML (soporta cursiva, sub/superíndice, símbolos)
-- `contenido_html` — HTML generado por Quill.js
-- `referencias_html` — HTML de referencias bibliográficas (formato APA)
-- `area_tematica` — número del 1 al 7
-- `presentacion_oral` — 0 o 1
-- `tipo_asignado_admin` — decisión final del admin sobre `oral` o `poster`
+Campos destacados en `abstracts`:
+
+- `tipo_resumen`: `contribucion`, `plenaria`, `semiplenaria`, `talento_joven`
+- `numero_invitado`: orden de invitado cuando aplica
+- `contenido_html`: contenido enriquecido generado por Quill
+- `referencias_html`: referencias en HTML
+- `area_tematica`: codigo de area
+- `presentacion_oral`: preferencia del autor
+- `tipo_asignado_admin`: decision final del admin (`oral` o `poster`)
+- `codigo_final`: codigo visible / final del resumen
 
 ---
 
@@ -197,129 +203,126 @@ El primer ingreso fuerza cambio de contraseña antes de habilitar el panel.
 
 | Rol | Acceso |
 |---|---|
-| Público | Home, resúmenes aprobados, buscador, formulario de envío |
-| Evaluador | Panel `/eval` — ver y evaluar resúmenes asignados |
-| Admin | Panel `/admin` — gestionar resúmenes, evaluadores |
+| Publico | Sitio institucional, abstracts aprobados, envio de resumen |
+| Evaluador | `/eval` y revision de asignados |
+| Admin | `/admin`, gestion de abstracts, evaluadores y programa |
 
 ---
 
-## Páginas principales
+## Rutas principales
 
-### Públicas
+### Publicas
 
-| URL | Descripción |
+| URL | Descripcion |
 |---|---|
-| `/` | Home del congreso |
-| `/abstracts` | Buscador de resúmenes aprobados |
-| `/abstracts/{id}` | Resumen individual |
-| `/abstracts/{id}/pdf` | Descargar resumen en PDF |
-| `/submit` | Formulario de envío de resúmenes |
-| `/revision/{token}` | Reenvío de correcciones por link firmado |
-| `/inscripcion` | Información de inscripción y datos bancarios |
-| `/sponsors` | Página institucional para auspiciantes |
+| `/` | Home |
 | `/about` | Sobre el encuentro |
-| `/circulares` | Información institucional complementaria |
+| `/circulares` | Circulares |
 | `/contacto` | Contacto |
-| `/speakers` | Speakers y mesas temáticas |
-| `/venue` | Lugar, cómo llegar, alojamiento |
+| `/inscripcion` | Informacion de inscripcion |
 | `/programa` | Programa del congreso |
-| `/robots.txt` | Reglas de indexación para buscadores |
-| `/sitemap.xml` | Sitemap público del sitio |
+| `/speakers` | Conferencias invitadas |
+| `/venue` | Sede y alojamiento |
+| `/sponsors` | Sponsors |
+| `/en/sponsors` | Version en ingles de sponsors |
+| `/submit` | Envio de resumen |
+| `/abstracts` | Buscador de resumenes aprobados |
+| `/abstracts/{id}` | Resumen individual |
+| `/abstracts/{id}/pdf` | PDF del resumen |
+| `/revision/{token}` | Reenvio por link firmado |
+| `/login` | Login |
+| `/forgot-password` | Solicitud de reset |
+| `/reset-password/{token}` | Cambio de contrasena por token |
+| `/robots.txt` | Reglas para crawlers |
+| `/sitemap.xml` | Sitemap |
 
 ### Protegidas
 
 | URL | Rol requerido |
 |---|---|
 | `/admin` | Admin |
+| `/admin/abstracts/new` | Admin |
 | `/admin/abstracts/{id}` | Admin |
+| `/admin/abstracts/{id}/edit` | Admin |
 | `/admin/abstracts/export/csv` | Admin |
 | `/admin/evaluadores` | Admin |
-| `/eval` | Evaluador |
-| `/eval/{id}` | Evaluador |
-| `/forgot-password` | Público |
-| `/reset-password/{token}` | Público por link firmado |
+| `/admin/programa` | Admin |
+| `/admin/programa/new` | Admin |
+| `/admin/programa/{id}/edit` | Admin |
+| `/eval` | Evaluador o admin |
+| `/eval/{id}` | Evaluador o admin |
+| `/force-password-change` | Usuario autenticado con cambio obligatorio |
 
 ---
 
-## Flujo de resúmenes
-```
-Ponente envía resumen en /submit (sin login)
-    → Estado: pendiente
-    → Admin asigna evaluadores en /admin/abstracts/{id}
-    → Evaluador revisa y deja decisión + comentario en /eval/{id}
-    → Si el abstract solicita oral, el evaluador recomienda o no oral
-    → Si requiere cambios, el evaluador puede enviar correo con link firmado a /revision/{token}
-    → El presentador reenvía correcciones y el resumen vuelve a pendiente
-    → Si aprobado, se envía correo de aceptación
-    → Admin define modalidad final (oral / póster)
-    → Admin puede enviar al presentador la decisión de modalidad
-    → Si aprobado: aparece en /abstracts público
-    → Cualquier visitante puede buscar y descargar PDF
+## Flujo de resumenes
+
+```text
+Ponente envia resumen en /submit
+    -> estado inicial pendiente
+    -> admin asigna evaluadores
+    -> evaluador deja decision y comentario
+    -> si hace falta, se envia link firmado de revision
+    -> el autor reenvia correcciones
+    -> si se aprueba, se envia mail de aceptacion
+    -> admin define modalidad final oral / poster
+    -> si corresponde, el resumen queda visible en /abstracts
 ```
 
-### Notas del flujo actual
+Notas del flujo actual:
 
-- La aprobación del evaluador cambia el estado del abstract a `aprobado` y dispara correo de aceptación.
-- El listado admin `/admin` permite filtrar aprobados simples vs. aprobados con revisión previa.
-- La categoría `aprobado con revisión` se determina a partir del historial (`abstract_logs`) cuando existió un `revision_email_sent`.
-- El admin puede exportar CSV respetando los filtros activos.
-- La modalidad final `oral` / `poster` la decide el admin, independientemente de la recomendación del evaluador.
+- la recomendacion de oral del evaluador no fija la decision final;
+- el admin puede filtrar abstracts aprobados simples vs. aprobados con revision previa;
+- el historial de eventos se guarda en `abstract_logs`;
+- los links de revision usan tokens firmados con vencimiento;
+- el admin puede exportar CSV respetando filtros activos.
 
 ---
 
-## Áreas temáticas
+## Areas tematicas
 
-| # | Área |
+| # | Area |
 |---|---|
-| 1 | Síntesis de nanomateriales |
+| 1 | Sintesis de nanomateriales |
 | 2 | Autoensamblado |
-| 3 | Nanobiointerfaces y procesos biológicos |
+| 3 | Nanobiointerfaces y procesos biologicos |
 | 4 | Superficies |
 | 5 | Propiedades de nanomateriales |
-| 6 | Aplicaciones de nanomateriales en ambiente, energía, agro, alimentos y catálisis |
-| 7 | Nanotecnología y Salud |
+| 6 | Aplicaciones de nanomateriales en ambiente, energia, agro, alimentos y catalisis |
+| 7 | Nanotecnologia y salud |
 
 ---
 
-## Despliegue en producción (Raspberry Pi 5)
+## Despliegue en produccion
+
+El esquema principal documentado hoy es:
+
+- FastAPI + Uvicorn
+- servicio `systemd`
+- Caddy como reverse proxy
+- GitLab como remoto del repo
+- webhook local opcional para redeploy
 
 ### 1. Instalar Caddy
+
 ```bash
 sudo apt install -y caddy
 ```
 
 ### 2. Configurar Caddy
-```bash
-sudo nano /etc/caddy/Caddyfile
-```
 
-Contenido:
-```
+Ejemplo minimo:
+
+```caddyfile
 nano2026.org {
-    reverse_proxy localhost:8000
+    reverse_proxy 127.0.0.1:8000
 }
 ```
 
-### 3. Definir variables de entorno de producción
+### 3. Crear servicio systemd para la app
 
-Como mínimo:
+Ejemplo:
 
-```bash
-export SECRET_KEY="clave-secreta-larga-y-aleatoria"
-export MAIL_USERNAME="usuario@example.com"
-export MAIL_PASSWORD="app-password"
-export MAIL_FROM="usuario@example.com"
-export PUBLIC_BASE_URL="https://nano2026.org"
-```
-
-Alternativamente, definirlas en el archivo de entorno que use el servicio systemd.
-
-### 4. Crear servicio systemd para uvicorn
-```bash
-sudo nano /etc/systemd/system/nano2026.service
-```
-
-Contenido:
 ```ini
 [Unit]
 Description=NANO2026 Web
@@ -327,98 +330,51 @@ After=network.target
 
 [Service]
 User=appuser
-WorkingDirectory=/ruta/al/proyecto/congreso_nano
-ExecStart=/ruta/al/proyecto/congreso_nano/venv/bin/uvicorn app.main:app --host 0.0.0.0 --port 8000 --workers 2
-EnvironmentFile=/ruta/al/proyecto/congreso_nano/.env
+WorkingDirectory=/srv/congreso_nano
+ExecStart=/srv/congreso_nano/venv/bin/uvicorn app.main:app --host 0.0.0.0 --port 8000 --workers 2
+EnvironmentFile=/srv/congreso_nano/.env
 Restart=always
 
 [Install]
 WantedBy=multi-user.target
 ```
 
-Activar:
+Activacion:
+
 ```bash
 sudo systemctl daemon-reload
 sudo systemctl enable nano2026
 sudo systemctl start nano2026
-```
-
-### 5. Verificar que corre
-```bash
 sudo systemctl status nano2026
 ```
 
-### 6. Automatización operativa y mantenimiento
-
-El despliegue en producción puede automatizarse usando un **webhook configurado en GitLab** que se dispara ante **Push events**. Ese webhook no lo recibe la app FastAPI: lo recibe un servicio separado corriendo en la Raspberry Pi, y ese servicio ejecuta el redeploy.
+### 4. Redeploy automatico con webhook de GitLab
 
 Flujo esperado:
 
 1. Se hace `git push` a la rama desplegada.
-2. GitLab envía un `POST` al endpoint del servicio `webhook` en la Raspberry Pi.
-3. El servicio `webhook` valida el request.
-4. Si el evento es válido, ejecuta un script de deploy.
-5. El script actualiza el repo y reinicia `nano2026.service`.
+2. GitLab envia un `POST` al servicio `scripts/webhook.py`.
+3. El webhook valida `X-Gitlab-Token`.
+4. Si el token coincide, dispara `scripts/deploy.sh`.
+5. `deploy.sh` actualiza el checkout y reinicia el servicio.
 
-En GitLab, en `Settings > Webhooks`, configurar:
+Importante:
 
-- URL del webhook apuntando a la Raspberry Pi
-- trigger `Push events`
-- secret token compartido con el servicio receptor
+- `scripts/deploy.sh` usa `git reset --hard origin/<branch>`;
+- el checkout de produccion no debe tener cambios manuales sin commitear;
+- el webhook es un servicio aparte, no una ruta FastAPI.
 
 ---
 
-## Scripts
+## Scripts operativos
 
-El directorio `scripts/` contiene utilidades operativas para despliegue, webhook y backups.
-
-La mayoría de los scripts están pensados para ser portables:
-
-- si no configurás nada, derivan la ruta del repo automáticamente a partir de la ubicación del propio script,
-- si necesitás adaptarlos a producción, podés sobreescribir comportamiento con variables de entorno,
-- lo más prolijo en Raspberry Pi es setear esas variables en `systemd` con `Environment=` o `EnvironmentFile=`.
-
-### Resumen rápido
-
-| Script | Propósito |
+| Script | Proposito |
 |---|---|
-| `scripts/deploy.sh` | Actualiza el repo desde Git y reinicia el servicio |
-| `scripts/webhook.py` | Recibe el webhook de GitLab y dispara el deploy |
-| `scripts/backup_db.sh` | Genera y sube backups de `congreso.db` a S3 |
-| `scripts/restore_db.sh` | Restaura un backup diario de SQLite desde S3 |
-| `scripts/rpi-backup.sh` | Genera un snapshot completo de la Raspberry Pi |
-
-### Cómo se configuran las rutas
-
-Los scripts usan dos estrategias:
-
-1. Detectar automáticamente el root del repo.
-2. Permitir override por variables de entorno.
-
-Patrón usado en los scripts shell:
-
-```bash
-SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
-REPO_DIR="${REPO_DIR:-$(cd "${SCRIPT_DIR}/.." && pwd)}"
-```
-
-Eso significa que, si corrés por ejemplo `./scripts/deploy.sh` desde el repo, `REPO_DIR` apunta solo al directorio raíz del proyecto sin hardcodear un home específico.
-
-Si querés fijar rutas explícitas en producción, podés hacerlo así:
-
-```bash
-REPO_DIR=/srv/congreso_nano SERVICE_NAME=nano2026 ./scripts/deploy.sh
-```
-
-o dentro de `systemd`:
-
-```ini
-[Service]
-Environment="REPO_DIR=/srv/congreso_nano"
-Environment="SERVICE_NAME=nano2026"
-Environment="WEBHOOK_SECRET=un-token-largo"
-Environment="DEPLOY_SCRIPT=/srv/congreso_nano/scripts/deploy.sh"
-```
+| `scripts/deploy.sh` | Actualiza el repo desplegado y reinicia el servicio |
+| `scripts/webhook.py` | Receptor minimo de webhook de GitLab |
+| `scripts/backup_db.sh` | Backup de `congreso.db` a S3 |
+| `scripts/restore_db.sh` | Restore de backup diario desde S3 |
+| `scripts/rpi-backup.sh` | Snapshot completo de la Raspberry Pi |
 
 ### `scripts/deploy.sh`
 
@@ -428,30 +384,13 @@ Uso:
 ./scripts/deploy.sh
 ```
 
-Qué hace:
-
-- entra al repo desplegado,
-- hace `git fetch` de la rama configurada,
-- resetea el working tree a `origin/<rama>`,
-- reinicia el servicio systemd de la app.
-
 Variables soportadas:
 
 | Variable | Default | Uso |
 |---|---|---|
-| `REPO_DIR` | raíz del repo detectada automáticamente | Ruta del checkout desplegado |
+| `REPO_DIR` | raiz del repo detectada automaticamente | Checkout desplegado |
 | `BRANCH` | `main` | Rama a desplegar |
 | `SERVICE_NAME` | `nano2026` | Servicio systemd a reiniciar |
-
-Ejemplo:
-
-```bash
-REPO_DIR=/srv/congreso_nano BRANCH=main SERVICE_NAME=nano2026 ./scripts/deploy.sh
-```
-
-Importante:
-
-- el script usa `git reset --hard`, así que descarta cambios locales no comiteados en el checkout de producción.
 
 ### `scripts/webhook.py`
 
@@ -461,37 +400,14 @@ Uso:
 python3 scripts/webhook.py
 ```
 
-Qué hace:
-
-- levanta un servidor HTTP mínimo,
-- escucha `POST` en la interfaz y puerto configurados,
-- valida el header `X-Gitlab-Token`,
-- ejecuta el script de deploy cuando el token coincide.
-
 Variables soportadas:
 
 | Variable | Default | Uso |
 |---|---|---|
-| `WEBHOOK_SECRET` | `nano2026webhook` | Token esperado desde GitLab |
-| `DEPLOY_SCRIPT` | `scripts/deploy.sh` dentro del repo | Script a ejecutar ante el webhook |
+| `WEBHOOK_SECRET` | `nano2026webhook` | Token esperado |
+| `DEPLOY_SCRIPT` | `scripts/deploy.sh` | Script disparado |
 | `WEBHOOK_HOST` | `127.0.0.1` | Host de escucha |
 | `WEBHOOK_PORT` | `9000` | Puerto de escucha |
-
-Ejemplo:
-
-```bash
-WEBHOOK_SECRET=un-token-largo \
-DEPLOY_SCRIPT=/srv/congreso_nano/scripts/deploy.sh \
-WEBHOOK_HOST=127.0.0.1 \
-WEBHOOK_PORT=9000 \
-python3 /srv/congreso_nano/scripts/webhook.py
-```
-
-En GitLab, en `Settings > Webhooks`, conviene configurar:
-
-- URL apuntando al endpoint expuesto por el servicio webhook,
-- `Push events`,
-- el mismo valor de token que uses en `WEBHOOK_SECRET`.
 
 ### `scripts/backup_db.sh`
 
@@ -501,78 +417,39 @@ Uso:
 ./scripts/backup_db.sh
 ```
 
-Qué hace:
-
-- genera un snapshot consistente de SQLite con `sqlite3 .backup`,
-- comprime la copia con `gzip`,
-- sube una copia diaria y otra horaria a S3,
-- escribe un log local.
-
 Variables soportadas:
 
 | Variable | Default | Uso |
 |---|---|---|
-| `REPO_DIR` | raíz del repo detectada automáticamente | Base para derivar paths locales |
-| `DB_PATH` | `${REPO_DIR}/congreso.db` | Base SQLite a respaldar |
-| `LOG_FILE` | `${REPO_DIR}/backup.log` | Archivo de log |
-| `S3_BUCKET` | `nano2026-backups` | Bucket de destino |
+| `REPO_DIR` | raiz del repo detectada automaticamente | Base para paths |
+| `DB_PATH` | `${REPO_DIR}/congreso.db` | SQLite a respaldar |
+| `LOG_FILE` | `${REPO_DIR}/backup.log` | Log local |
+| `S3_BUCKET` | `nano2026-backups` | Bucket destino |
 | `AWS_PROFILE` | `nano2026` | Perfil AWS CLI |
-| `RETENTION_DAYS` | `30` | Reservado para futura retención local |
-
-Ejemplo:
-
-```bash
-DB_PATH=/srv/congreso_nano/congreso.db \
-LOG_FILE=/var/log/nano2026-db-backup.log \
-AWS_PROFILE=prod \
-S3_BUCKET=nano2026-backups \
-./scripts/backup_db.sh
-```
+| `RETENTION_DAYS` | `30` | Reservado para futura retencion |
 
 ### `scripts/restore_db.sh`
 
-Uso para listar backups disponibles:
+Uso para listar backups:
 
 ```bash
 ./scripts/restore_db.sh
 ```
 
-Uso para restaurar una fecha puntual:
+Uso para restaurar una fecha:
 
 ```bash
 ./scripts/restore_db.sh YYYY-MM-DD
 ```
 
-Ejemplo:
-
-```bash
-./scripts/restore_db.sh 2026-03-10
-```
-
-Qué hace:
-
-- lista backups diarios disponibles si no recibe argumentos,
-- antes de restaurar pide confirmación interactiva,
-- guarda una copia local previa en `congreso.db.pre-restore.<timestamp>`,
-- descarga el backup desde S3,
-- valida integridad con `PRAGMA integrity_check`,
-- reemplaza la base local solo si la verificación da `ok`.
-
 Variables soportadas:
 
 | Variable | Default | Uso |
 |---|---|---|
-| `REPO_DIR` | raíz del repo detectada automáticamente | Base para derivar paths locales |
-| `DB_PATH` | `${REPO_DIR}/congreso.db` | Base SQLite a reemplazar |
-| `S3_BUCKET` | `nano2026-backups` | Bucket donde se buscan backups |
+| `REPO_DIR` | raiz del repo detectada automaticamente | Base para paths |
+| `DB_PATH` | `${REPO_DIR}/congreso.db` | Base a reemplazar |
+| `S3_BUCKET` | `nano2026-backups` | Bucket origen |
 | `AWS_PROFILE` | `nano2026` | Perfil AWS CLI |
-
-Qué validar después del restore:
-
-- que la aplicación levanta correctamente,
-- que podés iniciar sesión en `/login`,
-- que el panel `/admin` muestra datos esperados,
-- que la fecha y el contenido restaurados coinciden con el backup elegido.
 
 ### `scripts/rpi-backup.sh`
 
@@ -582,65 +459,43 @@ Uso:
 ./scripts/rpi-backup.sh
 ```
 
-Qué hace:
-
-- genera una imagen completa de la Raspberry Pi usando `image-backup`,
-- guarda la imagen localmente en `/mnt/backups`,
-- registra el proceso en un log diario dentro de `/mnt/backups/logs`,
-- sube la imagen a `s3://nano2026-backups/snapshots/`,
-- borra imágenes locales antiguas y logs viejos.
-
 Variables soportadas:
 
 | Variable | Default | Uso |
 |---|---|---|
 | `AWS_PROFILE` | `nano2026` | Perfil AWS CLI |
-| `S3_DEST` | `s3://nano2026-backups/snapshots/` | Destino de snapshots |
-| `WORK_DIR` | `$HOME` | Directorio desde el que corre `image-backup` |
+| `S3_DEST` | `s3://nano2026-backups/snapshots/` | Destino del snapshot |
+| `WORK_DIR` | `$HOME` | Directorio de trabajo |
 
-Supuestos actuales:
+Supuestos actuales del script:
 
-- existe un mountpoint local en `/mnt/backups`,
-- `image-backup` está disponible en `/usr/local/bin/image-backup`,
-- el script tiene permisos para ejecutar `sudo /usr/local/bin/image-backup`,
-- AWS CLI está configurado y autorizado para subir al destino configurado.
-
-Nota:
-
-- este snapshot del sistema complementa al backup de SQLite: uno protege la Raspberry completa y el otro facilita restauraciones rápidas de la base de datos.
-
-### Recomendaciones operativas
-
-- No restaurar con la app escribiendo sobre la base al mismo tiempo.
-- Verificar credenciales AWS y acceso al bucket antes de correr backup o restore.
-- Conservar los archivos `congreso.db.pre-restore.*` hasta confirmar que la restauración fue correcta.
+- guarda imagenes y logs en `$HOME/backups`;
+- usa `sudo /usr/local/bin/image-backup`;
+- sube el snapshot a S3;
+- borra imagenes locales antiguas despues de subir.
 
 ---
 
-## Notas
+## Notas operativas
 
-- La base de datos `congreso.db` se crea automáticamente al iniciar
-- Los resúmenes se almacenan como HTML limpio generado por Quill.js
-- El PDF se genera al vuelo con xhtml2pdf, sin almacenamiento en disco
-- El título del abstract soporta cursiva, sub/superíndice y símbolos especiales
-- Las referencias van en campo separado con formato APA
-- Los eventos relevantes del flujo se registran en `abstract_logs`
-- El proyecto usa envío de mails para aceptación, revisión, rechazo y comunicación de modalidad
-- Los links de revisión usan tokens firmados con vencimiento de 72 horas
-- La autenticación web se resuelve con cookie `access_token`
-- Para producción se recomienda poner Cloudflare delante del servidor
+- `congreso.db` se crea automaticamente si no existe.
+- El PDF de abstract se genera al vuelo.
+- La autenticacion web se resuelve con cookie `access_token`.
+- Los mails cubren aceptacion, rechazo, revision y comunicacion de modalidad.
+- `program_entries` y `program_days` son la fuente actual del programa editable.
+- Las tablas `sessions` y `speakers` siguen definidas en modelos, pero hoy las paginas publicas se apoyan principalmente en contenido de templates y logica de `app/main.py`.
 
 ---
 
 ## Herramientas de desarrollo
 
-Durante el desarrollo de este sitio se utilizaron las siguientes herramientas de asistencia para programación: Claude Sonnet 4.6 (Anthropic) y Codex sobre GPT-5.4 (OpenAI).
+Durante el desarrollo del sitio se utilizaron herramientas de asistencia para programacion, incluyendo Claude Sonnet 4.6 (Anthropic) y Codex sobre GPT-5.4 (OpenAI).
 
 ---
 
 ## Licencia
 
-Este repositorio se distribuye bajo la licencia `GNU AGPL-3.0`. Ver [LICENSE](/home/gcorthey/dev/congreso_nano/LICENSE).
+Este repositorio se distribuye bajo la licencia `GNU AGPL-3.0`. Ver [LICENSE](LICENSE).
 
 ---
 
