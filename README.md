@@ -41,20 +41,22 @@ congreso_nano/
 │   │   ├── logos/
 │   │   └── og/
 │   └── templates/
-│       ├── forgot_password.html
-│       ├── login.html
-│       ├── reset_password.html
 │       ├── admin/
 │       ├── eval/
-│       └── public/
+│       ├── public/
+│       ├── forgot_password.html
+│       ├── login.html
+│       └── reset_password.html
 ├── scripts/
 │   ├── backup_db.sh
 │   ├── deploy.sh
 │   ├── restore_db.sh
 │   ├── rpi-backup.sh
 │   └── webhook.py
+├── cloudflared.deb
 ├── Dockerfile
 ├── Procfile
+├── main
 ├── nixpacks.toml
 ├── requirements.txt
 ├── runtime.txt
@@ -66,6 +68,7 @@ Notas sobre despliegue:
 
 - La operacion principal hoy esta documentada para Raspberry Pi con `systemd`.
 - `Dockerfile`, `Procfile`, `nixpacks.toml` y `runtime.txt` quedaron como soporte o restos de despliegues alternativos; no son la fuente principal de verdad operativa.
+- `cloudflared.deb` y `main` existen hoy en el repo, pero no forman parte del runtime de la aplicacion y parecen artefactos residuales.
 
 ---
 
