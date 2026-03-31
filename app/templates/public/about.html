@@ -169,16 +169,16 @@
 <!-- Organizado por -->
 <div class="bg-white rounded-2xl shadow p-8 mb-4">
     <h2 class="text-xl font-bold text-gray-800 mb-2">Organizado por</h2>
-    {% set logos = [
-        ('conicet.png', 'CONICET'),
-        ('unahur.png', 'UNAHUR'),
-        ('fiuba.png', 'FIUBA'),
-        ('uba.png', 'UBA'),
-        ('inn.png', 'INN'),
-        ('adimra.png', 'ADIMRA'),
-        ('ins.png', 'INS'),
-        ('unlp.png', 'UNLP')
-    ] %}
+   {% set logos = [
+            ('conicet.svg', 'CONICET'),
+            ('unahur.png', 'UNAHUR'),
+            ('fiuba.png', 'FIUBA'),
+            ('uba.svg', 'UBA'),
+            ('inn.svg', 'INN'),
+            ('adimra.svg', 'ADIMRA'),
+            ('ins.svg', 'INS'),
+            ('unlp.png', 'UNLP')
+        ] %}
     <div class="sponsors-carousel py-2" id="sponsors-carousel">
         <div class="sponsors-track" id="sponsors-track">
             {% for _ in range(2) %}
