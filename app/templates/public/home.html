@@ -120,7 +120,7 @@
          Está en `absolute inset-0` para cubrir todo el hero.
          La opacidad baja evita que compita con el contenido principal. -->
     <div class="absolute inset-0 opacity-40"
-        style="background-image: url('/static/images/tio2.jpg'); background-size: cover; background-position: center;">
+        style="background-image: url('/static/images/tio2.webp'); background-size: cover; background-position: center;">
     </div>
 
     <!-- Contenido principal del hero.
@@ -293,15 +293,15 @@
 </div>
 <!-- Galería visual -->
 {% set gallery_images = [
-    ('/static/images/A.Sintesis.jpg', 'Sintesis'),
-    ('/static/images/B.PropiedadesNanomateriales.jpg', 'Propiedades de nanomateriales'),
-    ('/static/images/C.Autoensamblado.jpg', 'Autoensamblado'),
-    ('/static/images/D.Superficies.jpg', 'Superficies'),
-    ('/static/images/D.Superficies_.jpg', 'Superficies'),
-    ('/static/images/E.ProcesosBiologicos.jpg', 'Procesos biologicos'),
-    ('/static/images/F.NanoSalud.jpg', 'Nano salud'),
-    ('/static/images/G.Ambiente.jpg', 'Ambiente'),
-    ('/static/images/G.Energia.jpg', 'Energia')
+    ('/static/images/A.Sintesis.webp', 'Sintesis'),
+    ('/static/images/B.PropiedadesNanomateriales.webp', 'Propiedades de nanomateriales'),
+    ('/static/images/C.Autoensamblado.webp', 'Autoensamblado'),
+    ('/static/images/D.Superficies.webp', 'Superficies'),
+    ('/static/images/D.Superficies_.webp', 'Superficies'),
+    ('/static/images/E.ProcesosBiologicos.webp', 'Procesos biologicos'),
+    ('/static/images/F.NanoSalud.webp', 'Nano salud'),
+    ('/static/images/G.Ambiente.webp', 'Ambiente'),
+    ('/static/images/G.Energia.webp', 'Energia')
 ] %}
 <div class="gallery-carousel mb-12 rounded-2xl" id="gallery-carousel">
     <div class="gallery-track gap-4" id="gallery-track">
@@ -409,13 +409,13 @@
     <div class="bg-white rounded-2xl shadow p-8">
         <h2 class="text-xl font-bold text-gray-800 mb-2">Organizado por</h2>
         {% set logos = [
-            ('conicet.png', 'CONICET'),
+            ('conicet.svg', 'CONICET'),
             ('unahur.png', 'UNAHUR'),
             ('fiuba.png', 'FIUBA'),
-            ('uba.png', 'UBA'),
-            ('inn.png', 'INN'),
-            ('adimra.png', 'ADIMRA'),
-            ('ins.png', 'INS'),
+            ('uba.svg', 'UBA'),
+            ('inn.svg', 'INN'),
+            ('adimra.svg', 'ADIMRA'),
+            ('ins.svg', 'INS'),
             ('unlp.png', 'UNLP')
         ] %}
         <div class="sponsors-carousel py-2" id="sponsors-carousel">
