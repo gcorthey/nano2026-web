@@ -27,6 +27,7 @@ import csv
 from fastapi_mail import FastMail, MessageSchema, ConnectionConfig
 from sqlalchemy import text
 from xml.sax.saxutils import escape
+from urllib.parse import urlsplit, urlunsplit
 
 models.Base.metadata.create_all(bind=engine)
 
@@ -59,6 +60,30 @@ ensure_schema_updates()
 app = FastAPI(title="Congreso")
 app.mount("/static", StaticFiles(directory="app/static"), name="static")
 templates = Jinja2Templates(directory="app/templates")
+
+
+@app.middleware("http")
+async def canonical_host_redirect(request: Request, call_next):
+    public_base_url = os.getenv("PUBLIC_BASE_URL", "").strip()
+    if public_base_url:
+        target = urlsplit(public_base_url)
+        current = request.url
+        if target.scheme and target.netloc:
+            current_port = current.port
+            default_port = 443 if current.scheme == "https" else 80
+            current_netloc = current.hostname or ""
+            if current_port and current_port != default_port:
+                current_netloc = f"{current_netloc}:{current_port}"
+            if current.scheme != target.scheme or current_netloc.lower() != target.netloc.lower():
+                redirect_url = urlunsplit((
+                    target.scheme,
+                    target.netloc,
+                    current.path,
+                    current.query,
+                    "",
+                ))
+                return RedirectResponse(url=redirect_url, status_code=308)
+    return await call_next(request)
 
 
 def get_site_last_updated() -> str:
