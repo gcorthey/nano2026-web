@@ -35,8 +35,32 @@
                 </span>
                 {% endif %}
             </div>
-            <p class="text-gray-600 mt-2">{{ abstract.autor }}</p>
+            <p class="text-gray-600 mt-2">
+                {% if abstract.autores %}
+                    {% for autor in abstract.autores %}
+                        {% if autor.es_presentador %}<span class="underline">{% endif %}
+                        {{ autor.nombre }}
+                        {% if autor.afiliaciones_ids %}
+                            <sup class="text-teal-600 text-xs">{{ autor.afiliaciones_ids }}</sup>
+                        {% endif %}
+                        {% if autor.es_presentador %}</span>{% endif %}
+                        {% if not loop.last %}, {% endif %}
+                    {% endfor %}
+                {% else %}
+                    {{ abstract.autor }}
+                {% endif %}
+            </p>
+            {% if abstract.afiliaciones %}
+            <div class="mt-1">
+                {% for afil in abstract.afiliaciones %}
+                <p class="text-gray-400 text-sm">
+                    <sup class="text-teal-600">{{ afil.orden }}</sup> {{ afil.nombre }}
+                </p>
+                {% endfor %}
+            </div>
+            {% elif abstract.afiliacion %}
             <p class="text-gray-400 text-sm">{{ abstract.afiliacion }}</p>
+            {% endif %}
             <p class="text-gray-400 text-sm">{{ abstract.email_autor }}</p>
         </div>
     </div>
