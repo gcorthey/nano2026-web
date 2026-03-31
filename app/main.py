@@ -28,6 +28,10 @@ from fastapi_mail import FastMail, MessageSchema, ConnectionConfig
 from sqlalchemy import text
 from xml.sax.saxutils import escape
 from urllib.parse import urlsplit, urlunsplit
+from fastapi import FastAPI
+from fastapi.staticfiles import StaticFiles
+from starlette.middleware.base import BaseHTTPMiddleware
+from starlette.requests import Request
 
 models.Base.metadata.create_all(bind=engine)
 
@@ -58,6 +62,16 @@ ensure_schema_updates()
 
 
 app = FastAPI(title="Congreso")
+
+class StaticCacheMiddleware(BaseHTTPMiddleware):
+    async def dispatch(self, request: Request, call_next):
+        response = await call_next(request)
+        if request.url.path.startswith("/static/"):
+            response.headers["Cache-Control"] = "public, max-age=31536000, immutable"
+        return response
+
+app.add_middleware(StaticCacheMiddleware)
+
 app.mount("/static", StaticFiles(directory="app/static"), name="static")
 templates = Jinja2Templates(directory="app/templates")
 
