@@ -2785,8 +2785,8 @@ def robots_txt(request: Request):
     content = (
         "User-agent: *\n"
         "Allow: /\n"
-        "Disallow: /admin\n/"
-        "Disallow: /eval\n/"
+        "Disallow: /admin/\n"
+        "Disallow: /eval/\n"
         "Disallow: /login\n"
         "Disallow: /logout\n"
         "Disallow: /forgot-password\n"
