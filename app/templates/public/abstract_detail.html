@@ -13,6 +13,25 @@
     'semiplenaria': 'Semiplenaria',
     'talento_joven': 'Talento joven',
 } %}
+{% set show_affiliation_superscripts = true %}
+{% if abstract.autores %}
+    {% if abstract.autores|length == 1 %}
+        {% set show_affiliation_superscripts = false %}
+    {% else %}
+        {% set ns = namespace(first_ids=None, all_same=true) %}
+        {% for autor in abstract.autores %}
+            {% set current_ids = (autor.afiliaciones_ids or '')|trim %}
+            {% if ns.first_ids is none %}
+                {% set ns.first_ids = current_ids %}
+            {% elif ns.first_ids != current_ids %}
+                {% set ns.all_same = false %}
+            {% endif %}
+        {% endfor %}
+        {% if ns.all_same %}
+            {% set show_affiliation_superscripts = false %}
+        {% endif %}
+    {% endif %}
+{% endif %}
 
 <a href="/abstracts" class="text-blue-600 text-sm hover:underline">← Volver a resúmenes</a>
 
@@ -40,7 +59,7 @@
                     {% for autor in abstract.autores %}
                         {% if autor.es_presentador %}<span class="underline">{% endif %}
                         {{ autor.nombre }}
-                        {% if autor.afiliaciones_ids %}
+                        {% if show_affiliation_superscripts and autor.afiliaciones_ids %}
                             <sup class="text-teal-600 text-xs">{{ autor.afiliaciones_ids }}</sup>
                         {% endif %}
                         {% if autor.es_presentador %}</span>{% endif %}
@@ -54,7 +73,7 @@
             <div class="mt-1">
                 {% for afil in abstract.afiliaciones %}
                 <p class="text-gray-400 text-sm">
-                    <sup class="text-teal-600">{{ afil.orden }}</sup> {{ afil.nombre }}
+                    {% if show_affiliation_superscripts %}<sup class="text-teal-600">{{ afil.orden }}</sup> {% endif %}{{ afil.nombre }}
                 </p>
                 {% endfor %}
             </div>

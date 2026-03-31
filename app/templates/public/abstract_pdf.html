@@ -154,12 +154,32 @@
     <!-- Título -->
     <h1>{{ abstract.titulo | striptags }}</h1>
 
+    {% set show_affiliation_superscripts = true %}
+    {% if abstract.autores %}
+        {% if abstract.autores|length == 1 %}
+            {% set show_affiliation_superscripts = false %}
+        {% else %}
+            {% set ns = namespace(first_ids=None, all_same=true) %}
+            {% for autor in abstract.autores %}
+                {% set current_ids = (autor.afiliaciones_ids or '')|trim %}
+                {% if ns.first_ids is none %}
+                    {% set ns.first_ids = current_ids %}
+                {% elif ns.first_ids != current_ids %}
+                    {% set ns.all_same = false %}
+                {% endif %}
+            {% endfor %}
+            {% if ns.all_same %}
+                {% set show_affiliation_superscripts = false %}
+            {% endif %}
+        {% endif %}
+    {% endif %}
+
     <!-- Autores -->
     <p class="autores">
         {% for autor in abstract.autores %}
             {% if autor.es_presentador %}<u>{% endif %}
             {{ autor.nombre }}
-            {% if autor.afiliaciones_ids %}
+            {% if show_affiliation_superscripts and autor.afiliaciones_ids %}
                 <sup>{{ autor.afiliaciones_ids }}</sup>
             {% endif %}
             {% if autor.es_presentador %}</u>{% endif %}
@@ -170,7 +190,7 @@
     <!-- Afiliaciones -->
     <div class="afiliaciones">
         {% for afil in abstract.afiliaciones %}
-            <sup>{{ afil.orden }}</sup> {{ afil.nombre }}<br>
+            {% if show_affiliation_superscripts %}<sup>{{ afil.orden }}</sup> {% endif %}{{ afil.nombre }}<br>
         {% endfor %}
     </div>
 
