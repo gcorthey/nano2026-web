@@ -128,6 +128,9 @@
                 {% if speaker.scholar %}
                 <a href="{{ speaker.scholar }}" target="_blank" class="text-blue-500 text-xs hover:underline mt-2 inline-block">Google Scholar →</a>
                 {% endif %}
+                {% if speaker.abstract_url %}
+                <a href="{{ speaker.abstract_url }}" class="text-[#005C53] text-xs hover:underline mt-2 ml-3 inline-block">Resumen →</a>
+                {% endif %}
             </div>
         </div>
         {% endfor %}
