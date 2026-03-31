@@ -137,7 +137,7 @@
                 y Materiales Nanoestructurados</p>-->
 
             <!-- Logo principal del evento. -->
-            <img src="/static/logos/logo_nano_v2.png" alt="NANO 2026" class="mx-auto w-full max-w-[400px] md:max-w-[700px] object-contain" />
+            <img src="/static/logos/optimized/logo_nano_v2.webp" alt="NANO 2026" class="mx-auto w-full max-w-[400px] md:max-w-[700px] object-contain" width="700" height="189" />
         </div>
 
         <!-- Texto descriptivo corto:
@@ -250,18 +250,18 @@
 </div>
 
 {% set featured_speakers = [
-    ('Roman Krahne', 'IIT, Italia', 'Optoelectrónica y plasmónica', '/static/images/speakers/krahne.webp?v=20260330-2235'),
-    ('Carla Giacomelli', 'UNC, Argentina', 'Nanobiotecnología y materia blanda', '/static/images/speakers/giacomelli.webp?v=20260330-2235'),
-    ('Daniel Lanzillotti Kimura', 'C2N, Francia', 'Películas delgadas y fonónica', '/static/images/speakers/kimura.webp?v=20260330-2235'),
-    ('Leonardo Fraceto', 'UNESP, Brasil', 'Nanotecnología para el agro', '/static/images/speakers/fraceto.webp?v=20260330-2235'),
-    ('Laura Cornaglia', 'UNL, Argentina', 'Catálisis y nanomateriales', '/static/images/speakers/cornaglia.webp?v=20260330-2235'),
-    ('Federico Williams', 'UBA, Argentina', 'Fenómenos de superficies', '/static/images/speakers/williams.webp?v=20260330-2235'),
-    ('María Lidia Herrera', 'UNSAM, Argentina', 'Nanotecnología en alimentos', '/static/images/speakers/herrera.webp?v=20260330-2235'),
-    ('María Molina', 'UNRC, Argentina', 'Propiedades y aplicaciones de nanomateriales en salud', '/static/images/speakers/molina.webp?v=20260330-2235'),
-    ('Luciano Carlos', 'UNComahue, Argentina', 'Aplicaciones de nanomateriales en ambiente', '/static/images/speakers/carlos.webp?v=20260330-2235'),
-    ('Liliana Mogni', 'CNEA, Argentina', 'Síntesis y aplicaciones de nanomateriales para energía', '/static/images/speakers/mogni.webp?v=20260330-2235'),
-    ('Ana Sol Peinetti', 'INQUIMAE, UBA', 'Nanotecnología y salud', '/static/images/speakers/peinetti.webp?v=20260330-2235'),
-    ('Germán Gómez', 'INTEQUI, UNSL', 'Aplicaciones de nanomateriales en ambiente y salud', '/static/images/speakers/gomez.webp?v=20260330-2235')
+    ('Roman Krahne', 'IIT, Italia', 'Optoelectrónica y plasmónica', '/static/images/speakers/thumbs/krahne.webp?v=20260331-0015'),
+    ('Carla Giacomelli', 'UNC, Argentina', 'Nanobiotecnología y materia blanda', '/static/images/speakers/thumbs/giacomelli.webp?v=20260331-0015'),
+    ('Daniel Lanzillotti Kimura', 'C2N, Francia', 'Películas delgadas y fonónica', '/static/images/speakers/thumbs/kimura.webp?v=20260331-0015'),
+    ('Leonardo Fraceto', 'UNESP, Brasil', 'Nanotecnología para el agro', '/static/images/speakers/thumbs/fraceto.webp?v=20260331-0015'),
+    ('Laura Cornaglia', 'UNL, Argentina', 'Catálisis y nanomateriales', '/static/images/speakers/thumbs/cornaglia.webp?v=20260331-0015'),
+    ('Federico Williams', 'UBA, Argentina', 'Fenómenos de superficies', '/static/images/speakers/thumbs/williams.webp?v=20260331-0015'),
+    ('María Lidia Herrera', 'UNSAM, Argentina', 'Nanotecnología en alimentos', '/static/images/speakers/thumbs/herrera.webp?v=20260331-0015'),
+    ('María Molina', 'UNRC, Argentina', 'Propiedades y aplicaciones de nanomateriales en salud', '/static/images/speakers/thumbs/molina.webp?v=20260331-0015'),
+    ('Luciano Carlos', 'UNComahue, Argentina', 'Aplicaciones de nanomateriales en ambiente', '/static/images/speakers/thumbs/carlos.webp?v=20260331-0015'),
+    ('Liliana Mogni', 'CNEA, Argentina', 'Síntesis y aplicaciones de nanomateriales para energía', '/static/images/speakers/thumbs/mogni.webp?v=20260331-0015'),
+    ('Ana Sol Peinetti', 'INQUIMAE, UBA', 'Nanotecnología y salud', '/static/images/speakers/thumbs/peinetti.webp?v=20260331-0015'),
+    ('Germán Gómez', 'INTEQUI, UNSL', 'Aplicaciones de nanomateriales en ambiente y salud', '/static/images/speakers/thumbs/gomez.webp?v=20260331-0015')
 ] %}
 <div class="bg-white rounded-2xl shadow p-8 mb-12">
     <div class="flex flex-col gap-3 sm:flex-row sm:items-end sm:justify-between mb-6">
@@ -278,7 +278,7 @@
                 {% for name, institution, area, image in featured_speakers %}
                 <div class="shrink-0 w-[255px] sm:w-[285px] rounded-2xl border border-gray-100 bg-gradient-to-br from-white via-[#f7fbfa] to-[#eef6f5] p-4 shadow-sm" draggable="false">
                     <div class="flex items-center gap-4">
-                        <img src="{{ image }}" alt="{{ name }}" class="w-20 h-20 rounded-full object-cover object-top flex-shrink-0 border-4 border-[#d9ece8]" draggable="false" />
+                        <img src="{{ image }}" alt="{{ name }}" class="w-20 h-20 rounded-full object-cover object-top flex-shrink-0 border-4 border-[#d9ece8]" width="80" height="80" loading="lazy" decoding="async" draggable="false" />
                         <div class="min-w-0">
                             <h3 class="font-bold text-gray-900 leading-tight">{{ name }}</h3>
                             <p class="text-xs font-medium text-[#005C53] mt-1 line-clamp-2">{{ institution }}</p>
@@ -293,15 +293,15 @@
 </div>
 <!-- Galería visual -->
 {% set gallery_images = [
-    ('/static/images/A.Sintesis.webp', 'Sintesis'),
-    ('/static/images/B.PropiedadesNanomateriales.webp', 'Propiedades de nanomateriales'),
-    ('/static/images/C.Autoensamblado.webp', 'Autoensamblado'),
-    ('/static/images/D.Superficies.webp', 'Superficies'),
-    ('/static/images/D.Superficies_.webp', 'Superficies'),
-    ('/static/images/E.ProcesosBiologicos.webp', 'Procesos biologicos'),
-    ('/static/images/F.NanoSalud.webp', 'Nano salud'),
-    ('/static/images/G.Ambiente.webp', 'Ambiente'),
-    ('/static/images/G.Energia.webp', 'Energia')
+    ('/static/images/gallery/A.Sintesis.webp', 'Sintesis'),
+    ('/static/images/gallery/B.PropiedadesNanomateriales.webp', 'Propiedades de nanomateriales'),
+    ('/static/images/gallery/C.Autoensamblado.webp', 'Autoensamblado'),
+    ('/static/images/gallery/D.Superficies.webp', 'Superficies'),
+    ('/static/images/gallery/D.Superficies_.webp', 'Superficies'),
+    ('/static/images/gallery/E.ProcesosBiologicos.webp', 'Procesos biologicos'),
+    ('/static/images/gallery/F.NanoSalud.webp', 'Nano salud'),
+    ('/static/images/gallery/G.Ambiente.webp', 'Ambiente'),
+    ('/static/images/gallery/G.Energia.webp', 'Energia')
 ] %}
 <div class="gallery-carousel mb-12 rounded-2xl" id="gallery-carousel">
     <div class="gallery-track gap-4" id="gallery-track">
@@ -309,7 +309,7 @@
             {% for src, alt in gallery_images %}
             <div class="shrink-0 w-[280px] sm:w-[320px]">
                 <img src="{{ src }}"
-                    class="rounded-2xl object-cover w-full h-48 shadow" alt="{{ alt }}" draggable="false" />
+                    class="rounded-2xl object-cover w-full h-48 shadow" alt="{{ alt }}" width="640" height="384" loading="lazy" decoding="async" draggable="false" />
             </div>
             {% endfor %}
         {% endfor %}

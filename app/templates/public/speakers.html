@@ -23,14 +23,14 @@
                 'nombre': 'Roman Krahne',
                 'institucion': 'Istituto Italiano di Tecnologia (IIT), Italia',
                 'area': 'Optoelectrónica y plasmónica',
-                'img': '/static/images/speakers/krahne.webp?v=20260330-2235',
+                'img': '/static/images/speakers/thumbs/krahne.webp?v=20260331-0015',
                 'scholar': 'https://scholar.google.com/citations?user=Oq5AD3QAAAAJ&hl=en'
             },
             {
                 'nombre': 'Carla Giacomelli',
                 'institucion': 'INFIQC, Universidad Nacional de Córdoba, Argentina',
                 'area': 'Nanobiotecnología y materia blanda',
-                'img': '/static/images/speakers/giacomelli.webp?v=20260330-2235',
+                'img': '/static/images/speakers/thumbs/giacomelli.webp?v=20260331-0015',
                 'scholar': 'https://scholar.google.com/citations?user=hESiDPwAAAAJ&hl=es',
                 'abstract_url': '/abstracts/1'
             },
@@ -38,26 +38,26 @@
                 'nombre': 'Daniel Lanzillotti Kimura',
                 'institucion': 'C2N · Université Paris-Saclay, Francia',
                 'area': 'Películas delgadas, fonónica',
-                 'img': '/static/images/speakers/kimura.webp?v=20260330-2235',
+                 'img': '/static/images/speakers/thumbs/kimura.webp?v=20260331-0015',
                 'scholar': 'https://scholar.google.com/citations?user=Dn2EeFwAAAAJ&hl=es'
             },
             {
                 'nombre': 'Leonardo Fraceto',
                 'institucion': 'Universidade Estadual Paulista Júlio de Mesquita Filho, Brasil',
                 'area': 'Nanotecnología para el agro',
-               'img': '/static/images/speakers/fraceto.webp?v=20260330-2235',
+               'img': '/static/images/speakers/thumbs/fraceto.webp?v=20260331-0015',
                 'scholar': 'https://scholar.google.com/citations?user=UnA2eToAAAAJ&hl=pt-BR'
             },
             {
                 'nombre': 'Laura Cornaglia',
                 'institucion': 'INCAPE, Universidad Nacional del Litoral, Argentina',
                 'area': 'Nanomateriales en catálisis',
-                'img': '/static/images/speakers/cornaglia.webp?v=20260330-2235',
+                'img': '/static/images/speakers/thumbs/cornaglia.webp?v=20260331-0015',
                 'scholar': 'https://scholar.google.com/citations?user=cj1TEVwAAAAJ&hl=es'
             },
         ] %}
         <div class="bg-white rounded-2xl shadow p-6 flex gap-5 hover:shadow-md transition">
-            <img src="{{ speaker.img }}" class="w-24 h-24 rounded-full object-cover {{ speaker.img_position or 'object-[center_20%]' }} flex-shrink-0 border-4 border-[#005C53]" alt="{{ speaker.nombre }}"/>
+            <img src="{{ speaker.img }}" class="w-24 h-24 rounded-full object-cover {{ speaker.img_position or 'object-[center_20%]' }} flex-shrink-0 border-4 border-[#005C53]" alt="{{ speaker.nombre }}" width="96" height="96" loading="lazy" decoding="async"/>
             <div>
                 <h3 class="font-bold text-gray-900 text-lg">{{ speaker.nombre }}</h3>
                 <p class="text-[#005C53] text-sm font-medium mt-0.5">{{ speaker.institucion }}</p>
@@ -86,14 +86,14 @@
                 'nombre': 'Federico Williams',
                 'institucion': 'INQUIMAE, Universidad de Buenos Aires, Argentina',
                 'area': 'Fenómenos de superficies',
-                'img': '/static/images/speakers/williams.webp?v=20260330-2235',
+                'img': '/static/images/speakers/thumbs/williams.webp?v=20260331-0015',
                 'scholar': 'https://scholar.google.co.cr/citations?user=x1_cXy8AAAAJ&hl=th'
             },
             {
                 'nombre': 'Maria Lidia Herrera',
                 'institucion': 'ITECA, Universidad Nacional de San Martín, Argentina',
                 'area': 'Nanotecnología en alimentos',
-                'img': '/static/images/speakers/herrera.webp?v=20260330-2235',
+                'img': '/static/images/speakers/thumbs/herrera.webp?v=20260331-0015',
                 'scholar': 'https://scholar.google.com/citations?user=GFpdVMkAAAAJ&hl=es',
                 'abstract_url': '/abstracts/4'
             },    
@@ -101,26 +101,26 @@
                 'nombre': 'María Molina',
                 'institucion': 'Universidad Nacional de Río Cuarto, Argentina',
                 'area': 'Propiedades y aplicaciones de nanomateriales en salud',
-                'img': '/static/images/speakers/molina.webp?v=20260330-2235',
+                'img': '/static/images/speakers/thumbs/molina.webp?v=20260331-0015',
                 'scholar': 'https://scholar.google.com/citations?hl=es&user=0qy1xVYAAAAJ'
             },
                                     {
                 'nombre': 'Luciano Carlos',
                 'institucion': 'PROBIEN, Universidad Nacional del Comahue, Argentina',
                 'area': 'Aplicaciones de nanomateriales en ambiente',
-                'img': '/static/images/speakers/carlos.webp?v=20260330-2235',
+                'img': '/static/images/speakers/thumbs/carlos.webp?v=20260331-0015',
                 'scholar': 'https://scholar.google.com/citations?user=b42pIx0AAAAJ&hl=es'
             },    
             {
                 'nombre': 'Liliana Mogni',
                 'institucion': 'UE-INN, Centro Atómico Bariloche, CNEA, Argentina',
                 'area': 'Sintesis y aplicaciones de nanomateriales para energía',
-                'img': '/static/images/speakers/mogni.webp?v=20260330-2235',
+                'img': '/static/images/speakers/thumbs/mogni.webp?v=20260331-0015',
                 'scholar': 'https://scholar.google.com/citations?user=UMJ3XHgAAAAJ&hl=es'
             },                                         
         ] %}
         <div class="bg-white rounded-2xl shadow p-6 flex gap-5 hover:shadow-md transition">
-            <img src="{{ speaker.img }}" class="w-24 h-24 rounded-full object-cover {{ speaker.img_position or 'object-[center_20%]' }} flex-shrink-0 border-4 border-[#9FC131]" alt="{{ speaker.nombre }}"/>
+            <img src="{{ speaker.img }}" class="w-24 h-24 rounded-full object-cover {{ speaker.img_position or 'object-[center_20%]' }} flex-shrink-0 border-4 border-[#9FC131]" alt="{{ speaker.nombre }}" width="96" height="96" loading="lazy" decoding="async"/>
             <div>
                 <h3 class="font-bold text-gray-900 text-lg">{{ speaker.nombre }}</h3>
                 <p class="text-[#9FC131] text-sm font-medium mt-0.5">{{ speaker.institucion }}</p>
@@ -146,11 +146,11 @@
     </div>
     <div class="grid grid-cols-1 gap-4 sm:grid-cols-2">
         {% for speaker in [
-            ('Ana Sol Peinetti', 'INQUIMAE, UBA', 'Nanotecnología y salud', '/static/images/speakers/peinetti.webp?v=20260330-2235'),
-            ('Germán Gómez', 'INTEQUI, Universidad Nacional de San Luis', 'Aplicaciones de nanomateriales en ambiente y salud', '/static/images/speakers/gomez.webp?v=20260330-2235'),
+            ('Ana Sol Peinetti', 'INQUIMAE, UBA', 'Nanotecnología y salud', '/static/images/speakers/thumbs/peinetti.webp?v=20260331-0015'),
+            ('Germán Gómez', 'INTEQUI, Universidad Nacional de San Luis', 'Aplicaciones de nanomateriales en ambiente y salud', '/static/images/speakers/thumbs/gomez.webp?v=20260331-0015'),
         ] %}
         <div class="bg-white rounded-xl shadow p-5 flex items-center gap-4 hover:shadow-md transition">
-            <img src="{{ speaker[3] }}" class="w-14 h-14 rounded-full object-cover object-top flex-shrink-0 border-4 border-[#DBF227]" alt="{{ speaker[0] }}"/>
+            <img src="{{ speaker[3] }}" class="w-14 h-14 rounded-full object-cover object-top flex-shrink-0 border-4 border-[#DBF227]" alt="{{ speaker[0] }}" width="56" height="56" loading="lazy" decoding="async"/>
             <div>
                 <h3 class="font-semibold text-gray-900">{{ speaker[0] }}</h3>
                 <p class="text-[#9FC131] text-xs">{{ speaker[1] }}</p>
