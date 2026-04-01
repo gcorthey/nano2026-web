@@ -482,6 +482,36 @@ def get_recaptcha_site_key() -> str:
     return os.getenv("RECAPTCHA_SITE_KEY", "")
 
 
+async def verify_recaptcha_token(token: str) -> tuple[bool, str | None]:
+    secret = os.getenv("RECAPTCHA_SECRET", "").strip()
+    if not secret:
+        return False, "La verificación anti-spam no está configurada. Revisá RECAPTCHA_SECRET."
+    if not token.strip():
+        return False, "No se pudo validar el envío. Por favor intentá de nuevo."
+
+    try:
+        async with httpx.AsyncClient(timeout=10.0) as client:
+            resp = await client.post(
+                "https://www.google.com/recaptcha/api/siteverify",
+                data={
+                    "secret": secret,
+                    "response": token,
+                },
+            )
+            resp.raise_for_status()
+            result = resp.json()
+    except httpx.HTTPError:
+        return False, "No se pudo validar el envío en este momento. Por favor intentá de nuevo."
+    except ValueError:
+        return False, "La respuesta de verificación fue inválida. Por favor intentá de nuevo."
+
+    if not result.get("success"):
+        print("reCAPTCHA result:", result)
+        return False, "Verificación fallida. Por favor intentá de nuevo."
+
+    return True, None
+
+
 def absolute_url(request: Request, path: str) -> str:
     if path.startswith("http://") or path.startswith("https://"):
         return path
@@ -1034,6 +1064,7 @@ async def submit_abstract(
     recaptcha_token: str = Form(""),
     db: Session = Depends(get_db)
 ):
+    form_data = await request.form()
     form_state = {
         "tipo_resumen": "contribucion",
         "titulo": titulo,
@@ -1043,20 +1074,20 @@ async def submit_abstract(
         "contenido_html": contenido_html,
         "referencias_html": referencias_html,
         "tiene_referencias": 1 if tiene_referencias else 0,
-        "presentador": request._form.get("presentador", "").strip(),
+        "presentador": form_data.get("presentador", "").strip(),
         "autores": [],
         "afiliaciones": [],
     }
     for i in range(1, autor_count + 1):
         form_state["autores"].append({
             "index": i,
-            "nombre": request._form.get(f"autor_nombre_{i}", ""),
-            "afils": request._form.get(f"autor_afils_{i}", ""),
+            "nombre": form_data.get(f"autor_nombre_{i}", ""),
+            "afils": form_data.get(f"autor_afils_{i}", ""),
         })
     for i in range(1, afil_count + 1):
         form_state["afiliaciones"].append({
             "index": i,
-            "nombre": request._form.get(f"afil_nombre_{i}", ""),
+            "nombre": form_data.get(f"afil_nombre_{i}", ""),
         })
 
     def submit_error(message: str, status_code: int = 400):
@@ -1091,23 +1122,13 @@ async def submit_abstract(
     if tiene_referencias and len(referencias_texto) > 750:
         return submit_error("Las referencias bibliográficas no pueden superar los 750 caracteres.")
 
-    async with httpx.AsyncClient() as client:
-        resp = await client.post(
-            "https://www.google.com/recaptcha/api/siteverify",
-            data={
-                "secret": os.getenv("RECAPTCHA_SECRET"),
-                "response": recaptcha_token
-            }
-        )
-        result = resp.json()
-
-    if not result.get("success"):
-        print("reCAPTCHA result:", result)
-        return submit_error("Verificación fallida. Por favor intentá de nuevo.")
+    recaptcha_ok, recaptcha_error = await verify_recaptcha_token(recaptcha_token)
+    if not recaptcha_ok:
+        return submit_error(recaptcha_error or "Verificación fallida. Por favor intentá de nuevo.", status_code=503)
 
     afiliaciones_data: list[tuple[int, str]] = []
     for i in range(1, afil_count + 1):
-        nombre_afil = request._form.get(f"afil_nombre_{i}", "").strip()
+        nombre_afil = form_data.get(f"afil_nombre_{i}", "").strip()
         if nombre_afil:
             afiliaciones_data.append((i, nombre_afil))
 
@@ -1116,15 +1137,15 @@ async def submit_abstract(
 
     autores_data: list[tuple[int, str, str]] = []
     for i in range(1, autor_count + 1):
-        nombre_autor = request._form.get(f"autor_nombre_{i}", "").strip()
-        afils_str = request._form.get(f"autor_afils_{i}", "").strip()
+        nombre_autor = form_data.get(f"autor_nombre_{i}", "").strip()
+        afils_str = form_data.get(f"autor_afils_{i}", "").strip()
         if nombre_autor:
             autores_data.append((i, nombre_autor, afils_str))
 
     if not autores_data:
         return submit_error("Debe haber al menos un autor.")
 
-    presentador_idx = request._form.get("presentador", "").strip()
+    presentador_idx = form_data.get("presentador", "").strip()
     presentadores = [autor for autor in autores_data if str(autor[0]) == presentador_idx]
     if len(presentadores) != 1:
         return submit_error("Debe seleccionarse exactamente un autor presentador.")
@@ -2727,19 +2748,8 @@ async def contacto_post(
     body: str = Form(...),
     recaptcha_token: str = Form("")
 ):
-    # Verificar reCAPTCHA
-    async with httpx.AsyncClient() as client:
-        resp = await client.post(
-            "https://www.google.com/recaptcha/api/siteverify",
-            data={
-                "secret": os.getenv("RECAPTCHA_SECRET"),
-                "response": recaptcha_token
-            }
-        )
-        result = resp.json()
-    
-    if not result.get("success"):
-        print("reCAPTCHA result:", result)
+    recaptcha_ok, recaptcha_error = await verify_recaptcha_token(recaptcha_token)
+    if not recaptcha_ok:
         return templates.TemplateResponse("public/contacto.html", {
             **public_page_context(
                 request,
@@ -2751,8 +2761,8 @@ async def contacto_post(
                 canonical_path="/contacto"
             ),
             "recaptcha_site_key": get_recaptcha_site_key(),
-            "error": "Verificación fallida. Por favor intentá de nuevo."
-        })
+            "error": recaptcha_error or "Verificación fallida. Por favor intentá de nuevo."
+        }, status_code=503)
 
     # ... resto del código de envío de mail
     mensaje = MessageSchema(
