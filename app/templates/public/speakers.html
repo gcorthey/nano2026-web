@@ -102,7 +102,8 @@
                 'institucion': 'Universidad Nacional de Río Cuarto, Argentina',
                 'area': 'Propiedades y aplicaciones de nanomateriales en salud',
                 'img': '/static/images/speakers/thumbs/molina.webp?v=20260331-0015',
-                'scholar': 'https://scholar.google.com/citations?hl=es&user=0qy1xVYAAAAJ'
+                'scholar': 'https://scholar.google.com/citations?hl=es&user=0qy1xVYAAAAJ',
+                'abstract_url': '/abstracts/9'
             },
                                     {
                 'nombre': 'Luciano Carlos',
@@ -144,17 +145,35 @@
         <span class="bg-[#DBF227] text-black text-xs font-bold px-3 py-1 rounded-full uppercase tracking-wider">TALENTO JOVEN</span>
         <div class="flex-1 h-px bg-gray-200"></div>
     </div>
-    <div class="grid grid-cols-1 gap-4 sm:grid-cols-2">
+    <div class="grid grid-cols-1 gap-6 sm:grid-cols-2">
         {% for speaker in [
-            ('Ana Sol Peinetti', 'INQUIMAE, UBA', 'Nanotecnología y salud', '/static/images/speakers/thumbs/peinetti.webp?v=20260331-0015'),
-            ('Germán Gómez', 'INTEQUI, Universidad Nacional de San Luis', 'Aplicaciones de nanomateriales en ambiente y salud', '/static/images/speakers/thumbs/gomez.webp?v=20260331-0015'),
+            {
+                'nombre': 'Ana Sol Peinetti',
+                'institucion': 'INQUIMAE, UBA',
+                'area': 'Nanotecnología y salud',
+                'img': '/static/images/speakers/thumbs/peinetti.webp?v=20260331-0015',
+                'scholar': 'https://scholar.google.com/citations?user=53JgxmIAAAAJ&hl=es',
+            },
+            {
+                'nombre': 'Germán Gómez',
+                'institucion': 'INTEQUI, Universidad Nacional de San Luis',
+                'area': 'Aplicaciones de nanomateriales en ambiente y salud',
+                'img': '/static/images/speakers/thumbs/gomez.webp?v=20260331-0015',
+                'scholar': 'https://scholar.google.com/citations?user=G3FZjocAAAAJ&hl=en'
+            },
         ] %}
-        <div class="bg-white rounded-xl shadow p-5 flex items-center gap-4 hover:shadow-md transition">
-            <img src="{{ speaker[3] }}" class="w-14 h-14 rounded-full object-cover object-top flex-shrink-0 border-4 border-[#DBF227]" alt="{{ speaker[0] }}" width="56" height="56" loading="lazy" decoding="async"/>
+        <div class="bg-white rounded-2xl shadow p-6 flex gap-5 hover:shadow-md transition">
+            <img src="{{ speaker.img }}" class="w-24 h-24 rounded-full object-cover object-top flex-shrink-0 border-4 border-[#DBF227]" alt="{{ speaker.nombre }}" width="96" height="96" loading="lazy" decoding="async"/>
             <div>
-                <h3 class="font-semibold text-gray-900">{{ speaker[0] }}</h3>
-                <p class="text-[#9FC131] text-xs">{{ speaker[1] }}</p>
-                <p class="text-gray-500 text-xs mt-0.5">{{ speaker[2] }}</p>
+                <h3 class="font-bold text-gray-900 text-lg">{{ speaker.nombre }}</h3>
+                <p class="text-[#9FC131] text-sm font-medium mt-0.5">{{ speaker.institucion }}</p>
+                <p class="text-gray-500 text-sm mt-1">{{ speaker.area }}</p>
+                {% if speaker.scholar %}
+                <a href="{{ speaker.scholar }}" target="_blank" class="text-blue-500 text-xs hover:underline mt-2 inline-block">Google Scholar →</a>
+                {% endif %}
+                {% if speaker.abstract_url %}
+                <a href="{{ speaker.abstract_url }}" class="text-[#005C53] text-xs hover:underline mt-2 ml-3 inline-block">Resumen →</a>
+                {% endif %}
             </div>
         </div>
         {% endfor %}
