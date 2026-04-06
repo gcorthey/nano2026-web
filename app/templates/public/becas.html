@@ -1,0 +1,138 @@
+{% extends "public/base.html" %}
+{% block content %}
+
+<!-- Hero -->
+<div class="relative rounded-2xl overflow-hidden mb-10" style="min-height: 180px; background: linear-gradient(135deg, #042940 10%, #005C53 60%, #9FC131 100%);">
+    <div class="relative z-10 flex flex-col items-center justify-center text-center px-8 py-12">
+        <h1 class="text-3xl font-black text-white mb-2">Becas NANO2026</h1>
+        <p class="text-[#DBF227]">Ayuda económica para participar del encuentro</p>
+    </div>
+</div>
+
+<div class="bg-white rounded-2xl shadow p-8 mb-6">
+    <h2 class="text-xl font-bold text-gray-800 mb-3">Aplicá a las becas NANO 2026</h2>
+    <p class="text-gray-600 leading-relaxed">
+        Con el objetivo de promover una participación federal e inclusiva, el Comité Organizador otorgará becas de ayuda económica para la participación en el XXIV Encuentro de Superficies y Materiales Nanoestructurados, que se realizará del 3 al 5 de junio de 2026 en el Campus Miguelete de la Universidad Nacional de San Martín.
+    </p>
+</div>
+
+<div class="grid grid-cols-1 md:grid-cols-2 gap-6 mb-6">
+    <div class="bg-white rounded-2xl shadow p-6 flex flex-col gap-4">
+        <h2 class="text-lg font-bold text-gray-800">Las becas NANO 2026</h2>
+        <ul class="space-y-3 text-sm text-gray-600">
+            <li class="flex items-start gap-3">
+                <span class="mt-1 h-2.5 w-2.5 rounded-full bg-[#9FC131] flex-shrink-0"></span>
+                <span>Es requisito presentar un trabajo en el encuentro.</span>
+            </li>
+            <li class="flex items-start gap-3">
+                <span class="mt-1 h-2.5 w-2.5 rounded-full bg-[#005C53] flex-shrink-0"></span>
+                <span>Ofrecen una ayuda económica para la participación en el congreso.</span>
+            </li>
+            <li class="flex items-start gap-3">
+                <span class="mt-1 h-2.5 w-2.5 rounded-full bg-[#042940] flex-shrink-0"></span>
+                <span>No incluyen el pago de inscripción.</span>
+            </li>
+        </ul>
+    </div>
+
+    <div class="bg-white rounded-2xl shadow p-6 flex flex-col gap-4">
+        <h2 class="text-lg font-bold text-gray-800">Fechas y condición clave</h2>
+        <div class="flex items-start gap-3">
+            <span class="text-[#DBF227] mt-0.5">
+                <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z"/>
+                </svg>
+            </span>
+            <div>
+                <p class="text-sm text-gray-500 mb-0.5">Recepción de solicitudes</p>
+                <p class="text-gray-700 font-medium">hasta el 15 de abril de 2026</p>
+            </div>
+        </div>
+        <div class="flex items-start gap-3">
+            <span class="text-[#9FC131] mt-0.5">
+                <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z"/>
+                </svg>
+            </span>
+            <div>
+                <p class="text-sm text-gray-500 mb-0.5">Inscripción requerida</p>
+                <p class="text-gray-700 font-medium">La inscripción Early Bird debe abonarse hasta el 15 de abril de 2026.</p>
+            </div>
+        </div>
+        <p class="text-sm text-gray-500">
+            La inscripción, el pago y el envío del resumen pueden hacerse por separado, pero los tres pasos deben estar completos antes de esa fecha.
+        </p>
+    </div>
+</div>
+
+<div class="bg-white rounded-2xl shadow p-8 mb-6">
+    <h2 class="text-xl font-bold text-gray-800 mb-5">¿Cómo solicitar beca de ayuda económica?</h2>
+    <ol class="text-sm text-gray-600 space-y-6">
+        <li class="flex items-start gap-3">
+            <span class="bg-[#005C53] text-[#DBF227] text-xs font-bold rounded-full w-6 h-6 flex items-center justify-center flex-shrink-0 mt-0.5">1</span>
+            <span>Completá el <a href="/inscripcion" class="text-[#005C53] hover:text-[#042940] font-medium">formulario de inscripción</a> indicando la solicitud de beca.</span>
+        </li>
+        <li class="flex items-start gap-3">
+            <span class="bg-[#005C53] text-[#DBF227] text-xs font-bold rounded-full w-6 h-6 flex items-center justify-center flex-shrink-0 mt-0.5">2</span>
+            <span>Completá el <a href="/submit" class="text-[#005C53] hover:text-[#042940] font-medium">formulario de envío de resúmenes</a>. Recordá que por cada inscripción se pueden presentar hasta dos resúmenes.</span>
+        </li>
+        <li class="flex items-start gap-3">
+            <span class="bg-[#005C53] text-[#DBF227] text-xs font-bold rounded-full w-6 h-6 flex items-center justify-center flex-shrink-0 mt-0.5">3</span>
+            <span>Presentá la solicitud de beca hasta el 15/4/2026 y aboná la inscripción Early Bird dentro de ese mismo plazo.</span>
+        </li>
+        <li class="flex items-start gap-3">
+            <span class="bg-[#005C53] text-[#DBF227] text-xs font-bold rounded-full w-6 h-6 flex items-center justify-center flex-shrink-0 mt-0.5">4</span>
+            <span>Una vez cargada toda la documentación, recibirás novedades en el correo electrónico con el que te registraste.</span>
+        </li>
+    </ol>
+    <p class="text-sm text-gray-500 mt-6">
+        Consultá el <a href="/inscripcion" class="text-[#005C53] hover:text-[#042940] font-medium">tarifario e información de pago</a> para completar correctamente la inscripción.
+    </p>
+</div>
+
+<div class="grid grid-cols-1 md:grid-cols-[1.1fr_0.9fr] gap-6">
+    <div class="bg-gradient-to-r from-[#005C53] to-[#042940] rounded-2xl shadow p-8 text-white">
+        <h2 class="text-lg font-bold mb-4">Prioridad de asignación</h2>
+        <p class="text-teal-100 text-sm mb-5">
+            Se otorgará prioridad de asignación a la beca a los siguientes perfiles:
+        </p>
+        <ol class="space-y-3 text-sm">
+            <li class="flex items-start gap-3">
+                <span class="text-[#DBF227] font-bold">1.</span>
+                <span>Aplicantes que vivan por fuera del área metropolitana de Buenos Aires.</span>
+            </li>
+            <li class="flex items-start gap-3">
+                <span class="text-[#DBF227] font-bold">2.</span>
+                <span>Estudiantes de doctorado.</span>
+            </li>
+            <li class="flex items-start gap-3">
+                <span class="text-[#DBF227] font-bold">3.</span>
+                <span>Investigadores posdoctorales.</span>
+            </li>
+            <li class="flex items-start gap-3">
+                <span class="text-[#DBF227] font-bold">4.</span>
+                <span>Estudiantes de grado.</span>
+            </li>
+        </ol>
+    </div>
+
+    <div class="bg-white rounded-2xl shadow p-8">
+        <h2 class="text-lg font-bold text-gray-800 mb-4">Más información</h2>
+        <p class="text-sm text-gray-600 leading-relaxed mb-5">
+            Si necesitás completar tu postulación, revisá también la página de inscripción y el envío de resúmenes.
+        </p>
+        <div class="flex flex-col gap-3">
+            <a href="/inscripcion" class="bg-[#9FC131] hover:bg-[#8aae2b] text-white font-semibold px-5 py-3 rounded-full transition text-center">
+                Ver inscripción
+            </a>
+            <a href="/submit" class="bg-[#005C53] hover:bg-[#042940] text-white font-semibold px-5 py-3 rounded-full transition text-center">
+                Enviar resumen
+            </a>
+            <a href="mailto:nano2026@unsam.edu.ar" class="text-[#005C53] hover:text-[#042940] font-medium text-center">
+                nano2026@unsam.edu.ar
+            </a>
+        </div>
+    </div>
+</div>
+
+{% endblock %}

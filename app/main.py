@@ -2591,6 +2591,21 @@ def inscripcion(request: Request):
         )
     )
 
+@app.get("/becas", response_class=HTMLResponse)
+def becas(request: Request):
+    return templates.TemplateResponse(
+        "public/becas.html",
+        public_page_context(
+            request,
+            title="Becas de ayuda económica | NANO2026",
+            description=(
+                "Requisitos, fechas y pasos para solicitar las becas de ayuda "
+                "económica del NANO2026."
+            ),
+            canonical_path="/becas"
+        )
+    )
+
 @app.post("/admin/abstracts/{abstract_id}/tipo")
 def admin_asignar_tipo(
     abstract_id: int,
